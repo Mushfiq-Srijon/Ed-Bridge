@@ -1,0 +1,18 @@
+# Backend
+EdBridge.API/bin/
+EdBridge.API/obj/
+EdBridge.API/.vs/
+*.db
+*.db-shm
+*.db-wal
+
+# Frontend
+frontend/node_modules/
+frontend/build/
+frontend/.env.local
+frontend/.DS_Store
+
+# General
+.DS_Store
+.env
+*.log
