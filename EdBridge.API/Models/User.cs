@@ -14,9 +14,9 @@ namespace EdBridge.API.Models
         public string PasswordHash { get; set; }
         
         public string Name { get; set; }
-        public string Institution { get; set; }
-        public string EducationLevel { get; set; }
-        public string Phone { get; set; }
+        public string? Institution { get; set; }
+        public string? EducationLevel { get; set; }
+        public string? Phone { get; set; }
         
         public bool EmailVerified { get; set; } = false;
         public string Role { get; set; } = "User"; // "User" or "Admin"
