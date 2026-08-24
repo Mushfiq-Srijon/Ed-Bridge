@@ -43,3 +43,17 @@ export const authAPI = {
   login: (email, password) =>
     apiCall('/auth/login', 'POST', { email, password }),
 };
+
+export const notesAPI = {
+  getAll: () => apiCall('/notes'),
+
+  getById: (id) => apiCall(`/notes/${id}`),
+
+  search: (query) => apiCall(`/notes/search?q=${query}`),
+
+  create: (data) => apiCall('/notes', 'POST', data),
+
+  update: (id, data) => apiCall(`/notes/${id}`, 'PUT', data),
+
+  delete: (id) => apiCall(`/notes/${id}`, 'DELETE'),
+};

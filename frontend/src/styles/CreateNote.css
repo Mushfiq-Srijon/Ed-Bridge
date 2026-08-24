@@ -1,0 +1,112 @@
+.create-note-page {
+  min-height: 100vh;
+  padding: 5rem 2rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.create-note-page form {
+  max-width: 750px;
+  margin: 0 auto;
+  padding: 2.5rem;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.create-note-page h1 {
+  max-width: 750px;
+  margin: 0 auto 2rem;
+  color: #333;
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.create-note-page label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.create-note-page input,
+.create-note-page textarea,
+.create-note-page select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid #c3cfe2;
+  border-radius: 10px;
+  font-size: 1rem;
+  color: #333;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.create-note-page input:focus,
+.create-note-page textarea:focus,
+.create-note-page select:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+}
+
+.create-note-page textarea {
+  resize: vertical;
+  min-height: 180px;
+}
+
+.create-note-page p {
+  margin: 0.3rem 0 1rem;
+  color: #dc2626;
+  font-size: 0.85rem;
+}
+
+.create-note-page button {
+  padding: 0.9rem 1.6rem;
+  margin-right: 0.7rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.create-note-page button[type="submit"] {
+  background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+  color: white;
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.25);
+}
+
+.create-note-page button[type="submit"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(139, 92, 246, 0.4);
+}
+
+.create-note-page button[type="button"] {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.create-note-page button[type="button"]:hover {
+  background: #c3cfe2;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .create-note-page {
+    padding: 3rem 1rem;
+  }
+
+  .create-note-page form {
+    padding: 1.5rem;
+  }
+
+  .create-note-page h1 {
+    font-size: 2rem;
+  }
+
+  .create-note-page button {
+    margin-bottom: 0.7rem;
+  }
+}
