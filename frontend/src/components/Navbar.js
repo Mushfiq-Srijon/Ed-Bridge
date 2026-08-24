@@ -1,8 +1,17 @@
 import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import '../styles/Navbar.css';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, token, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <nav className="navbar">
@@ -26,8 +35,17 @@ export default function Navbar() {
         </ul>
 
         <div className="nav-buttons">
-          <a href="#login" className="btn-login">Login</a>
-          <a href="#register" className="btn-signup">Sign Up</a>
+          {token && user ? (
+            <>
+              <span className="nav-username">Hi, {user.name}</span>
+              <button className="btn-login" onClick={handleLogout}>Logout</button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="btn-login">Login</Link>
+              <Link to="/register" className="btn-signup">Sign Up</Link>
+            </>
+          )}
         </div>
       </div>
     </nav>
