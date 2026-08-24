@@ -19,8 +19,8 @@ export default function Navbar() {
         <div className="navbar-logo">
           <span className="logo-text">Ed-Bridge</span>
         </div>
-        
-        <button 
+
+        <button
           className="mobile-toggle"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
@@ -29,7 +29,11 @@ export default function Navbar() {
 
         <ul className={`nav-menu ${mobileMenuOpen ? 'active' : ''}`}>
           <li><a href="#features" className="nav-link">Features</a></li>
-          <li><a href="#marketplace" className="nav-link">Marketplace</a></li>
+          <li>
+            <Link to="/marketplace" className="nav-link">
+              Marketplace
+            </Link>
+          </li>
           <li><a href="#forum" className="nav-link">Forum</a></li>
           <li><a href="#footer" className="nav-link">About</a></li>
         </ul>
