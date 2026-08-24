@@ -163,3 +163,9 @@
     display: none;
   }
 }
+
+.nav-username {
+  color: white;
+  font-weight: 600;
+  padding: 0.7rem 1rem;
+}
