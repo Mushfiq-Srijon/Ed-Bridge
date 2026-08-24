@@ -34,6 +34,12 @@ export default function Navbar() {
               Marketplace
             </Link>
           </li>
+
+          <li>
+  <Link to="/notes" className="nav-link">
+    Notes
+  </Link>
+</li>
           <li><a href="#forum" className="nav-link">Forum</a></li>
           <li><a href="#footer" className="nav-link">About</a></li>
         </ul>
