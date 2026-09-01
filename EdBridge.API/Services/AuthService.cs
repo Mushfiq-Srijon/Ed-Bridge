@@ -35,19 +35,23 @@ namespace EdBridge.API.Services
         
         public string GenerateToken(User user)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var jwtKey = _config["Jwt:Key"] ?? throw new InvalidOperationException("JWT key is not configured.");
+            var jwtIssuer = _config["Jwt:Issuer"] ?? "EdBridge";
+            var jwtAudience = _config["Jwt:Audience"] ?? "EdBridgeUsers";
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             
             var claims = new List<System.Security.Claims.Claim>
             {
-                new System.Security.Claims.Claim("id", user.Id.ToString()),
+                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new System.Security.Claims.Claim("email", user.Email),
                 new System.Security.Claims.Claim("role", user.Role)
             };
             
             var token = new JwtSecurityToken(
-                issuer: _config["Jwt:Issuer"],
-                audience: _config["Jwt:Audience"],
+                issuer: jwtIssuer,
+                audience: jwtAudience,
                 claims: claims,
                 expires: DateTime.UtcNow.AddHours(24),
                 signingCredentials: credentials

@@ -9,6 +9,23 @@ export default function Navbar() {
   const { user, token } = useAuth();
   const navigate = useNavigate();
 
+  const handleScrollToSection = (sectionId) => {
+    const scrollToSection = () => {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    };
+
+    if (window.location.pathname === '/') {
+      scrollToSection();
+      return;
+    }
+
+    navigate('/');
+    setTimeout(scrollToSection, 150);
+  };
+
   return (
     <nav className="navbar">
       <div className="navbar-container">
@@ -24,7 +41,31 @@ export default function Navbar() {
         </button>
 
         <ul className={`nav-menu ${mobileMenuOpen ? 'active' : ''}`}>
-          <li><a href="#features" className="nav-link">Features</a></li>
+          <li>
+            <button
+              type="button"
+              className="nav-link nav-button-link"
+              onClick={() => {
+                if (window.location.pathname === '/') {
+                  window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+                  return;
+                }
+                navigate('/');
+                setTimeout(() => window.scrollTo({ top: 0, left: 0, behavior: 'smooth' }), 150);
+              }}
+            >
+              Home
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              className="nav-link nav-button-link"
+              onClick={() => handleScrollToSection('features')}
+            >
+              Features
+            </button>
+          </li>
           <li>
             <Link to="/marketplace" className="nav-link">
               Marketplace
@@ -39,7 +80,15 @@ export default function Navbar() {
           <li>
             <Link to="/forum" className="nav-link">Forum</Link>
           </li>
-          <li><a href="#footer" className="nav-link">About</a></li>
+          <li>
+            <button
+              type="button"
+              className="nav-link nav-button-link"
+              onClick={() => handleScrollToSection('footer')}
+            >
+              About
+            </button>
+          </li>
         </ul>
 
         <div className="nav-buttons">

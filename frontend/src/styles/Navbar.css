@@ -66,7 +66,16 @@
   font-size: 0.95rem;
 }
 
-.nav-link:hover {
+.nav-button-link {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+}
+
+.nav-link:hover,
+.nav-button-link:hover {
   color: white;
 }
 
