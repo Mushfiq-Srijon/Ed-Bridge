@@ -1,17 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PostList from '../components/Forum/PostList';
 import CreatePostModal from '../components/Forum/CreatePostModal';
 import SearchFilter from '../components/Forum/SearchFilter';
-import { MOCK_POSTS } from '../data/forumMockData';
+import { forumAPI } from '../services/api';
+import { transformPost } from '../utils/forumAdapter';
 import '../styles/Forum.css';
 
 export default function ForumPage() {
-  const [posts, setPosts] = useState(MOCK_POSTS);
-  const [filteredPosts, setFilteredPosts] = useState(MOCK_POSTS);
+  const [posts, setPosts] = useState([]);
+  const [filteredPosts, setFilteredPosts] = useState([]);
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedPost, setSelectedPost] = useState(null);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    loadPosts();
+  }, []);
+
+  const loadPosts = async () => {
+    try {
+      setLoading(true);
+      setError('');
+
+      const data = await forumAPI.getPosts();
+
+      const formattedPosts = data.map(transformPost);
+
+      setPosts(formattedPosts);
+      setFilteredPosts(formattedPosts);
+
+    } catch (error) {
+      console.error('Failed to load posts:', error);
+      setError(error.message || 'Failed to load posts');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSearch = (query) => {
     setSearchQuery(query);
@@ -24,74 +53,140 @@ export default function ForumPage() {
   };
 
   const filterPosts = (query, subject) => {
-    let filtered = posts;
+    let filtered = [...posts];
 
     if (query) {
-      filtered = filtered.filter(post =>
-        post.title.toLowerCase().includes(query.toLowerCase()) ||
-        post.content.toLowerCase().includes(query.toLowerCase())
+      const lowerQuery = query.toLowerCase();
+
+      filtered = filtered.filter(
+        (post) =>
+          post.title.toLowerCase().includes(lowerQuery) ||
+          post.content.toLowerCase().includes(lowerQuery)
       );
     }
 
     if (subject) {
-      filtered = filtered.filter(post => post.subject === subject);
+      filtered = filtered.filter(
+        (post) =>
+          post.subject === subject ||
+          post.tags.includes(subject)
+      );
     }
 
     setFilteredPosts(filtered);
   };
 
-  const handleCreatePost = (newPost) => {
-    const post = {
-      id: posts.length + 1,
-      ...newPost,
-      views: 0,
-      upvotes: 0,
-      downvotes: 0,
-      createdAt: 'just now',
-      userHasUpvoted: false,
-      userHasDownvoted: false,
-      userIsFollowing: false,
-      followers: 0,
-      replies: []
-    };
-    setPosts([post, ...posts]);
-    setFilteredPosts([post, ...filteredPosts]);
-    setIsCreateModalOpen(false);
+  const handleCreatePost = async (postData) => {
+    try {
+      const response = await forumAPI.createPost(postData);
+
+      const newPost = transformPost(response.post);
+
+      setPosts((prev) => [newPost, ...prev]);
+      setFilteredPosts((prev) => [newPost, ...prev]);
+
+      setIsCreateModalOpen(false);
+
+    } catch (error) {
+      console.error('Failed to create post:', error);
+      alert(error.message || 'Failed to create post');
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="forum-page">
+        <div className="loading-card">
+          <div className="loading-spinner"></div>
+          <p>Loading forum posts...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="forum-page">
+        <div className="empty-state">
+          <div className="empty-icon">⚠️</div>
+          <h3>Something went wrong</h3>
+          <p>{error}</p>
+
+          <button
+            className="btn-create-post"
+            onClick={loadPosts}
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="forum-page">
-      <div className="forum-header">
-        <div className="forum-title-section">
-          <h1>💬 Academic Forum</h1>
-          <p>Ask questions, share insights, and learn together from the community</p>
+
+      {/* HERO */}
+      <section className="forum-hero">
+        <div className="hero-content">
+          <div className="hero-icon">💬</div>
+
+          <h1>Academic Forum</h1>
+
+          <p>
+            Ask questions, share insights, and learn together
+            from the community.
+          </p>
+
+          <button
+            className="hero-create-btn"
+            onClick={() => setIsCreateModalOpen(true)}
+          >
+            <span>＋</span>
+            Ask a Question
+          </button>
         </div>
-        <button 
-          className="btn-create-post"
-          onClick={() => setIsCreateModalOpen(true)}
-        >
-          + Ask Question
-        </button>
-      </div>
+      </section>
 
-      <SearchFilter
-        searchQuery={searchQuery}
-        onSearchChange={handleSearch}
-        selectedSubject={selectedSubject}
-        onSubjectChange={handleSubjectFilter}
-      />
+      {/* SEARCH & FILTER */}
+      <section className="forum-search-wrapper">
+        <SearchFilter
+          searchQuery={searchQuery}
+          onSearchChange={handleSearch}
+          selectedSubject={selectedSubject}
+          onSubjectChange={handleSubjectFilter}
+        />
+      </section>
 
-      <PostList 
-        posts={filteredPosts}
-        onSelectPost={setSelectedPost}
-      />
+      {/* POSTS */}
+      <main className="forum-content">
+        <div className="posts-heading">
+          <div>
+            <h2>Recent Discussions</h2>
+            <p>
+              Explore questions and discussions from students
+            </p>
+          </div>
 
+          <span className="post-count">
+            {filteredPosts.length} {filteredPosts.length === 1 ? 'Post' : 'Posts'}
+          </span>
+        </div>
+
+        <PostList
+          posts={filteredPosts}
+          onSelectPost={() => {}}
+        />
+      </main>
+
+      {/* CREATE POST MODAL */}
       {isCreateModalOpen && (
         <CreatePostModal
           onClose={() => setIsCreateModalOpen(false)}
           onCreate={handleCreatePost}
         />
       )}
+
     </div>
   );
 }
