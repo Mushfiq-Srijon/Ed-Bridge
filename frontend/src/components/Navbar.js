@@ -2,16 +2,12 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../styles/Navbar.css';
+import ProfileDropdown from './ProfileDropdown';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, token, logout } = useAuth();
+  const { user, token } = useAuth();
   const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
 
   return (
     <nav className="navbar">
@@ -36,20 +32,19 @@ export default function Navbar() {
           </li>
 
           <li>
-  <Link to="/notes" className="nav-link">
-    Notes
-  </Link>
-</li>
-          <li><a href="#forum" className="nav-link">Forum</a></li>
+            <Link to="/notes" className="nav-link">
+              Notes
+            </Link>
+          </li>
+          <li>
+            <Link to="/forum" className="nav-link">Forum</Link>
+          </li>
           <li><a href="#footer" className="nav-link">About</a></li>
         </ul>
 
         <div className="nav-buttons">
           {token && user ? (
-            <>
-              <span className="nav-username">Hi, {user.name}</span>
-              <button className="btn-login" onClick={handleLogout}>Logout</button>
-            </>
+            <ProfileDropdown />
           ) : (
             <>
               <Link to="/login" className="btn-login">Login</Link>

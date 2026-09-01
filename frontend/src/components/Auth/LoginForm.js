@@ -8,6 +8,7 @@ export default function LoginForm() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
+  // All state at the top
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -45,6 +46,7 @@ export default function LoginForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setServerError('');
+    
     const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -69,7 +71,9 @@ export default function LoginForm() {
       <p className="form-subtitle">Sign in to access your Ed-Bridge account</p>
 
       {serverError && (
-        <div className="error-banner"><span>{serverError}</span></div>
+        <div className="error-banner">
+          <span>⚠️ {serverError}</span>
+        </div>
       )}
 
       <div className="form-group">
@@ -84,7 +88,7 @@ export default function LoginForm() {
           className={errors.email ? 'input-error' : ''}
           disabled={loading}
         />
-        {errors.email && <span className="error-text">{errors.email}</span>}
+        {errors.email && <span className="error-text">⚠️ {errors.email}</span>}
       </div>
 
       <div className="form-group">
@@ -106,10 +110,10 @@ export default function LoginForm() {
             onClick={() => setShowPassword(!showPassword)}
             disabled={loading}
           >
-            {showPassword ? 'Hide' : 'Show'}
+            {showPassword ? '👁️' : '👁️‍🗨️'}
           </button>
         </div>
-        {errors.password && <span className="error-text">{errors.password}</span>}
+        {errors.password && <span className="error-text">⚠️ {errors.password}</span>}
       </div>
 
       <div className="form-group checkbox-group">

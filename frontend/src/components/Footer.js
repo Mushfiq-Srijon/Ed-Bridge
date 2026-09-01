@@ -39,7 +39,7 @@ export default function Footer() {
       </div>
       
       <div className="footer-bottom">
-        <p>&copy; 2024 Ed-Bridge. All rights reserved. Made with ❤️ for students.</p>
+        <p>&copy; 2026 Ed-Bridge. All rights reserved.</p>
       </div>
     </footer>
   );

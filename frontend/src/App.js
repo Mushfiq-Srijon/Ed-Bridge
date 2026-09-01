@@ -7,6 +7,7 @@ import RegisterPage from './pages/RegisterPage';
 import MarketplacePage from './pages/MarketplacePage';
 import ListingDetailsPage from './pages/ListingDetailsPage';
 import NotesPage from './pages/NotesPage';
+import ForumPage from './pages/ForumPage';
 
 
 import './App.css';
@@ -30,7 +31,8 @@ function App() {
           <Route path="/marketplace" element={<MarketplacePage />} />
           <Route path="/marketplace" element={<MarketplacePage />} />
           <Route path="/notes" element={<NotesPage />} />
-<Route path="/marketplace/listing/:id" element={<ListingDetailsPage />} />
+          <Route path="/marketplace/listing/:id" element={<ListingDetailsPage />} />
+          <Route path="/forum" element={<ForumPage />} />
 
         </Routes>
       </AuthProvider>
