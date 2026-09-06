@@ -150,6 +150,32 @@ namespace EdBridge.API.Controllers
             return Ok(new { message = "Upvote removed" });
         }
         
+        [HttpPost("{id}/downvote")]
+[Authorize]
+public async Task<IActionResult> DownvotePost(int id)
+{
+    var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+    var success = await _postService.DownvotePostAsync(id, userId);
+    
+    if (!success)
+        return BadRequest(new { message = "Already downvoted or post not found" });
+    
+    return Ok(new { message = "Post downvoted" });
+}
+
+[HttpDelete("{id}/downvote")]
+[Authorize]
+public async Task<IActionResult> RemoveDownvote(int id)
+{
+    var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+    var success = await _postService.RemoveDownvoteAsync(id, userId);
+    
+    if (!success)
+        return BadRequest(new { message = "Downvote not found" });
+    
+    return Ok(new { message = "Downvote removed" });
+}
+
         [HttpPost("{id}/follow")]
         [Authorize]
         public async Task<IActionResult> FollowPost(int id)

@@ -1594,3 +1594,52 @@
     padding: 1.1rem;
   }
 }
+
+.edit-title-input {
+  width: 100%;
+  font-size: 1.5rem;
+  font-weight: 700;
+  padding: 0.5rem;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.edit-content-textarea {
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.edit-form-actions {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.btn-save-edit {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-cancel-edit {
+  background: #e0e0e0;
+  color: #333;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.delete-btn {
+  color: #ff6b6b;
+}

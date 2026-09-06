@@ -205,23 +205,33 @@ namespace EdBridge.API.Services
                 .ToListAsync();
         }
 
-        public async Task<bool> UpvotePostAsync(int postId, int userId)
-        {
-            var post = await _db.Posts.FindAsync(postId);
-            if (post == null) return false; // Post doesn't exist
+public async Task<bool> UpvotePostAsync(int postId, int userId)
+{
+    var post = await _db.Posts.FindAsync(postId);
+    if (post == null) return false; // Post doesn't exist
 
-            var existing = await _db.PostUpvotes
-                .FirstOrDefaultAsync(pu => pu.PostId == postId && pu.UserId == userId);
+    var existing = await _db.PostUpvotes
+        .FirstOrDefaultAsync(pu => pu.PostId == postId && pu.UserId == userId);
 
-            if (existing != null) return false; // Already upvoted
+    if (existing != null) return false; // Already upvoted
 
-            var upvote = new PostUpvote { PostId = postId, UserId = userId };
-            _db.PostUpvotes.Add(upvote);
+    // If user had downvoted, remove that downvote first (can't have both)
+    var existingDownvote = await _db.PostDownvotes
+        .FirstOrDefaultAsync(pd => pd.PostId == postId && pd.UserId == userId);
 
-            post.UpvoteCount++;
-            await _db.SaveChangesAsync();
-            return true;
-        }
+    if (existingDownvote != null)
+    {
+        _db.PostDownvotes.Remove(existingDownvote);
+        if (post.DownvoteCount > 0) post.DownvoteCount--;
+    }
+
+    var upvote = new PostUpvote { PostId = postId, UserId = userId };
+    _db.PostUpvotes.Add(upvote);
+
+    post.UpvoteCount++;
+    await _db.SaveChangesAsync();
+    return true;
+}
 
         public async Task<bool> DeletePostAsync(int id)
         {
@@ -256,6 +266,52 @@ namespace EdBridge.API.Services
             return true;
         }
 
+
+        public async Task<bool> DownvotePostAsync(int postId, int userId)
+{
+    var post = await _db.Posts.FindAsync(postId);
+    if (post == null) return false;
+
+    var existingDownvote = await _db.PostDownvotes
+        .FirstOrDefaultAsync(pd => pd.PostId == postId && pd.UserId == userId);
+
+    if (existingDownvote != null) return false; // Already downvoted
+
+    // If user had upvoted, remove that upvote first (can't have both)
+    var existingUpvote = await _db.PostUpvotes
+        .FirstOrDefaultAsync(pu => pu.PostId == postId && pu.UserId == userId);
+
+    if (existingUpvote != null)
+    {
+        _db.PostUpvotes.Remove(existingUpvote);
+        if (post.UpvoteCount > 0) post.UpvoteCount--;
+    }
+
+    var downvote = new PostDownvote { PostId = postId, UserId = userId };
+    _db.PostDownvotes.Add(downvote);
+
+    post.DownvoteCount++;
+    await _db.SaveChangesAsync();
+    return true;
+}
+
+
+
+public async Task<bool> RemoveDownvoteAsync(int postId, int userId)
+{
+    var downvote = await _db.PostDownvotes
+        .FirstOrDefaultAsync(pd => pd.PostId == postId && pd.UserId == userId);
+
+    if (downvote == null) return false;
+
+    _db.PostDownvotes.Remove(downvote);
+
+    var post = await _db.Posts.FindAsync(postId);
+    if (post.DownvoteCount > 0) post.DownvoteCount--;
+
+    await _db.SaveChangesAsync();
+    return true;
+}
         public async Task<bool> FollowPostAsync(int postId, int userId)
         {
             var existing = await _db.PostFollows

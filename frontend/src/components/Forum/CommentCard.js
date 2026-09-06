@@ -12,7 +12,7 @@ export default function CommentCard({ comment, onUpvote, onDownvote, onReport })
           <span className="author-avatar">👤</span>
           <div>
             <p className="author-name">
-              {comment.isAnonymous ? '🔒 Anonymous' : comment.author.name}
+              {comment.isAnonymous ? '🔒 Anonymous' : (comment.author?.name || 'Unknown User')}
             </p>
             <span className="comment-time">{comment.createdAt}</span>
           </div>

@@ -98,6 +98,13 @@ export const forumAPI = {
   // Remove upvote
   removeUpvote: (postId) =>
     apiCall(`/posts/${postId}/upvote`, 'DELETE'),
+  // Downvote
+downvotePost: (postId) =>
+  apiCall(`/posts/${postId}/downvote`, 'POST'),
+
+// Remove downvote
+removeDownvote: (postId) =>
+  apiCall(`/posts/${postId}/downvote`, 'DELETE'),
 
   // Follow
   followPost: (postId) =>
