@@ -99,12 +99,12 @@ export const forumAPI = {
   removeUpvote: (postId) =>
     apiCall(`/posts/${postId}/upvote`, 'DELETE'),
   // Downvote
-downvotePost: (postId) =>
-  apiCall(`/posts/${postId}/downvote`, 'POST'),
+  downvotePost: (postId) =>
+    apiCall(`/posts/${postId}/downvote`, 'POST'),
 
-// Remove downvote
-removeDownvote: (postId) =>
-  apiCall(`/posts/${postId}/downvote`, 'DELETE'),
+  // Remove downvote
+  removeDownvote: (postId) =>
+    apiCall(`/posts/${postId}/downvote`, 'DELETE'),
 
   // Follow
   followPost: (postId) =>
@@ -113,4 +113,31 @@ removeDownvote: (postId) =>
   // Unfollow
   unfollowPost: (postId) =>
     apiCall(`/posts/${postId}/follow`, 'DELETE'),
+
+  upvoteReply: async (postId, replyId) => {
+    return apiCall(`/posts/${postId}/replies/${replyId}/upvote`, 'POST');
+  },
+
+  removeReplyUpvote: async (postId, replyId) => {
+    return apiCall(`/posts/${postId}/replies/${replyId}/upvote`, 'DELETE');
+  },
+
+  downvoteReply: async (postId, replyId) => {
+    return apiCall(`/posts/${postId}/replies/${replyId}/downvote`, 'POST');
+  },
+
+  removeReplyDownvote: async (postId, replyId) => {
+    return apiCall(`/posts/${postId}/replies/${replyId}/downvote`, 'DELETE');
+  },
+
+  reportPost: async (postId, reason) => {
+    return apiCall(`/posts/${postId}/report`, 'POST', { reason });
+  },
+
+  reportReply: async (postId, replyId, reason) => {
+    return apiCall(`/posts/${postId}/replies/${replyId}/report`, 'POST', { reason });
+  },
+
+  getSubjects: () =>
+    apiCall('/posts/subjects'),
 };

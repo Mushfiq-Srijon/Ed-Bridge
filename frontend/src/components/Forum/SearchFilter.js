@@ -1,5 +1,5 @@
-import React from 'react';
-import { COMMON_SUBJECTS } from '../../data/forumMockData';
+import React, { useState, useEffect } from 'react';
+import { forumAPI } from '../../services/api';
 
 export default function SearchFilter({
   searchQuery,
@@ -7,6 +7,24 @@ export default function SearchFilter({
   selectedSubject,
   onSubjectChange,
 }) {
+  const [subjects, setSubjects] = useState([]);
+
+  useEffect(() => {
+    loadSubjects();
+  }, []);
+
+  const loadSubjects = async () => {
+    try {
+      const data = await forumAPI.getSubjects();
+      console.log('Subjects data:', data);
+      console.log('Type:', typeof data, 'Is Array:', Array.isArray(data));
+      setSubjects(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Failed to load subjects:', error);
+      setSubjects([]);
+    }
+  };
+
   return (
     <div className="forum-search-section">
       <div className="search-box">
@@ -29,15 +47,19 @@ export default function SearchFilter({
             >
               All Subjects
             </button>
-            {COMMON_SUBJECTS.map(subject => (
-              <button
-                key={subject}
-                className={`filter-btn ${selectedSubject === subject ? 'active' : ''}`}
-                onClick={() => onSubjectChange(subject)}
-              >
-                {subject}
-              </button>
-            ))}
+            {Array.isArray(subjects) && subjects.length > 0 ? (
+              subjects.map(subject => (
+                <button
+                  key={subject.id}
+                  className={`filter-btn ${selectedSubject === subject.name ? 'active' : ''}`}
+                  onClick={() => onSubjectChange(subject.name)}
+                >
+                  {subject.name}
+                </button>
+              ))
+            ) : (
+              <p style={{ color: '#999' }}>Loading subjects...</p>
+            )}
           </div>
         </div>
       </div>

@@ -26,10 +26,14 @@ namespace EdBridge.API.Services
 
             _db.Posts.Add(post);
             await _db.SaveChangesAsync();
+
+            // Reload the post with author included
+            await _db.Entry(post).Reference(p => p.Author).LoadAsync();
+
             return post;
         }
 
-        public async Task<PostDetailDto?> GetPostByIdAsync(int id)
+        public async Task<PostDetailDto?> GetPostByIdAsync(int id, int? currentUserId = null)
         {
             var post = await _db.Posts
                 .Include(p => p.Author)
@@ -42,81 +46,57 @@ namespace EdBridge.API.Services
             if (post == null)
                 return null;
 
-            post.ViewCount++;
+            // Only increment view count if:
+            // 1. User is viewing someone else's post
+            // 2. User hasn't viewed this post before
+            if (currentUserId.HasValue && currentUserId.Value != post.UserId)
+            {
+                var existingView = await _db.PostViews
+                    .FirstOrDefaultAsync(pv => pv.PostId == id && pv.UserId == currentUserId.Value);
 
-            await _db.SaveChangesAsync();
+                if (existingView == null)
+                {
+                    post.ViewCount++;
+                    _db.PostViews.Add(new PostView
+                    {
+                        PostId = id,
+                        UserId = currentUserId.Value,
+                        ViewedAt = DateTime.UtcNow
+                    });
+                    await _db.SaveChangesAsync();
+                }
+            }
 
             return new PostDetailDto
             {
                 Id = post.Id,
-
                 Title = post.Title,
-
                 Content = post.Content,
-
                 IsAnonymous = post.IsAnonymous,
-
                 ViewCount = post.ViewCount,
-
                 UpvoteCount = post.UpvoteCount,
-
                 DownvoteCount = post.DownvoteCount,
-
                 CreatedAt = post.CreatedAt,
-
                 UpdatedAt = post.UpdatedAt,
-
                 UserId = post.UserId,
-
                 Author = post.IsAnonymous
-                    ? new UserDto
-                    {
-                        Id = 0,
-                        Name = "Anonymous",
-                        Email = string.Empty
-                    }
-                    : new UserDto
-                    {
-                        Id = post.Author.Id,
-                        Name = post.Author.Name,
-                        Email = post.Author.Email
-                    },
-
-                Tags = post.PostSubjectTags
-                    .Select(pst => pst.SubjectTag.Name)
-                    .ToList(),
-
+                    ? new UserDto { Id = 0, Name = "Anonymous", Email = string.Empty }
+                    : new UserDto { Id = post.Author.Id, Name = post.Author.Name, Email = post.Author.Email },
+                Tags = post.PostSubjectTags.Select(pst => pst.SubjectTag.Name).ToList(),
                 Replies = post.Replies
                     .OrderBy(r => r.CreatedAt)
                     .Select(r => new ReplyDto
                     {
                         Id = r.Id,
-
                         Content = r.Content,
-
                         IsAnonymous = r.IsAnonymous,
-
                         IsBestAnswer = r.IsBestAnswer,
-
                         UpvoteCount = r.UpvoteCount,
-
                         DownvoteCount = r.DownvoteCount,
-
                         CreatedAt = r.CreatedAt,
-
                         Author = r.IsAnonymous
-                        ? new UserDto
-                        {
-                            Id = 0,
-                            Name = "Anonymous",
-                            Email = string.Empty
-                        }
-                            : new UserDto
-                            {
-                                Id = r.Author.Id,
-                                Name = r.Author.Name,
-                                Email = r.Author.Email
-                            }
+                            ? new UserDto { Id = 0, Name = "Anonymous", Email = string.Empty }
+                            : new UserDto { Id = r.Author.Id, Name = r.Author.Name, Email = r.Author.Email }
                     })
                     .ToList()
             };
@@ -205,33 +185,33 @@ namespace EdBridge.API.Services
                 .ToListAsync();
         }
 
-public async Task<bool> UpvotePostAsync(int postId, int userId)
-{
-    var post = await _db.Posts.FindAsync(postId);
-    if (post == null) return false; // Post doesn't exist
+        public async Task<bool> UpvotePostAsync(int postId, int userId)
+        {
+            var post = await _db.Posts.FindAsync(postId);
+            if (post == null) return false; // Post doesn't exist
 
-    var existing = await _db.PostUpvotes
-        .FirstOrDefaultAsync(pu => pu.PostId == postId && pu.UserId == userId);
+            var existing = await _db.PostUpvotes
+                .FirstOrDefaultAsync(pu => pu.PostId == postId && pu.UserId == userId);
 
-    if (existing != null) return false; // Already upvoted
+            if (existing != null) return false; // Already upvoted
 
-    // If user had downvoted, remove that downvote first (can't have both)
-    var existingDownvote = await _db.PostDownvotes
-        .FirstOrDefaultAsync(pd => pd.PostId == postId && pd.UserId == userId);
+            // If user had downvoted, remove that downvote first (can't have both)
+            var existingDownvote = await _db.PostDownvotes
+                .FirstOrDefaultAsync(pd => pd.PostId == postId && pd.UserId == userId);
 
-    if (existingDownvote != null)
-    {
-        _db.PostDownvotes.Remove(existingDownvote);
-        if (post.DownvoteCount > 0) post.DownvoteCount--;
-    }
+            if (existingDownvote != null)
+            {
+                _db.PostDownvotes.Remove(existingDownvote);
+                if (post.DownvoteCount > 0) post.DownvoteCount--;
+            }
 
-    var upvote = new PostUpvote { PostId = postId, UserId = userId };
-    _db.PostUpvotes.Add(upvote);
+            var upvote = new PostUpvote { PostId = postId, UserId = userId };
+            _db.PostUpvotes.Add(upvote);
 
-    post.UpvoteCount++;
-    await _db.SaveChangesAsync();
-    return true;
-}
+            post.UpvoteCount++;
+            await _db.SaveChangesAsync();
+            return true;
+        }
 
         public async Task<bool> DeletePostAsync(int id)
         {
@@ -268,50 +248,50 @@ public async Task<bool> UpvotePostAsync(int postId, int userId)
 
 
         public async Task<bool> DownvotePostAsync(int postId, int userId)
-{
-    var post = await _db.Posts.FindAsync(postId);
-    if (post == null) return false;
+        {
+            var post = await _db.Posts.FindAsync(postId);
+            if (post == null) return false;
 
-    var existingDownvote = await _db.PostDownvotes
-        .FirstOrDefaultAsync(pd => pd.PostId == postId && pd.UserId == userId);
+            var existingDownvote = await _db.PostDownvotes
+                .FirstOrDefaultAsync(pd => pd.PostId == postId && pd.UserId == userId);
 
-    if (existingDownvote != null) return false; // Already downvoted
+            if (existingDownvote != null) return false; // Already downvoted
 
-    // If user had upvoted, remove that upvote first (can't have both)
-    var existingUpvote = await _db.PostUpvotes
-        .FirstOrDefaultAsync(pu => pu.PostId == postId && pu.UserId == userId);
+            // If user had upvoted, remove that upvote first (can't have both)
+            var existingUpvote = await _db.PostUpvotes
+                .FirstOrDefaultAsync(pu => pu.PostId == postId && pu.UserId == userId);
 
-    if (existingUpvote != null)
-    {
-        _db.PostUpvotes.Remove(existingUpvote);
-        if (post.UpvoteCount > 0) post.UpvoteCount--;
-    }
+            if (existingUpvote != null)
+            {
+                _db.PostUpvotes.Remove(existingUpvote);
+                if (post.UpvoteCount > 0) post.UpvoteCount--;
+            }
 
-    var downvote = new PostDownvote { PostId = postId, UserId = userId };
-    _db.PostDownvotes.Add(downvote);
+            var downvote = new PostDownvote { PostId = postId, UserId = userId };
+            _db.PostDownvotes.Add(downvote);
 
-    post.DownvoteCount++;
-    await _db.SaveChangesAsync();
-    return true;
-}
+            post.DownvoteCount++;
+            await _db.SaveChangesAsync();
+            return true;
+        }
 
 
 
-public async Task<bool> RemoveDownvoteAsync(int postId, int userId)
-{
-    var downvote = await _db.PostDownvotes
-        .FirstOrDefaultAsync(pd => pd.PostId == postId && pd.UserId == userId);
+        public async Task<bool> RemoveDownvoteAsync(int postId, int userId)
+        {
+            var downvote = await _db.PostDownvotes
+                .FirstOrDefaultAsync(pd => pd.PostId == postId && pd.UserId == userId);
 
-    if (downvote == null) return false;
+            if (downvote == null) return false;
 
-    _db.PostDownvotes.Remove(downvote);
+            _db.PostDownvotes.Remove(downvote);
 
-    var post = await _db.Posts.FindAsync(postId);
-    if (post.DownvoteCount > 0) post.DownvoteCount--;
+            var post = await _db.Posts.FindAsync(postId);
+            if (post.DownvoteCount > 0) post.DownvoteCount--;
 
-    await _db.SaveChangesAsync();
-    return true;
-}
+            await _db.SaveChangesAsync();
+            return true;
+        }
         public async Task<bool> FollowPostAsync(int postId, int userId)
         {
             var existing = await _db.PostFollows
@@ -333,6 +313,94 @@ public async Task<bool> RemoveDownvoteAsync(int postId, int userId)
             if (follow == null) return false;
 
             _db.PostFollows.Remove(follow);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> UpvoteReplyAsync(int replyId, int userId)
+        {
+            var reply = await _db.Replies.FindAsync(replyId);
+            if (reply == null) return false;
+
+            var existing = await _db.ReplyUpvotes
+                .FirstOrDefaultAsync(ru => ru.ReplyId == replyId && ru.UserId == userId);
+
+            if (existing != null) return false; // Already upvoted
+
+            // If user had downvoted, remove that downvote first
+            var existingDownvote = await _db.ReplyDownvotes
+                .FirstOrDefaultAsync(rd => rd.ReplyId == replyId && rd.UserId == userId);
+
+            if (existingDownvote != null)
+            {
+                _db.ReplyDownvotes.Remove(existingDownvote);
+                if (reply.DownvoteCount > 0) reply.DownvoteCount--;
+            }
+
+            var upvote = new ReplyUpvote { ReplyId = replyId, UserId = userId };
+            _db.ReplyUpvotes.Add(upvote);
+            reply.UpvoteCount++;
+
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> RemoveReplyUpvoteAsync(int replyId, int userId)
+        {
+            var upvote = await _db.ReplyUpvotes
+                .FirstOrDefaultAsync(ru => ru.ReplyId == replyId && ru.UserId == userId);
+
+            if (upvote == null) return false;
+
+            _db.ReplyUpvotes.Remove(upvote);
+
+            var reply = await _db.Replies.FindAsync(replyId);
+            if (reply != null && reply.UpvoteCount > 0) reply.UpvoteCount--;
+
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> DownvoteReplyAsync(int replyId, int userId)
+        {
+            var reply = await _db.Replies.FindAsync(replyId);
+            if (reply == null) return false;
+
+            var existingDownvote = await _db.ReplyDownvotes
+                .FirstOrDefaultAsync(rd => rd.ReplyId == replyId && rd.UserId == userId);
+
+            if (existingDownvote != null) return false; // Already downvoted
+
+            // If user had upvoted, remove that upvote first
+            var existingUpvote = await _db.ReplyUpvotes
+                .FirstOrDefaultAsync(ru => ru.ReplyId == replyId && ru.UserId == userId);
+
+            if (existingUpvote != null)
+            {
+                _db.ReplyUpvotes.Remove(existingUpvote);
+                if (reply.UpvoteCount > 0) reply.UpvoteCount--;
+            }
+
+            var downvote = new ReplyDownvote { ReplyId = replyId, UserId = userId };
+            _db.ReplyDownvotes.Add(downvote);
+            reply.DownvoteCount++;
+
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> RemoveReplyDownvoteAsync(int replyId, int userId)
+        {
+            var downvote = await _db.ReplyDownvotes
+                .FirstOrDefaultAsync(rd => rd.ReplyId == replyId && rd.UserId == userId);
+
+            if (downvote == null) return false;
+
+            _db.ReplyDownvotes.Remove(downvote);
+
+            var reply = await _db.Replies.FindAsync(replyId);
+            if (reply != null && reply.DownvoteCount > 0) reply.DownvoteCount--;
+
             await _db.SaveChangesAsync();
             return true;
         }
