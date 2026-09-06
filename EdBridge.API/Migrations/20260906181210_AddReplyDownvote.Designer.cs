@@ -4,6 +4,7 @@ using EdBridge.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EdBridge.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260906181210_AddReplyDownvote")]
+    partial class AddReplyDownvote
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -321,24 +324,6 @@ namespace EdBridge.API.Migrations
                     b.ToTable("PostUpvotes");
                 });
 
-            modelBuilder.Entity("EdBridge.API.Models.PostView", b =>
-                {
-                    b.Property<int>("PostId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("ViewedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("PostId", "UserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("PostViews");
-                });
-
             modelBuilder.Entity("EdBridge.API.Models.Reply", b =>
                 {
                     b.Property<int>("Id")
@@ -431,20 +416,10 @@ namespace EdBridge.API.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("ListingId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("PostId")
+                    b.Property<int>("ListingId")
                         .HasColumnType("int");
 
                     b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int?>("ReplyId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ReportType")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -464,10 +439,6 @@ namespace EdBridge.API.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ListingId");
-
-                    b.HasIndex("PostId");
-
-                    b.HasIndex("ReplyId");
 
                     b.HasIndex("ReporterId");
 
@@ -749,25 +720,6 @@ namespace EdBridge.API.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("EdBridge.API.Models.PostView", b =>
-                {
-                    b.HasOne("EdBridge.API.Models.Post", "Post")
-                        .WithMany()
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EdBridge.API.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Post");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("EdBridge.API.Models.Reply", b =>
                 {
                     b.HasOne("EdBridge.API.Models.Post", "Post")
@@ -829,15 +781,9 @@ namespace EdBridge.API.Migrations
                 {
                     b.HasOne("EdBridge.API.Models.Listing", "Listing")
                         .WithMany("Reports")
-                        .HasForeignKey("ListingId");
-
-                    b.HasOne("EdBridge.API.Models.Post", "Post")
-                        .WithMany()
-                        .HasForeignKey("PostId");
-
-                    b.HasOne("EdBridge.API.Models.Reply", "Reply")
-                        .WithMany()
-                        .HasForeignKey("ReplyId");
+                        .HasForeignKey("ListingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("EdBridge.API.Models.User", "Reporter")
                         .WithMany()
@@ -850,10 +796,6 @@ namespace EdBridge.API.Migrations
                         .HasForeignKey("ResolvedByAdminId");
 
                     b.Navigation("Listing");
-
-                    b.Navigation("Post");
-
-                    b.Navigation("Reply");
 
                     b.Navigation("Reporter");
 

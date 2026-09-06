@@ -175,7 +175,8 @@ export default function ForumPage() {
 
         <PostList
           posts={filteredPosts}
-          onSelectPost={() => {}}
+          onSelectPost={() => { }}
+          onPostDeleted={loadPosts}
         />
       </main>
 

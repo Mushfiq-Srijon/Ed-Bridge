@@ -4,7 +4,7 @@ import { forumAPI } from '../../services/api';
 import { transformPost } from '../../utils/forumAdapter';
 import { useAuth } from '../../context/AuthContext';
 
-export default function PostDetail({ post, onBack }) {
+export default function PostDetail({ post, onBack, onDeleted }) {
   const { user } = useAuth();
   const [currentPost, setCurrentPost] = useState(post);
   const [isEditing, setIsEditing] = useState(false);
@@ -23,16 +23,16 @@ export default function PostDetail({ post, onBack }) {
           userHasUpvoted: false,
         }));
       } else {
-  await forumAPI.upvotePost(currentPost.id);
-  setCurrentPost((prev) => ({
-    ...prev,
-    upvotes: prev.upvotes + 1,
-    userHasUpvoted: true,
-    // If user had downvoted, backend removed that downvote — reflect it here too
-    downvotes: prev.userHasDownvoted ? Math.max(0, prev.downvotes - 1) : prev.downvotes,
-    userHasDownvoted: false,
-  }));
-}
+        await forumAPI.upvotePost(currentPost.id);
+        setCurrentPost((prev) => ({
+          ...prev,
+          upvotes: prev.upvotes + 1,
+          userHasUpvoted: true,
+          // If user had downvoted, backend removed that downvote — reflect it here too
+          downvotes: prev.userHasDownvoted ? Math.max(0, prev.downvotes - 1) : prev.downvotes,
+          userHasDownvoted: false,
+        }));
+      }
     } catch (error) {
       console.error('Failed to update vote:', error);
       alert(error.message || 'Failed to update vote');
@@ -40,30 +40,30 @@ export default function PostDetail({ post, onBack }) {
   };
 
   const handleDownvote = async () => {
-  try {
-    if (currentPost.userHasDownvoted) {
-      await forumAPI.removeDownvote(currentPost.id);
-      setCurrentPost((prev) => ({
-        ...prev,
-        downvotes: Math.max(0, prev.downvotes - 1),
-        userHasDownvoted: false,
-      }));
-    } else {
-      await forumAPI.downvotePost(currentPost.id);
-      setCurrentPost((prev) => ({
-        ...prev,
-        downvotes: prev.downvotes + 1,
-        userHasDownvoted: true,
-        // If user had upvoted, backend removed that upvote — reflect it here too
-        upvotes: prev.userHasUpvoted ? Math.max(0, prev.upvotes - 1) : prev.upvotes,
-        userHasUpvoted: false,
-      }));
+    try {
+      if (currentPost.userHasDownvoted) {
+        await forumAPI.removeDownvote(currentPost.id);
+        setCurrentPost((prev) => ({
+          ...prev,
+          downvotes: Math.max(0, prev.downvotes - 1),
+          userHasDownvoted: false,
+        }));
+      } else {
+        await forumAPI.downvotePost(currentPost.id);
+        setCurrentPost((prev) => ({
+          ...prev,
+          downvotes: prev.downvotes + 1,
+          userHasDownvoted: true,
+          // If user had upvoted, backend removed that upvote — reflect it here too
+          upvotes: prev.userHasUpvoted ? Math.max(0, prev.upvotes - 1) : prev.upvotes,
+          userHasUpvoted: false,
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to update downvote:', error);
+      alert(error.message || 'Failed to update downvote');
     }
-  } catch (error) {
-    console.error('Failed to update downvote:', error);
-    alert(error.message || 'Failed to update downvote');
-  }
-};
+  };
 
   const handleFollow = async () => {
     try {
@@ -94,40 +94,44 @@ export default function PostDetail({ post, onBack }) {
     }
   };
 
-  const handleUpvoteComment = (commentId) => {
-    setCurrentPost((prev) => ({
-      ...prev,
-      replies: prev.replies.map((reply) =>
-        reply.id === commentId
-          ? {
-              ...reply,
-              upvotes: reply.userHasUpvoted ? reply.upvotes - 1 : reply.upvotes + 1,
-              userHasUpvoted: !reply.userHasUpvoted,
-              userHasDownvoted: false,
-            }
-          : reply
-      ),
-    }));
+  const handleUpvoteComment = async (commentId) => {
+    try {
+      const reply = currentPost.replies.find(r => r.id === commentId);
+      if (!reply) return;
+
+      if (reply.userHasUpvoted) {
+        await forumAPI.removeReplyUpvote(currentPost.id, commentId);
+      } else {
+        await forumAPI.upvoteReply(currentPost.id, commentId);
+      }
+
+      // Refresh the post to get accurate counts
+      const updatedPost = await forumAPI.getPost(currentPost.id);
+      setCurrentPost(transformPost(updatedPost));
+    } catch (error) {
+      console.error('Failed to upvote reply:', error);
+      alert(error.message || 'Failed to upvote reply');
+    }
   };
 
-  const handleDownvoteComment = (commentId) => {
-    setCurrentPost((prev) => ({
-      ...prev,
-      replies: prev.replies.map((reply) =>
-        reply.id === commentId
-          ? {
-              ...reply,
-              downvotes: reply.userHasDownvoted ? reply.downvotes - 1 : reply.downvotes + 1,
-              userHasDownvoted: !reply.userHasDownvoted,
-              userHasUpvoted: false,
-            }
-          : reply
-      ),
-    }));
-  };
+  const handleDownvoteComment = async (commentId) => {
+    try {
+      const reply = currentPost.replies.find(r => r.id === commentId);
+      if (!reply) return;
 
-  const handleReportComment = (commentId) => {
-    alert('Comment ' + commentId + ' reported! Admin will review it.');
+      if (reply.userHasDownvoted) {
+        await forumAPI.removeReplyDownvote(currentPost.id, commentId);
+      } else {
+        await forumAPI.downvoteReply(currentPost.id, commentId);
+      }
+
+      // Refresh the post to get accurate counts
+      const updatedPost = await forumAPI.getPost(currentPost.id);
+      setCurrentPost(transformPost(updatedPost));
+    } catch (error) {
+      console.error('Failed to downvote reply:', error);
+      alert(error.message || 'Failed to downvote reply');
+    }
   };
 
   const handleEditClick = () => {
@@ -168,10 +172,37 @@ export default function PostDetail({ post, onBack }) {
 
     try {
       await forumAPI.deletePost(currentPost.id);
-      onBack();
+      if (onDeleted) onDeleted();
+      else onBack();
     } catch (error) {
       console.error('Failed to delete post:', error);
       alert(error.message || 'Failed to delete post');
+    }
+  };
+
+  const handleReportPost = async () => {
+    const reason = prompt('Why are you reporting this post?');
+    if (!reason || reason.trim() === '') return;
+
+    try {
+      await forumAPI.reportPost(currentPost.id, reason);
+      alert('Post reported successfully. Admin will review it.');
+    } catch (error) {
+      console.error('Failed to report post:', error);
+      alert(error.message || 'Failed to report post');
+    }
+  };
+
+  const handleReportComment = async (commentId) => {
+    const reason = prompt('Why are you reporting this reply?');
+    if (!reason || reason.trim() === '') return;
+
+    try {
+      await forumAPI.reportReply(currentPost.id, commentId, reason);
+      alert('Reply reported successfully. Admin will review it.');
+    } catch (error) {
+      console.error('Failed to report reply:', error);
+      alert(error.message || 'Failed to report reply');
     }
   };
 
@@ -255,11 +286,11 @@ export default function PostDetail({ post, onBack }) {
           className={'action-btn follow-btn ' + (currentPost.userIsFollowing ? 'active' : '')}
           onClick={handleFollow}
         >
-          🔔 Follow ({currentPost.followers})
+          🔔 Follow
         </button>
 
         {!isOwner && (
-          <button className="action-btn report-btn" onClick={() => alert('Post reported!')}>
+          <button className="action-btn report-btn" onClick={handleReportPost}>
             🚩 Report
           </button>
         )}

@@ -5,26 +5,19 @@ import { forumAPI } from '../../services/api';
 import { transformPost } from '../../utils/forumAdapter';
 import '../../styles/Forum.css';
 
-export default function PostList({ posts }) {
+export default function PostList({ posts, onPostDeleted }) {
   const [selectedPost, setSelectedPost] = useState(null);
-
   const [loadingPost, setLoadingPost] = useState(false);
 
   const handleSelectPost = async (post) => {
     try {
       setLoadingPost(true);
-
       const data = await forumAPI.getPost(post.id);
-
       const formattedPost = transformPost(data);
-
       setSelectedPost(formattedPost);
-
     } catch (error) {
       console.error('Failed to load post:', error);
-
       alert(error.message || 'Failed to load post');
-
     } finally {
       setLoadingPost(false);
     }
@@ -32,6 +25,11 @@ export default function PostList({ posts }) {
 
   const handleCloseDetail = () => {
     setSelectedPost(null);
+  };
+
+  const handlePostDeleted = () => {
+    setSelectedPost(null);
+    if (onPostDeleted) onPostDeleted(); // Refresh parent's post list
   };
 
   if (loadingPost) {
@@ -47,6 +45,7 @@ export default function PostList({ posts }) {
       <PostDetail
         post={selectedPost}
         onBack={handleCloseDetail}
+        onDeleted={handlePostDeleted}
       />
     );
   }

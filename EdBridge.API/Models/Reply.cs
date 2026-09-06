@@ -24,5 +24,6 @@ namespace EdBridge.API.Models
         public User Author { get; set; }
         
         public ICollection<ReplyUpvote> Upvotes { get; set; } = new List<ReplyUpvote>();
+        public ICollection<ReplyDownvote> Downvotes { get; set; } = new List<ReplyDownvote>();
     }
 }

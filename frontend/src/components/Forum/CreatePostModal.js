@@ -1,18 +1,32 @@
-import React, { useState } from 'react';
-import { COMMON_SUBJECTS, COMMON_TAGS } from '../../data/forumMockData';
+import React, { useState, useEffect } from 'react';
+import { forumAPI } from '../../services/api';
 
 export default function CreatePostModal({ onClose, onCreate }) {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    subject: '',
-    customSubject: '',
-    tags: [],
+    subjectTagIds: [],
     isAnonymous: false,
   });
 
+  const [subjects, setSubjects] = useState([]);
   const [errors, setErrors] = useState({});
-  const [showCustomSubject, setShowCustomSubject] = useState(false);
+
+  useEffect(() => {
+    loadSubjects();
+  }, []);
+
+  const loadSubjects = async () => {
+    try {
+      const data = await forumAPI.getSubjects();
+      console.log('Subjects data:', data);
+      console.log('Type:', typeof data, 'Is Array:', Array.isArray(data));
+      setSubjects(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Failed to load subjects:', error);
+      setSubjects([]);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -22,29 +36,18 @@ export default function CreatePostModal({ onClose, onCreate }) {
     }));
   };
 
-  const handleSubjectChange = (e) => {
-    const value = e.target.value;
-    if (value === 'custom') {
-      setShowCustomSubject(true);
-      setFormData(prev => ({ ...prev, subject: '' }));
-    } else {
-      setShowCustomSubject(false);
-      setFormData(prev => ({ ...prev, subject: value }));
-    }
-  };
-
-  const handleTagToggle = (tag) => {
+  const handleSubjectToggle = (subjectId) => {
     setFormData(prev => ({
       ...prev,
-      tags: prev.tags.includes(tag)
-        ? prev.tags.filter(t => t !== tag)
-        : [...prev.tags, tag]
+      subjectTagIds: prev.subjectTagIds.includes(subjectId)
+        ? prev.subjectTagIds.filter(id => id !== subjectId)
+        : [...prev.subjectTagIds, subjectId]
     }));
   };
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.title.trim()) {
       newErrors.title = 'Question title is required';
     } else if (formData.title.length < 10) {
@@ -57,13 +60,8 @@ export default function CreatePostModal({ onClose, onCreate }) {
       newErrors.content = 'Please provide more details (at least 20 characters)';
     }
 
-    const subject = showCustomSubject ? formData.customSubject : formData.subject;
-    if (!subject) {
-      newErrors.subject = 'Please select or enter a subject';
-    }
-
-    if (formData.tags.length === 0) {
-      newErrors.tags = 'Please select at least one tag';
+    if (formData.subjectTagIds.length === 0) {
+      newErrors.subject = 'Please select at least one subject';
     }
 
     return newErrors;
@@ -71,22 +69,18 @@ export default function CreatePostModal({ onClose, onCreate }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
 
-    const subject = showCustomSubject ? formData.customSubject : formData.subject;
-
     onCreate({
       title: formData.title,
       content: formData.content,
-      subject: subject,
-      tags: formData.tags,
+      subjectTagIds: formData.subjectTagIds,
       isAnonymous: formData.isAnonymous,
-      author: formData.isAnonymous ? null : { id: 1, name: 'You', email: 'your@email.com' },
     });
   };
 
@@ -131,52 +125,26 @@ export default function CreatePostModal({ onClose, onCreate }) {
             {errors.content && <span className="error-text">⚠️ {errors.content}</span>}
           </div>
 
-          {/* Subject */}
+          {/* Subjects */}
           <div className="form-group">
-            <label>Subject *</label>
-            <select
-              value={showCustomSubject ? 'custom' : formData.subject}
-              onChange={handleSubjectChange}
-              className={errors.subject ? 'input-error' : ''}
-            >
-              <option value="">Select a subject</option>
-              {COMMON_SUBJECTS.map(subject => (
-                <option key={subject} value={subject}>
-                  {subject}
-                </option>
-              ))}
-              <option value="custom">+ Add custom subject</option>
-            </select>
-
-            {showCustomSubject && (
-              <input
-                type="text"
-                name="customSubject"
-                placeholder="Enter your subject (e.g., Advanced Physics)"
-                value={formData.customSubject}
-                onChange={handleChange}
-                className="custom-subject-input"
-              />
-            )}
-            {errors.subject && <span className="error-text">⚠️ {errors.subject}</span>}
-          </div>
-
-          {/* Tags */}
-          <div className="form-group">
-            <label>Tags * (Select at least one)</label>
+            <label>Subjects * (Select at least one)</label>
             <div className="tags-selection">
-              {COMMON_TAGS.map(tag => (
-                <button
-                  key={tag}
-                  type="button"
-                  className={`tag-btn ${formData.tags.includes(tag) ? 'active' : ''}`}
-                  onClick={() => handleTagToggle(tag)}
-                >
-                  #{tag}
-                </button>
-              ))}
+              {Array.isArray(subjects) && subjects.length > 0 ? (
+                subjects.map(subject => (
+                  <button
+                    key={subject.id}
+                    type="button"
+                    className={`tag-btn ${formData.subjectTagIds.includes(subject.id) ? 'active' : ''}`}
+                    onClick={() => handleSubjectToggle(subject.id)}
+                  >
+                    {subject.name}
+                  </button>
+                ))
+              ) : (
+                <p style={{ color: '#999', fontSize: '14px' }}>Loading subjects...</p>
+              )}
             </div>
-            {errors.tags && <span className="error-text">⚠️ {errors.tags}</span>}
+            {errors.subject && <span className="error-text">⚠️ {errors.subject}</span>}
           </div>
 
           {/* Anonymous Option */}
