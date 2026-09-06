@@ -19,6 +19,7 @@ namespace EdBridge.API.Data
         public DbSet<Report> Reports { get; set; }
         public DbSet<Reply> Replies { get; set; }
         public DbSet<PostUpvote> PostUpvotes { get; set; }
+        public DbSet<PostDownvote> PostDownvotes { get; set; }     
         public DbSet<ReplyUpvote> ReplyUpvotes { get; set; }
         public DbSet<PostFollow> PostFollows { get; set; }
 
@@ -50,6 +51,9 @@ namespace EdBridge.API.Data
             // Configure PostUpvote - one user can only upvote once per post
             modelBuilder.Entity<PostUpvote>()
                 .HasKey(pu => new { pu.PostId, pu.UserId });
+            // Configure PostDownvote - one user can only downvote once per post
+            modelBuilder.Entity<PostDownvote>()
+                 .HasKey(pd => new { pd.PostId, pd.UserId });
 
             modelBuilder.Entity<ReplyUpvote>()
                 .HasKey(ru => new { ru.ReplyId, ru.UserId });

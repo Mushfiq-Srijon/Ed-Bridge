@@ -7,6 +7,8 @@ export const transformReply = (reply) => ({
     ? null
     : reply.author || null,
 
+  authorId: reply.userId,
+
   isAnonymous: reply.isAnonymous,
 
   upvotes: reply.upvoteCount || reply.upvotes || 0,
@@ -32,6 +34,8 @@ export const transformPost = (post) => ({
   author: post.isAnonymous
     ? null
     : post.author || null,
+
+  authorId: post.userId,
 
   isAnonymous: post.isAnonymous,
 
