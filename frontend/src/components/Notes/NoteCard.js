@@ -1,20 +1,21 @@
 import React from 'react';
 import '../../styles/NoteCard.css';
+
 export default function NoteCard({ note, onView }) {
   return (
     <div className="note-card">
       <h3>{note.title}</h3>
 
-      <p>By {note.author}</p>
+      <p>By {note.author?.name || 'Unknown'}</p>
 
       <p>{note.subject}</p>
 
       <p>{note.courseCode}</p>
 
-      <p>{note.content.substring(0, 120)}...</p>
+      <p>{(note.content || '').substring(0, 120)}...</p>
 
       <div>
-        {note.tags.map((tag) => (
+        {(note.tags || []).map((tag) => (
           <span key={tag}>#{tag} </span>
         ))}
       </div>
@@ -25,9 +26,7 @@ export default function NoteCard({ note, onView }) {
 
       <p>{note.createdAt}</p>
 
-      <button onClick={onView}>
-        View Full Note →
-      </button>
+      <button onClick={onView}>View Full Note →</button>
     </div>
   );
 }

@@ -1,26 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { notesAPI } from '../../services/api';
 import '../../styles/CreateNote.css';
+
 export default function CreateNote({ onBack }) {
   const [formData, setFormData] = useState({
     title: '',
-    subject: '',
+    subjectTagId: '',
     courseCode: '',
     content: '',
-    tags: '',
   });
 
+  const [subjects, setSubjects] = useState([]);
   const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+  const [serverError, setServerError] = useState('');
 
-  const subjects = [
-    'Mathematics',
-    'Physics',
-    'Biology',
-    'Chemistry',
-    'English',
-    'History',
-    'Economics',
-    'Computer Science',
-  ];
+  useEffect(() => {
+    loadSubjects();
+  }, []);
+
+  const loadSubjects = async () => {
+    try {
+      const data = await notesAPI.getSubjects();
+      setSubjects(data);
+    } catch (err) {
+      console.error('Failed to load subjects:', err);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,6 +35,10 @@ export default function CreateNote({ onBack }) {
       ...prev,
       [name]: value,
     }));
+
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
   };
 
   const validateForm = () => {
@@ -38,8 +48,8 @@ export default function CreateNote({ onBack }) {
       newErrors.title = 'Title is required';
     }
 
-    if (!formData.subject) {
-      newErrors.subject = 'Subject is required';
+    if (!formData.subjectTagId) {
+      newErrors.subjectTagId = 'Subject is required';
     }
 
     if (!formData.courseCode.trim()) {
@@ -53,17 +63,34 @@ export default function CreateNote({ onBack }) {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setServerError('');
 
     const newErrors = validateForm();
 
-    if (Object.keys(newErrors).length === 0) {
-      console.log('Note submitted:', formData);
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      await notesAPI.create({
+        title: formData.title,
+        content: formData.content,
+        courseCode: formData.courseCode,
+        subjectTagIds: [parseInt(formData.subjectTagId, 10)],
+      });
+
       alert('Note created successfully!');
       onBack();
-    } else {
-      setErrors(newErrors);
+    } catch (err) {
+      console.error('Failed to create note:', err);
+      setServerError(err.message || 'Failed to create note');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -72,6 +99,8 @@ export default function CreateNote({ onBack }) {
       <button onClick={onBack}>← Back</button>
 
       <h1>Create New Note</h1>
+
+      {serverError && <p className="error-banner">{serverError}</p>}
 
       <form onSubmit={handleSubmit}>
         <div>
@@ -82,6 +111,7 @@ export default function CreateNote({ onBack }) {
             name="title"
             value={formData.title}
             onChange={handleChange}
+            disabled={submitting}
           />
 
           {errors.title && <p>{errors.title}</p>}
@@ -91,20 +121,21 @@ export default function CreateNote({ onBack }) {
           <label>Subject *</label>
 
           <select
-            name="subject"
-            value={formData.subject}
+            name="subjectTagId"
+            value={formData.subjectTagId}
             onChange={handleChange}
+            disabled={submitting}
           >
             <option value="">Select a subject</option>
 
             {subjects.map((subject) => (
-              <option key={subject} value={subject}>
-                {subject}
+              <option key={subject.id} value={subject.id}>
+                {subject.name}
               </option>
             ))}
           </select>
 
-          {errors.subject && <p>{errors.subject}</p>}
+          {errors.subjectTagId && <p>{errors.subjectTagId}</p>}
         </div>
 
         <div>
@@ -115,6 +146,7 @@ export default function CreateNote({ onBack }) {
             name="courseCode"
             value={formData.courseCode}
             onChange={handleChange}
+            disabled={submitting}
           />
 
           {errors.courseCode && <p>{errors.courseCode}</p>}
@@ -128,25 +160,16 @@ export default function CreateNote({ onBack }) {
             value={formData.content}
             onChange={handleChange}
             rows="10"
+            disabled={submitting}
           />
 
           {errors.content && <p>{errors.content}</p>}
         </div>
 
-        <div>
-          <label>Tags</label>
-
-          <input
-            type="text"
-            name="tags"
-            placeholder="Physics, Mechanics, Science"
-            value={formData.tags}
-            onChange={handleChange}
-          />
-        </div>
-
-        <button type="submit">Create Note</button>
-        <button type="button" onClick={onBack}>
+        <button type="submit" disabled={submitting}>
+          {submitting ? 'Creating...' : 'Create Note'}
+        </button>
+        <button type="button" onClick={onBack} disabled={submitting}>
           Cancel
         </button>
       </form>

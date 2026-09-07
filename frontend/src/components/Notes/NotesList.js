@@ -1,114 +1,122 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import NoteCard from './NoteCard';
 import NoteSearch from './NoteSearch';
+import { notesAPI } from '../../services/api';
+import { transformNote } from '../../utils/noteAdapter';
 import '../../styles/NotesList.css';
 
-const MOCK_NOTES = [
-  {
-    id: 1,
-    title: "Physics 101 - Newton's Laws",
-    author: 'Ahmed Khan',
-    subject: 'Physics',
-    courseCode: 'PHY101',
-    content:
-      "Complete notes on Newton's three laws of motion with real-world examples and applications in everyday life...",
-    createdAt: '2024-08-20',
-    tags: ['Physics', 'Mechanics', 'Science'],
-    views: 156,
-    downloads: 34,
-  },
-  {
-    id: 2,
-    title: 'Calculus - Derivatives & Chain Rule',
-    author: 'Fatima Ahmed',
-    subject: 'Mathematics',
-    courseCode: 'MATH201',
-    content:
-      'Detailed calculus notes covering derivatives, chain rule, product rule, quotient rule and practical applications...',
-    createdAt: '2024-08-19',
-    tags: ['Mathematics', 'Calculus', 'Derivatives'],
-    views: 243,
-    downloads: 67,
-  },
-  {
-    id: 3,
-    title: 'Biology - Cell Structure & Functions',
-    author: 'Rashid Hassan',
-    subject: 'Biology',
-    courseCode: 'BIO150',
-    content:
-      'Comprehensive guide to animal and plant cell structures, organelles, and their functions in cellular processes...',
-    createdAt: '2024-08-18',
-    tags: ['Biology', 'Cells', 'Science'],
-    views: 189,
-    downloads: 45,
-  },
-  {
-    id: 4,
-    title: 'English Literature - Shakespeare Analysis',
-    author: 'Zara Khan',
-    subject: 'English',
-    courseCode: 'ENG301',
-    content:
-      "In-depth analysis of Shakespeare's major works including Hamlet, Romeo & Juliet, and A Midsummer Night's Dream...",
-    createdAt: '2024-08-17',
-    tags: ['English', 'Literature', 'Shakespeare'],
-    views: 112,
-    downloads: 28,
-  },
-];
-
 export default function NotesList({ onViewNote, onCreateNote }) {
-  const [notes] = useState(MOCK_NOTES);
+  const [notes, setNotes] = useState([]);
+  const [filteredNotes, setFilteredNotes] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSubject, setSelectedSubject] = useState(null);
-  const [selectedTag, setSelectedTag] = useState(null);
 
-  const filteredNotes = notes.filter((note) => {
-    const matchesSearch =
-      note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      note.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      note.courseCode.toLowerCase().includes(searchTerm.toLowerCase());
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-    const matchesSubject =
-  !selectedSubject || note.subject === selectedSubject;
+  useEffect(() => {
+    loadNotes();
+    loadSubjects();
+  }, []);
 
-const matchesTag =
-  !selectedTag || note.tags.includes(selectedTag);
+  const loadNotes = async () => {
+    try {
+      setLoading(true);
+      setError('');
 
-return matchesSearch && matchesSubject && matchesTag;
-  });
+      const data = await notesAPI.getAll();
+      const formattedNotes = data.map(transformNote);
 
-  const subjects = [...new Set(notes.map((note) => note.subject))];
-  const tags = [...new Set(notes.flatMap((note) => note.tags))];
+      setNotes(formattedNotes);
+      setFilteredNotes(formattedNotes);
+    } catch (err) {
+      console.error('Failed to load notes:', err);
+      setError(err.message || 'Failed to load notes');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadSubjects = async () => {
+    try {
+      const data = await notesAPI.getSubjects();
+      setSubjects(data);
+    } catch (err) {
+      console.error('Failed to load subjects:', err);
+    }
+  };
+
+  const handleSearch = (query) => {
+    setSearchTerm(query);
+    filterNotes(query, selectedSubject);
+  };
+
+  const handleSubjectFilter = (subject) => {
+    setSelectedSubject(subject);
+    filterNotes(searchTerm, subject);
+  };
+
+  const filterNotes = (query, subject) => {
+    let filtered = [...notes];
+
+    if (query) {
+      const lowerQuery = query.toLowerCase();
+      filtered = filtered.filter(
+        (note) =>
+          note.title.toLowerCase().includes(lowerQuery) ||
+          (note.author?.name || '').toLowerCase().includes(lowerQuery) ||
+          note.courseCode.toLowerCase().includes(lowerQuery)
+      );
+    }
+
+    if (subject) {
+      filtered = filtered.filter((note) => note.subject === subject);
+    }
+
+    setFilteredNotes(filtered);
+  };
+
+  if (loading) {
+    return (
+      <div className="notes-list-page">
+        <p>Loading notes...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="notes-list-page">
+        <p>{error}</p>
+        <button onClick={loadNotes}>Try Again</button>
+      </div>
+    );
+  }
 
   return (
     <div className="notes-list-page">
       <h1>📚 Study Notes Repository</h1>
 
-      <button onClick={onCreateNote}>
-  + Create Note
-</button>
+      <button onClick={onCreateNote}>+ Create Note</button>
 
       <NoteSearch
-  searchTerm={searchTerm}
-  onSearchChange={setSearchTerm}
-  subjects={subjects}
-  selectedSubject={selectedSubject}
-  onSubjectChange={setSelectedSubject}
-  tags={tags}
-  selectedTag={selectedTag}
-  onTagChange={setSelectedTag}
-/>
+        searchTerm={searchTerm}
+        onSearchChange={handleSearch}
+        subjects={subjects.map((s) => s.name)}
+        selectedSubject={selectedSubject}
+        onSubjectChange={handleSubjectFilter}
+      />
 
       <div className="notes-grid">
-        {filteredNotes.map((note) => (
-          <NoteCard
-  key={note.id}
-  note={note}
-  onView={() => onViewNote(note.id)}
-/>
-        ))}
+        {filteredNotes.length === 0 ? (
+          <p>No notes found.</p>
+        ) : (
+          filteredNotes.map((note) => (
+            <NoteCard key={note.id} note={note} onView={() => onViewNote(note.id)} />
+          ))
+        )}
       </div>
     </div>
   );

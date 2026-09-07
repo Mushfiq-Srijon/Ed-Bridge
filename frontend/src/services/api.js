@@ -45,17 +45,26 @@ export const authAPI = {
 };
 
 export const notesAPI = {
-  getAll: () => apiCall('/notes'),
+  getAll: (page = 1, pageSize = 10) =>
+    apiCall(`/notes?page=${page}&pageSize=${pageSize}`),
 
   getById: (id) => apiCall(`/notes/${id}`),
 
-  search: (query) => apiCall(`/notes/search?q=${query}`),
+  search: (query, page = 1) =>
+    apiCall(`/notes/search?query=${encodeURIComponent(query)}&page=${page}`),
+
+  getBySubject: (subjectId, page = 1) =>
+    apiCall(`/notes/subject/${subjectId}?page=${page}`),
 
   create: (data) => apiCall('/notes', 'POST', data),
 
   update: (id, data) => apiCall(`/notes/${id}`, 'PUT', data),
 
   delete: (id) => apiCall(`/notes/${id}`, 'DELETE'),
+
+  download: (id) => apiCall(`/notes/${id}/download`, 'POST'),
+
+  getSubjects: () => apiCall('/posts/subjects'),
 };
 
 export const forumAPI = {

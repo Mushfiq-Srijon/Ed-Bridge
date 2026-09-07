@@ -53,6 +53,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<PostService>();
+builder.Services.AddScoped<NoteService>();
 
 var app = builder.Build();
 
