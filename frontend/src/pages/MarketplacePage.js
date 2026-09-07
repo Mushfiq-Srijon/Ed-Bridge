@@ -1,16 +1,17 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import MarketplaceSearch from "../components/Marketplace/MarketplaceSearch";
 import MarketplaceFilters from "../components/Marketplace/MarketplaceFilters";
 import ListingCard from "../components/Marketplace/ListingCard";
 
-import mockListings from "../data/mockListing";
+import { listingsAPI } from "../services/api";
 
 import "../styles/Marketplace.css";
 
 export default function MarketplacePage() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+
   const [searchTerm, setSearchTerm] = useState("");
 
   const [filters, setFilters] = useState({
@@ -23,107 +24,64 @@ export default function MarketplacePage() {
 
   const [sortOption, setSortOption] = useState("newest");
 
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchListings = async () => {
+      try {
+        setLoading(true);
+        const result = await listingsAPI.getAll(
+          { ...filters, search: searchTerm, sort: sortOption },
+          1,
+          50
+        );
+        setListings(result.items);
+        setError(null);
+      } catch (err) {
+        setError("Could not load listings. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchListings();
+  }, [filters, searchTerm, sortOption]);
+
   const categories = useMemo(() => {
     const uniqueCategories = [
-      ...new Set(mockListings.map((listing) => listing.category)),
+      ...new Set(listings.map((listing) => listing.category)),
     ];
 
     return ["All", ...uniqueCategories];
-  }, []);
+  }, [listings]);
 
   const areas = useMemo(() => {
     const uniqueAreas = [
-      ...new Set(mockListings.map((listing) => listing.area)),
+      ...new Set(listings.map((listing) => listing.area)),
     ];
 
     return ["All", ...uniqueAreas];
-  }, []);
+  }, [listings]);
 
   const filteredListings = useMemo(() => {
-    let results = mockListings.filter(
-      (listing) => listing.status === "Active"
-    );
-
-    // Search
-    if (searchTerm.trim()) {
-      const search = searchTerm.toLowerCase();
-
-      results = results.filter((listing) => {
-        return (
-          listing.title.toLowerCase().includes(search) ||
-          listing.description.toLowerCase().includes(search) ||
-          listing.category.toLowerCase().includes(search) ||
-          listing.area.toLowerCase().includes(search) ||
-          listing.subjectTags.some((tag) =>
-            tag.toLowerCase().includes(search)
-          )
-        );
-      });
-    }
-
-    // Category
-    if (filters.category !== "All") {
-      results = results.filter(
-        (listing) => listing.category === filters.category
-      );
-    }
-
-    // Condition
-    if (filters.condition !== "All") {
-      results = results.filter(
-        (listing) => listing.condition === filters.condition
-      );
-    }
-
-    // Area
-    if (filters.area !== "All") {
-      results = results.filter(
-        (listing) => listing.area === filters.area
-      );
-    }
-
-    // Minimum price
-    if (filters.minPrice !== "") {
-      results = results.filter(
-        (listing) =>
-          listing.askingPrice >= Number(filters.minPrice)
-      );
-    }
-
-    // Maximum price
-    if (filters.maxPrice !== "") {
-      results = results.filter(
-        (listing) =>
-          listing.askingPrice <= Number(filters.maxPrice)
-      );
-    }
-
-    // Sorting
-    if (sortOption === "price-low") {
-      results.sort(
-        (a, b) => a.askingPrice - b.askingPrice
-      );
-    }
-
-    if (sortOption === "price-high") {
-      results.sort(
-        (a, b) => b.askingPrice - a.askingPrice
-      );
-    }
-
-    if (sortOption === "rating") {
-      results.sort(
-        (a, b) =>
-          b.seller.rating - a.seller.rating
-      );
-    }
-
-    return results;
-  }, [searchTerm, filters, sortOption]);
+    // Backend already filters by category/condition/area/price/search/sort,
+    // so listings coming in are already the correct set.
+    return listings;
+  }, [listings]);
 
   const handleListingClick = (listing) => {
-  navigate(`/marketplace/listing/${listing.id}`);
-};
+    navigate(`/marketplace/listing/${listing.id}`);
+  };
+
+  if (loading) {
+    return <div className="marketplace-loading">Loading listings...</div>;
+  }
+
+  if (error) {
+    return <div className="marketplace-error">{error}</div>;
+  }
 
   return (
     <div className="marketplace-page">
@@ -222,10 +180,6 @@ export default function MarketplacePage() {
 
                 <option value="price-high">
                   Price: High to Low
-                </option>
-
-                <option value="rating">
-                  Seller Rating
                 </option>
               </select>
 
