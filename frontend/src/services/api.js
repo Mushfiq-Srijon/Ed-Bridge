@@ -150,3 +150,31 @@ export const forumAPI = {
   getSubjects: () =>
     apiCall('/posts/subjects'),
 };
+export const listingsAPI = {
+  getAll: (filters = {}, page = 1, pageSize = 12) => {
+    const params = new URLSearchParams();
+    if (filters.category && filters.category !== "All") params.append("category", filters.category);
+    if (filters.condition && filters.condition !== "All") params.append("condition", filters.condition);
+    if (filters.area && filters.area !== "All") params.append("area", filters.area);
+    if (filters.minPrice) params.append("minPrice", filters.minPrice);
+    if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
+    if (filters.search) params.append("search", filters.search);
+    if (filters.sort) params.append("sort", filters.sort);
+    params.append("page", page);
+    params.append("pageSize", pageSize);
+
+    return apiCall(`/listings?${params.toString()}`);
+  },
+
+  getById: (id) => apiCall(`/listings/${id}`),
+
+  getCategories: () => apiCall("/listings/categories"),
+
+  getAreas: () => apiCall("/listings/areas"),
+
+  create: (data) => apiCall("/listings", "POST", data),
+
+  update: (id, data) => apiCall(`/listings/${id}`, "PUT", data),
+
+  delete: (id) => apiCall(`/listings/${id}`, "DELETE"),
+};

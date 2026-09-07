@@ -53,17 +53,7 @@ export default function ListingCard({ listing, onClick }) {
           </div>
 
           <div className="seller-details">
-            <span className="seller-name">
-              {listing.seller.name}
-
-              {listing.seller.verified && (
-                <span className="verified-badge">✓</span>
-              )}
-            </span>
-
-            <span className="seller-rating">
-              ⭐ {listing.seller.rating} ({listing.seller.reviews})
-            </span>
+            <span className="seller-name">{listing.seller?.name}</span>
           </div>
         </div>
       </div>

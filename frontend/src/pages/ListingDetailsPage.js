@@ -1,15 +1,25 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import mockListings from "../data/mockListing";
+import { listingsAPI } from "../services/api";
 import "../styles/ListingDetails.css";
 
 export default function ListingDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const listing = mockListings.find(
-    (item) => item.id === Number(id)
-  );
+  const [listing, setListing] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    listingsAPI.getById(id)
+      .then(setListing)
+      .catch(() => setListing(null))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  if (loading) {
+    return <div className="listing-loading">Loading listing...</div>;
+  }
 
   if (!listing) {
     return (
@@ -43,7 +53,7 @@ export default function ListingDetailsPage() {
           {/* Image */}
           <div className="listing-details-image-section">
             <img
-              src={listing.image}
+              src={listing.imageUrl}
               alt={listing.title}
               className="listing-details-image"
             />
@@ -80,9 +90,11 @@ export default function ListingDetailsPage() {
               📍 {listing.area}
             </div>
 
-            <div className="details-education">
-              🎓 {listing.educationLevel}
-            </div>
+            {listing.educationLevel && (
+              <div className="details-education">
+                🎓 {listing.educationLevel}
+              </div>
+            )}
 
             {/* Tags */}
             <div className="details-tags">
@@ -104,27 +116,20 @@ export default function ListingDetailsPage() {
             <div className="seller-details-card">
 
               <div className="seller-details-avatar">
-                {listing.seller.name.charAt(0)}
+                {listing.seller?.name?.charAt(0)}
               </div>
 
               <div className="seller-details-info">
 
                 <div className="seller-details-name">
-                  {listing.seller.name}
-
-                  {listing.seller.verified && (
-                    <span className="seller-verified">
-                      ✓ Verified
-                    </span>
-                  )}
+                  {listing.seller?.name}
                 </div>
 
-                <div className="seller-details-rating">
-                  ⭐ {listing.seller.rating}
-                  <span>
-                    ({listing.seller.reviews} reviews)
-                  </span>
-                </div>
+                {listing.seller?.institution && (
+                  <div className="seller-details-institution">
+                    {listing.seller.institution}
+                  </div>
+                )}
 
               </div>
 
@@ -135,7 +140,7 @@ export default function ListingDetailsPage() {
               className="contact-seller-button"
               onClick={() =>
                 alert(
-                  `Messaging ${listing.seller.name} about "${listing.title}"`
+                  `Messaging ${listing.seller?.name} about "${listing.title}"`
                 )
               }
             >
