@@ -27,8 +27,19 @@ export const apiCall = async (endpoint, method = 'GET', body = null) => {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `API Error: ${response.status}`);
+      const responseText = await response.text();
+      let errorMessage = `API Error: ${response.status}`;
+
+      if (responseText) {
+        try {
+          const errorData = JSON.parse(responseText);
+          errorMessage = errorData.message || errorMessage;
+        } catch {
+          errorMessage = responseText;
+        }
+      }
+
+      throw new Error(errorMessage);
     }
     return await response.json();
   } catch (error) {
@@ -57,8 +68,6 @@ export const notesAPI = {
     apiCall(`/notes/subject/${subjectId}?page=${page}`),
 
   create: (data) => apiCall('/notes', 'POST', data),
-
-  update: (id, data) => apiCall(`/notes/${id}`, 'PUT', data),
 
   delete: (id) => apiCall(`/notes/${id}`, 'DELETE'),
 
@@ -164,6 +173,7 @@ export const listingsAPI = {
     params.append("pageSize", pageSize);
 
     return apiCall(`/listings?${params.toString()}`);
+
   },
 
   getById: (id) => apiCall(`/listings/${id}`),
@@ -177,4 +187,49 @@ export const listingsAPI = {
   update: (id, data) => apiCall(`/listings/${id}`, "PUT", data),
 
   delete: (id) => apiCall(`/listings/${id}`, "DELETE"),
+
+  getMessages: (listingId, page = 1) =>
+    apiCall(`/messages/listing/${listingId}?page=${page}`),
+
+  sendMessage: (listingId, data) =>
+    apiCall(`/messages/listing/${listingId}`, 'POST', data),
+
+  getConversations: () =>
+    apiCall('/messages/conversations'),
+
+  updateStatus: (id, status) =>
+    apiCall(`/listings/${id}/status`, 'PUT', { status }),
+
+};
+
+export const reviewsAPI = {
+  // Get reviews for a seller
+  getSellerReviews: (sellerId, page = 1, pageSize = 10) =>
+    apiCall(`/reviews/seller/${sellerId}?page=${page}&pageSize=${pageSize}`),
+
+  // Get seller's average rating
+  getSellerRating: (sellerId) =>
+    apiCall(`/reviews/seller/${sellerId}/rating`),
+
+  // Create review after purchase
+  createReview: (data) =>
+    apiCall('/reviews', 'POST', data),
+
+  // Get user's reviews (for profile)
+  getUserReviews: (userId, page = 1) =>
+    apiCall(`/reviews/user/${userId}?page=${page}`),
+};
+
+export const reportAPI = {
+  // Report a listing
+  reportListing: (listingId, reason) =>
+    apiCall(`/listings/${listingId}/report`, 'POST', { reason }),
+
+  // Report a post
+  reportPost: (postId, reason) =>
+    apiCall(`/posts/${postId}/report`, 'POST', { reason }),
+
+  // Report a reply
+  reportReply: (postId, replyId, reason) =>
+    apiCall(`/posts/${postId}/replies/${replyId}/report`, 'POST', { reason }),
 };

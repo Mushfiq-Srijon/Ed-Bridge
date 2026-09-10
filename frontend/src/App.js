@@ -9,6 +9,7 @@ import MarketplacePage from './pages/MarketplacePage';
 import ListingDetailsPage from './pages/ListingDetailsPage';
 import NotesPage from './pages/NotesPage';
 import ForumPage from './pages/ForumPage';
+import MessagesPage from './pages/MessagesPage';
 
 import './App.css';
 
@@ -44,6 +45,7 @@ function App() {
           <Route path="/notes" element={<NotesPage />} />
           <Route path="/marketplace/listing/:id" element={<ListingDetailsPage />} />
           <Route path="/forum" element={<ForumPage />} />
+          <Route path="/messages" element={<PrivateRoute><MessagesPage /></PrivateRoute>} />
         </Routes>
       </AuthProvider>
     </Router>

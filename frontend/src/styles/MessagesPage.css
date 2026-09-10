@@ -1,0 +1,135 @@
+.messages-page {
+  min-height: calc(100vh - 80px);
+  padding: 3rem 1.5rem;
+  background: #f8fafc;
+}
+
+.messages-page-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.messages-back {
+  border: 0;
+  background: transparent;
+  color: #4f46e5;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0;
+}
+
+.messages-page-header {
+  margin: 2rem 0;
+}
+
+.messages-eyebrow {
+  margin: 0 0 0.4rem;
+  color: #4f46e5;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.messages-page-header h1 {
+  margin: 0;
+  color: #111827;
+}
+
+.messages-page-header p:last-child {
+  color: #6b7280;
+}
+
+.messages-state {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: white;
+  color: #6b7280;
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.messages-state h2 {
+  color: #1f2937;
+  margin-top: 0;
+}
+
+.messages-error {
+  color: #b91c1c;
+}
+
+.conversation-list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.conversation-card {
+  align-items: center;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  cursor: pointer;
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  text-align: left;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+
+.conversation-card:hover {
+  border-color: #818cf8;
+  box-shadow: 0 5px 18px rgba(79, 70, 229, 0.1);
+}
+
+.conversation-avatar {
+  align-items: center;
+  background: #4f46e5;
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  flex-shrink: 0;
+  font-weight: 700;
+  height: 42px;
+  justify-content: center;
+  width: 42px;
+}
+
+.conversation-details {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.conversation-details strong {
+  color: #111827;
+}
+
+.conversation-details span {
+  color: #4f46e5;
+  font-size: 0.85rem;
+}
+
+.conversation-details small {
+  color: #6b7280;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conversation-time {
+  color: #9ca3af;
+  font-size: 0.8rem;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .messages-page {
+    padding: 2rem 1rem;
+  }
+
+  .conversation-time {
+    display: none;
+  }
+}

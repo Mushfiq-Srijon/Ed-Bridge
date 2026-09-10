@@ -52,6 +52,13 @@ export default function ProfileDropdown() {
 
           <button
             className="dropdown-item"
+            onClick={() => handleMenuClick('/messages')}
+          >
+            💬 Messages
+          </button>
+
+          <button
+            className="dropdown-item"
             onClick={() => handleMenuClick('/profile')}
           >
             👤 My Profile

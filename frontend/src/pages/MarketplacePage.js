@@ -4,15 +4,19 @@ import { useNavigate } from "react-router-dom";
 import MarketplaceSearch from "../components/Marketplace/MarketplaceSearch";
 import MarketplaceFilters from "../components/Marketplace/MarketplaceFilters";
 import ListingCard from "../components/Marketplace/ListingCard";
+import CreateListingModal from "../components/Marketplace/CreateListingModal";
 
 import { listingsAPI } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 import "../styles/Marketplace.css";
 
 export default function MarketplacePage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [searchTerm, setSearchTerm] = useState("");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const [filters, setFilters] = useState({
     category: "All",
@@ -29,25 +33,37 @@ export default function MarketplacePage() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchListings = async () => {
-      try {
-        setLoading(true);
-        const result = await listingsAPI.getAll(
-          { ...filters, search: searchTerm, sort: sortOption },
-          1,
-          50
-        );
-        setListings(result.items);
-        setError(null);
-      } catch (err) {
-        setError("Could not load listings. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchListings();
+    loadListings();
   }, [filters, searchTerm, sortOption]);
+
+  const loadListings = async () => {
+    try {
+      setLoading(true);
+      const result = await listingsAPI.getAll(
+        { ...filters, search: searchTerm, sort: sortOption },
+        1,
+        50
+      );
+      setListings(result.items);
+      setError(null);
+    } catch (err) {
+      setError("Could not load listings. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateListing = async (listingData) => {
+    try {
+      await listingsAPI.create(listingData);
+      setIsCreateModalOpen(false);
+      await loadListings();
+      alert("Listing created successfully!");
+    } catch (error) {
+      console.error("Failed to create listing:", error);
+      alert(error.message || "Failed to create listing");
+    }
+  };
 
   const categories = useMemo(() => {
     const uniqueCategories = [
@@ -66,8 +82,6 @@ export default function MarketplacePage() {
   }, [listings]);
 
   const filteredListings = useMemo(() => {
-    // Backend already filters by category/condition/area/price/search/sort,
-    // so listings coming in are already the correct set.
     return listings;
   }, [listings]);
 
@@ -108,6 +122,16 @@ export default function MarketplacePage() {
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
           />
+
+          {user && (
+            <button
+              className="hero-create-btn"
+              onClick={() => setIsCreateModalOpen(true)}
+            >
+              <span>＋</span>
+              Post a Listing
+            </button>
+          )}
         </div>
       </section>
 
@@ -233,6 +257,15 @@ export default function MarketplacePage() {
 
         </div>
       </main>
+
+      {/* Create Listing Modal */}
+      {isCreateModalOpen && (
+        <CreateListingModal
+          onClose={() => setIsCreateModalOpen(false)}
+          onCreate={handleCreateListing}
+        />
+      )}
+
     </div>
   );
 }
