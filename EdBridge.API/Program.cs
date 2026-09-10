@@ -53,6 +53,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<PostService>();
+builder.Services.AddScoped<MessageService>();
 builder.Services.AddScoped<ListingService>();
 builder.Services.AddScoped<NoteService>();
 

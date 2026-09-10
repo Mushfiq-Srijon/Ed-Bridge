@@ -116,5 +116,35 @@ namespace EdBridge.API.Controllers
             await _listingService.DeleteListingAsync(id);
             return Ok(new { message = "Listing deleted" });
         }
+
+        [HttpPut("{id}/status")]
+        [Authorize]
+        public async Task<IActionResult> UpdateListingStatus(int id, [FromBody] UpdateListingStatusRequest req)
+        {
+            var existing = await _db.Listings.FindAsync(id);
+            if (existing == null) return NotFound(new { message = "Listing not found" });
+
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            if (existing.UserId != userId && User.FindFirst(ClaimTypes.Role)?.Value != "Admin")
+                return Forbid();
+
+            // Validate status
+            var validStatuses = new[] { "Active", "Sold", "Under Investigation", "Removed" };
+            if (!validStatuses.Contains(req.Status))
+                return BadRequest(new { message = "Invalid status" });
+
+            existing.Status = req.Status;
+            existing.UpdatedAt = DateTime.UtcNow;
+
+            _db.Listings.Update(existing);
+            await _db.SaveChangesAsync();
+
+            return Ok(new { message = "Listing status updated", status = existing.Status });
+        }
+
+        public class UpdateListingStatusRequest
+        {
+            public string Status { get; set; } = string.Empty;
+        }
     }
 }

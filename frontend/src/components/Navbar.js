@@ -80,6 +80,11 @@ export default function Navbar() {
           <li>
             <Link to="/forum" className="nav-link">Forum</Link>
           </li>
+          {token && (
+            <li>
+              <Link to="/messages" className="nav-link">Messages</Link>
+            </li>
+          )}
           <li>
             <button
               type="button"
