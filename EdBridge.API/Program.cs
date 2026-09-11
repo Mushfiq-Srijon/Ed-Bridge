@@ -56,7 +56,11 @@ builder.Services.AddScoped<PostService>();
 builder.Services.AddScoped<MessageService>();
 builder.Services.AddScoped<ListingService>();
 builder.Services.AddScoped<NoteService>();
-
+// File upload size limit (50MB)
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 52428800;
+});
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -69,6 +73,8 @@ app.UseHttpsRedirection();
 app.UseCors("AllowReact");
 app.UseAuthentication();
 app.UseAuthorization();
+// Serve uploaded files
+app.UseStaticFiles();
 app.MapControllers();
 
 app.Run();

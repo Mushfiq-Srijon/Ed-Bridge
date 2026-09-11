@@ -67,11 +67,66 @@ export const notesAPI = {
   getBySubject: (subjectId, page = 1) =>
     apiCall(`/notes/subject/${subjectId}?page=${page}`),
 
-  create: (data) => apiCall('/notes', 'POST', data),
+  create: (formData) => {
+    const token = getAuthToken();
+    return fetch(`${API_BASE_URL}/notes`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    }).then(async (res) => {
+      if (!res.ok) {
+        const text = await res.text();
+        let msg = `API Error: ${res.status}`;
+        try { msg = JSON.parse(text).message || msg; } catch { msg = text; }
+        throw new Error(msg);
+      }
+      return res.json();
+    });
+  },
+
+  update: (id, data) => apiCall(`/notes/${id}`, 'PUT', data),
 
   delete: (id) => apiCall(`/notes/${id}`, 'DELETE'),
 
-  download: (id) => apiCall(`/notes/${id}/download`, 'POST'),
+  download: async (id) => {
+    const token = getAuthToken();
+    const response = await fetch(`${API_BASE_URL}/notes/${id}/download`, {
+      method: 'GET',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      let msg = `API Error: ${response.status}`;
+      try { msg = JSON.parse(text).message || msg; } catch { msg = text; }
+      throw new Error(msg);
+    }
+
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/pdf')) {
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `note_${id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+      return { downloaded: true };
+    }
+
+    return response.json();
+  },
+
+  addComment: (id, commentText) =>
+    apiCall(`/notes/${id}/comment`, 'POST', { commentText }),
+
+  rate: (id, rating) =>
+    apiCall(`/notes/${id}/rate`, 'POST', { rating }),
+
+  report: (id, reason) =>
+    apiCall(`/notes/${id}/report`, 'POST', { reason }),
 
   getSubjects: () => apiCall('/posts/subjects'),
 };

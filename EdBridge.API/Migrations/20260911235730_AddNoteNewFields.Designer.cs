@@ -4,6 +4,7 @@ using EdBridge.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EdBridge.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260911235730_AddNoteNewFields")]
+    partial class AddNoteNewFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,7 +39,7 @@ namespace EdBridge.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("EdBridge.API.Models.Listing", b =>
@@ -105,7 +108,7 @@ namespace EdBridge.API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Listings", (string)null);
+                    b.ToTable("Listings");
                 });
 
             modelBuilder.Entity("EdBridge.API.Models.ListingSubjectTag", b =>
@@ -120,7 +123,7 @@ namespace EdBridge.API.Migrations
 
                     b.HasIndex("SubjectTagId");
 
-                    b.ToTable("ListingSubjectTag", (string)null);
+                    b.ToTable("ListingSubjectTag");
                 });
 
             modelBuilder.Entity("EdBridge.API.Models.Message", b =>
@@ -155,7 +158,7 @@ namespace EdBridge.API.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("Messages", (string)null);
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("EdBridge.API.Models.Note", b =>
@@ -201,7 +204,7 @@ namespace EdBridge.API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notes", (string)null);
+                    b.ToTable("Notes");
                 });
 
             modelBuilder.Entity("EdBridge.API.Models.NoteSubjectTag", b =>
@@ -216,7 +219,7 @@ namespace EdBridge.API.Migrations
 
                     b.HasIndex("SubjectTagId");
 
-                    b.ToTable("NoteSubjectTag", (string)null);
+                    b.ToTable("NoteSubjectTag");
                 });
 
             modelBuilder.Entity("EdBridge.API.Models.Post", b =>
@@ -260,7 +263,7 @@ namespace EdBridge.API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Posts", (string)null);
+                    b.ToTable("Posts");
                 });
 
             modelBuilder.Entity("EdBridge.API.Models.PostDownvote", b =>
@@ -281,7 +284,7 @@ namespace EdBridge.API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PostDownvotes", (string)null);
+                    b.ToTable("PostDownvotes");
                 });
 
             modelBuilder.Entity("EdBridge.API.Models.PostFollow", b =>
@@ -302,7 +305,7 @@ namespace EdBridge.API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PostFollows", (string)null);
+                    b.ToTable("PostFollows");
                 });
 
             modelBuilder.Entity("EdBridge.API.Models.PostSubjectTag", b =>
@@ -317,7 +320,7 @@ namespace EdBridge.API.Migrations
 
                     b.HasIndex("SubjectTagId");
 
-                    b.ToTable("PostSubjectTag", (string)null);
+                    b.ToTable("PostSubjectTag");
                 });
 
             modelBuilder.Entity("EdBridge.API.Models.PostUpvote", b =>
@@ -338,7 +341,7 @@ namespace EdBridge.API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PostUpvotes", (string)null);
+                    b.ToTable("PostUpvotes");
                 });
 
             modelBuilder.Entity("EdBridge.API.Models.PostView", b =>
@@ -356,7 +359,7 @@ namespace EdBridge.API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PostViews", (string)null);
+                    b.ToTable("PostViews");
                 });
 
             modelBuilder.Entity("EdBridge.API.Models.Reply", b =>
@@ -401,7 +404,7 @@ namespace EdBridge.API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Replies", (string)null);
+                    b.ToTable("Replies");
                 });
 
             modelBuilder.Entity("EdBridge.API.Models.ReplyDownvote", b =>
@@ -416,7 +419,7 @@ namespace EdBridge.API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ReplyDownvotes", (string)null);
+                    b.ToTable("ReplyDownvotes");
                 });
 
             modelBuilder.Entity("EdBridge.API.Models.ReplyUpvote", b =>
@@ -437,7 +440,7 @@ namespace EdBridge.API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ReplyUpvotes", (string)null);
+                    b.ToTable("ReplyUpvotes");
                 });
 
             modelBuilder.Entity("EdBridge.API.Models.Report", b =>
@@ -493,7 +496,7 @@ namespace EdBridge.API.Migrations
 
                     b.HasIndex("ResolvedByAdminId");
 
-                    b.ToTable("Reports", (string)null);
+                    b.ToTable("Reports");
                 });
 
             modelBuilder.Entity("EdBridge.API.Models.Review", b =>
@@ -526,7 +529,7 @@ namespace EdBridge.API.Migrations
 
                     b.HasIndex("SellerId");
 
-                    b.ToTable("Reviews", (string)null);
+                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("EdBridge.API.Models.SubjectTag", b =>
@@ -543,7 +546,7 @@ namespace EdBridge.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SubjectTags", (string)null);
+                    b.ToTable("SubjectTags");
                 });
 
             modelBuilder.Entity("EdBridge.API.Models.User", b =>
@@ -596,7 +599,7 @@ namespace EdBridge.API.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("EdBridge.API.Models.Listing", b =>

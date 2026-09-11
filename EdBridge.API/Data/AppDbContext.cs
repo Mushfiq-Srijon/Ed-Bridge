@@ -7,12 +7,13 @@ namespace EdBridge.API.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        // Define all tables
         public DbSet<User> Users { get; set; }
         public DbSet<Listing> Listings { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<SubjectTag> SubjectTags { get; set; }
         public DbSet<Note> Notes { get; set; }
+        public DbSet<NoteComment> NoteComments { get; set; }
+        public DbSet<NoteRating> NoteRatings { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Review> Reviews { get; set; }
@@ -24,52 +25,24 @@ namespace EdBridge.API.Data
         public DbSet<ReplyUpvote> ReplyUpvotes { get; set; }
         public DbSet<PostFollow> PostFollows { get; set; }
         public DbSet<PostView> PostViews { get; set; }
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    base.OnModelCreating(modelBuilder);
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
+    modelBuilder.Entity<ListingSubjectTag>()
+        .HasKey(x => new { x.ListingId, x.SubjectTagId });
 
-            // Configure many-to-many primary keys
-            modelBuilder.Entity<ListingSubjectTag>()
-                .HasKey(lst => new { lst.ListingId, lst.SubjectTagId });
+    modelBuilder.Entity<NoteSubjectTag>()
+        .HasKey(x => new { x.NoteId, x.SubjectTagId });
 
-            modelBuilder.Entity<NoteSubjectTag>()
-                .HasKey(nst => new { nst.NoteId, nst.SubjectTagId });
+    modelBuilder.Entity<PostSubjectTag>()
+        .HasKey(x => new { x.PostId, x.SubjectTagId });
 
-            modelBuilder.Entity<PostSubjectTag>()
-                .HasKey(pst => new { pst.PostId, pst.SubjectTagId });
+    modelBuilder.Entity<PostView>()
+        .HasKey(x => new { x.PostId, x.UserId });
 
-            // Create indexes for faster searching
-            modelBuilder.Entity<Listing>()
-                .HasIndex(l => l.Status);
-
-            modelBuilder.Entity<Listing>()
-                .HasIndex(l => l.CreatedAt);
-
-            modelBuilder.Entity<User>()
-                .HasIndex(u => u.Email)
-                .IsUnique();
-
-            // Configure PostUpvote - one user can only upvote once per post
-            modelBuilder.Entity<PostUpvote>()
-                .HasKey(pu => new { pu.PostId, pu.UserId });
-            // Configure PostDownvote - one user can only downvote once per post
-            modelBuilder.Entity<PostDownvote>()
-                 .HasKey(pd => new { pd.PostId, pd.UserId });
-
-            modelBuilder.Entity<ReplyUpvote>()
-                .HasKey(ru => new { ru.ReplyId, ru.UserId });
-
-            // Configure ReplyDownvote - one user can only downvote once per reply
-            modelBuilder.Entity<ReplyDownvote>()
-                .HasKey(rd => new { rd.ReplyId, rd.UserId });
-
-            modelBuilder.Entity<PostFollow>()
-                .HasKey(pf => new { pf.PostId, pf.UserId });
-
-            // Configure PostView - composite key
-            modelBuilder.Entity<PostView>()
-                .HasKey(pv => new { pv.PostId, pv.UserId });
-        }
+    modelBuilder.Entity<ReplyDownvote>()
+        .HasKey(x => new { x.ReplyId, x.UserId });
+}
     }
 }

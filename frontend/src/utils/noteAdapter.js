@@ -1,26 +1,26 @@
 export const transformNote = (note) => ({
   id: note.id,
-
   title: note.title,
-
   content: note.content,
-
   courseCode: note.courseCode,
-
   author: note.author || null,
-
   authorId: note.userId,
-
-  // Backend returns Tags as a list of subject names; we use the first one as "subject"
   tags: note.tags || [],
-
   subject: note.tags?.[0] || 'General',
-
   views: note.viewCount || 0,
-
   downloads: note.downloadCount || 0,
-
+  hasPdf: note.hasPdf || false,
+  thumbnailPath: note.thumbnailPath || null,
+  educationLevel: note.educationLevel || null,
+  className: note.className || null,
+  group: note.group || null,
+  department: note.department || null,
+  courseTitle: note.courseTitle || null,
+  yearSemester: note.yearSemester || null,
+  averageRating: note.averageRating || 0,
+  ratingCount: note.ratingCount || 0,
+  userRating: note.userRating || null,
+  comments: note.comments || [],
   createdAt: note.createdAt,
-
   updatedAt: note.updatedAt,
 });
