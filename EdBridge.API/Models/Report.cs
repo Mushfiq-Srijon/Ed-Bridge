@@ -16,6 +16,7 @@ namespace EdBridge.API.Models
         public int? ListingId { get; set; }
         public int? PostId { get; set; }
         public int? ReplyId { get; set; }
+        public int? NoteId { get; set; }
         public int? ResolvedByAdminId { get; set; }
 
         [ForeignKey("ReporterId")]
