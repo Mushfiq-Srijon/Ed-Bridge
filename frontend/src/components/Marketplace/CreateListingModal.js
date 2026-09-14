@@ -206,7 +206,7 @@ export default function CreateListingModal({ onClose, onCreate }) {
                             )}
                         </div>
 
-                        <p style={{ fontSize: '12px', color: '#6b7280', margin: '12px 0 8px' }}>Or paste URL:</p>
+                        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '12px 0 8px' }}>Or paste URL:</p>
                         <input
                             type="url"
                             name="imageUrl"
@@ -326,7 +326,7 @@ export default function CreateListingModal({ onClose, onCreate }) {
                                     </button>
                                 ))
                             ) : (
-                                <p style={{ color: '#999', fontSize: '14px' }}>Loading subjects...</p>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Loading subjects...</p>
                             )}
                         </div>
                         {errors.subject && <span className="error-text">⚠️ {errors.subject}</span>}

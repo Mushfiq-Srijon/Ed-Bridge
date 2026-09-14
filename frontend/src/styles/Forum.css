@@ -1,6 +1,6 @@
 /* =========================================================
    MODERN ACADEMIC FORUM
-   Blue + White Theme
+   Blue + White Theme (Dark Mode Ready)
    ========================================================= */
 
 .forum-page * {
@@ -9,9 +9,9 @@
 
 .forum-page {
   min-height: 100vh;
-  background: #f5f8fc;
+  background: var(--bg-secondary);
   padding-bottom: 4rem;
-  color: #172033;
+  color: var(--text-primary);
 }
 
 /* =========================================================
@@ -170,14 +170,14 @@
 .forum-search-section {
   width: 100%;
 
-  background: #ffffff;
+  background: var(--bg-card);
 
-  border: 1px solid #e5eaf1;
+  border: 1px solid var(--border-color);
   border-radius: 16px;
 
   padding: 1.4rem 1.5rem;
 
-  box-shadow: 0 5px 20px rgba(30, 60, 90, 0.06);
+  box-shadow: 0 5px 20px var(--shadow-color);
 }
 
 /* Search box */
@@ -191,12 +191,12 @@
 
   padding: 0.95rem 1rem;
 
-  background: #f8fafc;
+  background: var(--bg-secondary);
 
-  border: 1px solid #dce3ec;
+  border: 1px solid var(--border-color);
   border-radius: 10px;
 
-  color: #172033;
+  color: var(--text-primary);
 
   font-size: 0.95rem;
 
@@ -204,13 +204,13 @@
 }
 
 .forum-page .search-input::placeholder {
-  color: #9aa6b5;
+  color: var(--text-secondary);
 }
 
 .forum-page .search-input:focus {
   outline: none;
 
-  background: #ffffff;
+  background: var(--bg-card);
 
   border-color: #0d6efd;
 
@@ -234,7 +234,7 @@
 .filter-group label {
   font-size: 0.82rem;
   font-weight: 700;
-  color: #4d5b6b;
+  color: var(--text-secondary);
 }
 
 .filter-buttons {
@@ -244,10 +244,10 @@
 }
 
 .forum-page .filter-btn {
-  background: #f4f7fb;
-  color: #526174;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
 
-  border: 1px solid #e1e7ef;
+  border: 1px solid var(--border-color);
 
   padding: 0.5rem 0.9rem;
 
@@ -299,13 +299,13 @@
   font-size: 1.35rem;
   font-weight: 800;
 
-  color: #172033;
+  color: var(--text-primary);
 }
 
 .posts-heading p {
   margin: 0;
 
-  color: #7b8797;
+  color: var(--text-secondary);
 
   font-size: 0.88rem;
 }
@@ -344,9 +344,9 @@
    ========================================================= */
 
 .post-card {
-  background: #ffffff;
+  background: var(--bg-card);
 
-  border: 1px solid #e4e9f0;
+  border: 1px solid var(--border-color);
 
   border-radius: 14px;
 
@@ -363,7 +363,7 @@
     box-shadow 0.2s ease,
     border-color 0.2s ease;
 
-  box-shadow: 0 3px 12px rgba(30, 60, 90, 0.04);
+  box-shadow: 0 3px 12px var(--shadow-color);
 }
 
 .post-card:hover {
@@ -390,9 +390,9 @@
 
   padding: 0.7rem;
 
-  background: #f7faff;
+  background: var(--bg-secondary);
 
-  border: 1px solid #e8eef7;
+  border: 1px solid var(--border-color);
 
   border-radius: 10px;
 }
@@ -414,7 +414,7 @@
 .stat-label {
   font-size: 0.68rem;
 
-  color: #8b97a6;
+  color: var(--text-secondary);
 
   font-weight: 600;
 
@@ -433,7 +433,7 @@
 
   font-size: 1.08rem;
 
-  color: #172033;
+  color: var(--text-primary);
 
   font-weight: 750;
 
@@ -443,7 +443,7 @@
 .post-excerpt {
   margin: 0 0 0.9rem;
 
-  color: #687587;
+  color: var(--text-secondary);
 
   line-height: 1.55;
 
@@ -467,13 +467,13 @@
 .meta-item {
   font-size: 0.78rem;
 
-  color: #667487;
+  color: var(--text-secondary);
 
   font-weight: 600;
 }
 
 .meta-time {
-  color: #9aa5b3;
+  color: var(--text-secondary);
 
   font-size: 0.76rem;
 }
@@ -511,11 +511,11 @@
 }
 
 .tag {
-  background: #f4f7fb;
+  background: var(--bg-secondary);
 
-  color: #58708c;
+  color: var(--text-secondary);
 
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
 
   padding: 0.25rem 0.55rem;
 
@@ -529,7 +529,7 @@
 /* Open button */
 
 .btn-open {
-  background: #ffffff;
+  background: var(--bg-card);
 
   color: #0d6efd;
 
@@ -568,15 +568,15 @@
 
   padding: 3rem 2rem;
 
-  background: #ffffff;
+  background: var(--bg-card);
 
-  border: 1px solid #e4e9f0;
+  border: 1px solid var(--border-color);
 
   border-radius: 16px;
 
   text-align: center;
 
-  box-shadow: 0 5px 20px rgba(30, 60, 90, 0.05);
+  box-shadow: 0 5px 20px var(--shadow-color);
 }
 
 .empty-icon {
@@ -588,11 +588,11 @@
 .empty-state h3 {
   margin: 0 0 0.4rem;
 
-  color: #172033;
+  color: var(--text-primary);
 }
 
 .empty-state p {
-  color: #7b8797;
+  color: var(--text-secondary);
 
   margin-bottom: 1.5rem;
 }
@@ -600,7 +600,7 @@
 .loading-card p {
   margin: 1rem 0 0;
 
-  color: #687587;
+  color: var(--text-secondary);
 
   font-size: 0.9rem;
 }
@@ -669,13 +669,13 @@
 
   padding: 2rem;
 
-  background: #ffffff;
+  background: var(--bg-card);
 
-  border: 1px solid #e3e9f1;
+  border: 1px solid var(--border-color);
 
   border-radius: 16px;
 
-  box-shadow: 0 8px 30px rgba(30, 60, 90, 0.07);
+  box-shadow: 0 8px 30px var(--shadow-color);
 }
 
 .btn-back {
@@ -703,7 +703,7 @@
 
   padding-bottom: 1.5rem;
 
-  border-bottom: 1px solid #e8edf3;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .post-detail-header h1 {
@@ -711,7 +711,7 @@
 
   font-size: 1.9rem;
 
-  color: #172033;
+  color: var(--text-primary);
 
   line-height: 1.35;
 }
@@ -731,15 +731,15 @@
 
   padding: 1.3rem;
 
-  background: #f7faff;
+  background: var(--bg-secondary);
 
-  border: 1px solid #e6edf7;
+  border: 1px solid var(--border-color);
 
   border-radius: 10px;
 
   line-height: 1.8;
 
-  color: #354052;
+  color: var(--text-primary);
 
   font-size: 0.95rem;
 }
@@ -757,11 +757,11 @@
 }
 
 .action-btn {
-  background: #ffffff;
+  background: var(--bg-card);
 
-  border: 1px solid #dce4ee;
+  border: 1px solid var(--border-color);
 
-  color: #435267;
+  color: var(--text-secondary);
 
   padding: 0.65rem 1rem;
 
@@ -781,7 +781,7 @@
 
   color: #0d6efd;
 
-  background: #f7faff;
+  background: var(--bg-secondary);
 }
 
 .upvote-btn.active,
@@ -820,7 +820,7 @@
 
   padding-top: 1.5rem;
 
-  border-top: 1px solid #e8edf3;
+  border-top: 1px solid var(--border-color);
 }
 
 .comments-title {
@@ -828,7 +828,7 @@
 
   font-size: 1.2rem;
 
-  color: #172033;
+  color: var(--text-primary);
 
   font-weight: 800;
 }
@@ -856,9 +856,9 @@
 }
 
 .reply-form {
-  background: #f7faff;
+  background: var(--bg-secondary);
 
-  border: 1px solid #e3ebf7;
+  border: 1px solid var(--border-color);
 
   padding: 1.2rem;
 
@@ -872,9 +872,13 @@
 
   padding: 0.85rem;
 
-  border: 1px solid #d9e1eb;
+  background: var(--bg-card);
+
+  border: 1px solid var(--border-color);
 
   border-radius: 8px;
+
+  color: var(--text-primary);
 
   font-family: inherit;
 
@@ -916,7 +920,7 @@
 
   font-size: 0.85rem;
 
-  color: #4f5e70;
+  color: var(--text-secondary);
 }
 
 .anonymous-checkbox input {
@@ -964,13 +968,13 @@
 .no-replies {
   text-align: center;
 
-  color: #8a96a5;
+  color: var(--text-secondary);
 
   padding: 2rem;
 
-  background: #f7faff;
+  background: var(--bg-secondary);
 
-  border: 1px solid #e5ebf3;
+  border: 1px solid var(--border-color);
 
   border-radius: 10px;
 }
@@ -980,9 +984,9 @@
    ========================================================= */
 
 .comment-card {
-  background: #ffffff;
+  background: var(--bg-card);
 
-  border: 1px solid #e3e9f1;
+  border: 1px solid var(--border-color);
 
   border-left: 3px solid #0d6efd;
 
@@ -994,7 +998,7 @@
 }
 
 .comment-card:hover {
-  box-shadow: 0 5px 18px rgba(30, 60, 90, 0.06);
+  box-shadow: 0 5px 18px var(--shadow-color);
 }
 
 .comment-header {
@@ -1038,7 +1042,7 @@
 
   font-weight: 700;
 
-  color: #263348;
+  color: var(--text-primary);
 
   font-size: 0.85rem;
 }
@@ -1046,7 +1050,7 @@
 .comment-time {
   display: block;
 
-  color: #9aa5b3;
+  color: var(--text-secondary);
 
   font-size: 0.72rem;
 
@@ -1078,17 +1082,17 @@
 
   cursor: pointer;
 
-  color: #9aa5b3;
+  color: var(--text-secondary);
 }
 
 .options-btn:hover {
-  color: #3e4c60;
+  color: var(--text-primary);
 }
 
 .comment-content {
   margin: 0.8rem 0;
 
-  color: #465366;
+  color: var(--text-primary);
 
   line-height: 1.6;
 
@@ -1157,7 +1161,7 @@
 }
 
 .modal-content {
-  background: #ffffff;
+  background: var(--bg-card);
 
   border-radius: 16px;
 
@@ -1197,7 +1201,7 @@
 
   padding: 1.4rem 1.5rem;
 
-  border-bottom: 1px solid #e6ebf2;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .modal-header h2 {
@@ -1205,11 +1209,11 @@
 
   font-size: 1.25rem;
 
-  color: #172033;
+  color: var(--text-primary);
 }
 
 .modal-close {
-  background: #f4f7fb;
+  background: var(--bg-secondary);
 
   border: none;
 
@@ -1217,7 +1221,7 @@
 
   cursor: pointer;
 
-  color: #738094;
+  color: var(--text-secondary);
 
   width: 34px;
   height: 34px;
@@ -1254,7 +1258,7 @@
 .form-group label {
   font-weight: 700;
 
-  color: #344257;
+  color: var(--text-primary);
 
   font-size: 0.83rem;
 }
@@ -1264,11 +1268,13 @@
 .form-group textarea {
   padding: 0.75rem;
 
-  background: #f9fbfd;
+  background: var(--bg-secondary);
 
-  border: 1px solid #dce3ec;
+  border: 1px solid var(--border-color);
 
   border-radius: 8px;
+
+  color: var(--text-primary);
 
   font-size: 0.9rem;
 
@@ -1282,11 +1288,16 @@
 .form-group textarea:focus {
   outline: none;
 
-  background: #ffffff;
+  background: var(--bg-card);
 
   border-color: #0d6efd;
 
   box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.08);
+}
+
+.form-group select option {
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .input-error {
@@ -1306,7 +1317,7 @@
 
   font-size: 0.72rem;
 
-  color: #9aa5b3;
+  color: var(--text-secondary);
 }
 
 .custom-subject-input {
@@ -1322,11 +1333,11 @@
 }
 
 .tag-btn {
-  background: #f4f7fb;
+  background: var(--bg-secondary);
 
-  color: #4f6074;
+  color: var(--text-secondary);
 
-  border: 1px solid #dfe6ef;
+  border: 1px solid var(--border-color);
 
   padding: 0.5rem 0.8rem;
 
@@ -1380,7 +1391,7 @@
 .checkbox-hint {
   font-size: 0.75rem;
 
-  color: #8b97a6;
+  color: var(--text-secondary);
 
   margin: 0;
 
@@ -1420,9 +1431,9 @@
 }
 
 .btn-cancel {
-  background: #f1f4f8;
+  background: var(--bg-secondary);
 
-  color: #4c596b;
+  color: var(--text-secondary);
 
   border: none;
 
@@ -1440,7 +1451,7 @@
 }
 
 .btn-cancel:hover {
-  background: #e5eaf0;
+  background: var(--border-color);
 }
 
 /* =========================================================
@@ -1600,6 +1611,8 @@
   font-size: 1.5rem;
   font-weight: 700;
   padding: 0.5rem;
+  background: var(--bg-card);
+  color: var(--text-primary);
   border: 2px solid #667eea;
   border-radius: 8px;
   margin-bottom: 1rem;
@@ -1608,6 +1621,8 @@
 .edit-content-textarea {
   width: 100%;
   padding: 0.8rem;
+  background: var(--bg-card);
+  color: var(--text-primary);
   border: 2px solid #667eea;
   border-radius: 8px;
   font-family: inherit;
@@ -1631,8 +1646,8 @@
 }
 
 .btn-cancel-edit {
-  background: #e0e0e0;
-  color: #333;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   border: none;
   padding: 0.6rem 1.2rem;
   border-radius: 8px;

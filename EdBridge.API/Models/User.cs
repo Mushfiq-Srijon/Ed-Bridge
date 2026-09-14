@@ -17,6 +17,7 @@ namespace EdBridge.API.Models
         public string? Institution { get; set; }
         public string? EducationLevel { get; set; }
         public string? Phone { get; set; }
+        public string? ProfilePhotoPath { get; set; }
         
         public bool EmailVerified { get; set; } = false;
         public string Role { get; set; } = "User"; // "User" or "Admin"

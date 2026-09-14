@@ -108,3 +108,12 @@
     font-size: 0.9rem;
   }
 }
+
+.profile-mini-photo {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  vertical-align: middle;
+  margin-right: 4px;
+}

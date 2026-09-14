@@ -355,3 +355,7 @@
 .modal-content::-webkit-scrollbar-thumb:hover {
     background: #9ca3af;
 }
+.form-group select option {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}

@@ -35,12 +35,21 @@ export default function ProfileDropdown() {
   return (
     <div className="profile-dropdown" ref={dropdownRef}>
       <button
-        className="profile-button"
-        onClick={() => setIsOpen(!isOpen)}
-        title={user?.name}
-      >
-        👤 {user?.name?.split(' ')[0]}
-      </button>
+  className="profile-button"
+  onClick={() => setIsOpen(!isOpen)}
+  title={user?.name}
+>
+  {user?.profilePhotoPath ? (
+    <img
+      src={`http://localhost:5180/${user.profilePhotoPath}`}
+      alt="Profile"
+      className="profile-mini-photo"
+    />
+  ) : (
+    <span>👤</span>
+  )}
+  {user?.name?.split(' ')[0]}
+</button>
 
       {isOpen && (
         <div className="dropdown-menu">

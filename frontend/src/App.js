@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Navbar from './components/Navbar';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
@@ -10,6 +11,8 @@ import ListingDetailsPage from './pages/ListingDetailsPage';
 import NotesPage from './pages/NotesPage';
 import ForumPage from './pages/ForumPage';
 import MessagesPage from './pages/MessagesPage';
+import ProfilePage from './pages/ProfilePage';
+import SettingsPage from './pages/SettingsPage';
 
 import './App.css';
 
@@ -34,20 +37,24 @@ function PrivateRoute({ children }) {
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <ScrollToTop />
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/marketplace" element={<MarketplacePage />} />
-          <Route path="/notes" element={<NotesPage />} />
-          <Route path="/marketplace/listing/:id" element={<ListingDetailsPage />} />
-          <Route path="/forum" element={<ForumPage />} />
-          <Route path="/messages" element={<PrivateRoute><MessagesPage /></PrivateRoute>} />
-        </Routes>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <ScrollToTop />
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/marketplace" element={<MarketplacePage />} />
+            <Route path="/notes" element={<NotesPage />} />
+            <Route path="/marketplace/listing/:id" element={<ListingDetailsPage />} />
+            <Route path="/forum" element={<ForumPage />} />
+            <Route path="/messages" element={<PrivateRoute><MessagesPage /></PrivateRoute>} />
+            <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+            <Route path="/settings" element={<PrivateRoute><SettingsPage /></PrivateRoute>} />
+          </Routes>
+        </AuthProvider>
+      </ThemeProvider>
     </Router>
   );
 }
