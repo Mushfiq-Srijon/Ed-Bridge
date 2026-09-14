@@ -1,6 +1,6 @@
 .marketplace-page {
   min-height: 100vh;
-  background: #f8fafc;
+  background: var(--bg-secondary);
 }
 
 /* =========================
@@ -90,14 +90,14 @@
 ========================= */
 
 .category-navigation {
-  background: white;
+  background: var(--bg-card);
   border-radius: 14px;
   padding: 12px;
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
   margin-bottom: 25px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 5px 20px var(--shadow-color);
 }
 
 .category-button {
@@ -105,7 +105,7 @@
   background: transparent;
   padding: 10px 17px;
   border-radius: 8px;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -113,8 +113,8 @@
 }
 
 .category-button:hover {
-  background: #f3f4f6;
-  color: #111827;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .category-button.active {
@@ -151,22 +151,22 @@
 .results-header h2 {
   margin: 0 0 4px;
   font-size: 23px;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .results-header p {
   margin: 0;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 13px;
 }
 
 .sort-select {
   height: 40px;
   padding: 0 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  background: white;
-  color: #374151;
+  background: var(--bg-card);
+  color: var(--text-primary);
   font-size: 13px;
   outline: none;
 }
@@ -186,8 +186,8 @@
 ========================= */
 
 .no-results {
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 14px;
   padding: 70px 20px;
   text-align: center;
@@ -200,12 +200,12 @@
 
 .no-results h3 {
   margin: 0 0 8px;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .no-results p {
   margin: 0 0 20px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .no-results button {

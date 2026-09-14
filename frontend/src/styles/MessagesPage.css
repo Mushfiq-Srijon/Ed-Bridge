@@ -1,7 +1,7 @@
 .messages-page {
   min-height: calc(100vh - 80px);
   padding: 3rem 1.5rem;
-  background: #f8fafc;
+  background: var(--bg-secondary);
 }
 
 .messages-page-container {
@@ -33,24 +33,24 @@
 
 .messages-page-header h1 {
   margin: 0;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .messages-page-header p:last-child {
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .messages-state {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 14px;
-  background: white;
-  color: #6b7280;
+  background: var(--bg-card);
+  color: var(--text-secondary);
   padding: 3rem 1.5rem;
   text-align: center;
 }
 
 .messages-state h2 {
-  color: #1f2937;
+  color: var(--text-primary);
   margin-top: 0;
 }
 
@@ -65,8 +65,8 @@
 
 .conversation-card {
   align-items: center;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 14px;
   cursor: pointer;
   display: flex;
@@ -102,7 +102,7 @@
 }
 
 .conversation-details strong {
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .conversation-details span {
@@ -111,14 +111,14 @@
 }
 
 .conversation-details small {
-  color: #6b7280;
+  color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .conversation-time {
-  color: #9ca3af;
+  color: var(--text-secondary);
   font-size: 0.8rem;
   margin-left: auto;
   white-space: nowrap;

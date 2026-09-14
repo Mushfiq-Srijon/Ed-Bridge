@@ -53,6 +53,33 @@ export const authAPI = {
     apiCall('/auth/register', 'POST', { email, password, name }),
   login: (email, password) =>
     apiCall('/auth/login', 'POST', { email, password }),
+
+  getProfile: () => apiCall('/auth/profile'),
+
+  updateProfile: (data) => apiCall('/auth/profile', 'PUT', data),
+
+  uploadProfilePhoto: async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const token = localStorage.getItem('token');
+    const response = await fetch('http://localhost:5180/api/auth/profile/photo', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `API Error: ${response.status}`);
+    }
+
+    return response.json();
+  },
+
+  removeProfilePhoto: () => apiCall('/auth/profile/photo', 'DELETE'),
 };
 
 export const notesAPI = {
