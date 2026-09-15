@@ -223,3 +223,38 @@
     font-size: 1.5rem;
   }
 }
+
+[data-theme='dark'] .auth-form {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme='dark'] .auth-form h2,
+[data-theme='dark'] .form-group label,
+[data-theme='dark'] .checkbox-group label {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .form-subtitle,
+[data-theme='dark'] .auth-form .user-email {
+  color: var(--text-secondary);
+}
+
+[data-theme='dark'] .form-group input {
+  background: var(--bg-primary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .form-group input::placeholder {
+  color: var(--text-secondary);
+}
+
+[data-theme='dark'] .form-group input:focus {
+  background: var(--bg-secondary);
+}
+
+[data-theme='dark'] .form-group input:disabled {
+  background: var(--bg-secondary);
+}

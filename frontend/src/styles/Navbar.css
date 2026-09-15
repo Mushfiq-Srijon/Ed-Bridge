@@ -97,6 +97,31 @@
 .nav-buttons {
   display: flex;
   gap: 1rem;
+  align-items: center;
+}
+
+.theme-menu-button {
+  min-width: 2rem;
+  text-align: center;
+}
+
+.theme-menu-button:hover {
+  color: white;
+}
+
+.theme-toggle {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  font-size: 1.1rem;
+  height: 40px;
+  width: 40px;
+}
+
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .btn-login {

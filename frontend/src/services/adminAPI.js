@@ -2,7 +2,7 @@ const API_BASE = 'http://localhost:5180/api/admin';
 
 // Get token from localStorage
 const getAuthHeader = () => {
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem('token');
   return {
     'Authorization': `Bearer ${token}`,
     'Content-Type': 'application/json'

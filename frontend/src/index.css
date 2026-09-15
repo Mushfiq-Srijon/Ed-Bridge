@@ -38,3 +38,221 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+[data-theme='dark'] .marketplace-page,
+[data-theme='dark'] .notes-page,
+[data-theme='dark'] .forum-page,
+[data-theme='dark'] .settings-page,
+[data-theme='dark'] .profile-page,
+[data-theme='dark'] .messages-page,
+[data-theme='dark'] .listing-details-page {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .marketplace-page h1,
+[data-theme='dark'] .marketplace-page h2,
+[data-theme='dark'] .marketplace-page h3,
+[data-theme='dark'] .notes-page h1,
+[data-theme='dark'] .notes-page h2,
+[data-theme='dark'] .notes-page h3,
+[data-theme='dark'] .forum-page h1,
+[data-theme='dark'] .forum-page h2,
+[data-theme='dark'] .forum-page h3,
+[data-theme='dark'] .settings-page h1,
+[data-theme='dark'] .settings-page h2,
+[data-theme='dark'] .profile-page h1,
+[data-theme='dark'] .profile-page h2,
+[data-theme='dark'] .messages-page h1,
+[data-theme='dark'] .messages-page h2,
+[data-theme='dark'] .listing-details-page h1,
+[data-theme='dark'] .listing-details-page h2,
+[data-theme='dark'] .listing-details-page h3 {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .marketplace-page p,
+[data-theme='dark'] .notes-page p,
+[data-theme='dark'] .forum-page p,
+[data-theme='dark'] .profile-page p,
+[data-theme='dark'] .messages-page p,
+[data-theme='dark'] .listing-details-page p {
+  color: var(--text-secondary);
+}
+
+[data-theme='dark'] .listing-details-card,
+[data-theme='dark'] .seller-details-card,
+[data-theme='dark'] .profile-card,
+[data-theme='dark'] .conversation-card,
+[data-theme='dark'] .settings-section,
+[data-theme='dark'] .loading-card {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .listing-details-card h1,
+[data-theme='dark'] .listing-details-card h2,
+[data-theme='dark'] .listing-details-card h3,
+[data-theme='dark'] .seller-details-card h1,
+[data-theme='dark'] .seller-details-card h2,
+[data-theme='dark'] .seller-details-card h3,
+[data-theme='dark'] .profile-card h1,
+[data-theme='dark'] .profile-card h2,
+[data-theme='dark'] .profile-card h3,
+[data-theme='dark'] .conversation-card h1,
+[data-theme='dark'] .conversation-card h2,
+[data-theme='dark'] .conversation-card h3 {
+  color: var(--text-primary);
+}
+[data-theme='dark'] input,
+[data-theme='dark'] textarea,
+[data-theme='dark'] select {
+  background-color: var(--bg-primary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+[data-theme='dark'] input::placeholder,
+[data-theme='dark'] textarea::placeholder {
+  color: var(--text-secondary);
+}
+[data-theme='dark'] .admin-dashboard .stat-card,
+[data-theme='dark'] .admin-dashboard .status-breakdown,
+[data-theme='dark'] .admin-dashboard .report-item,
+[data-theme='dark'] .admin-dashboard .user-item,
+[data-theme='dark'] .admin-dashboard .listing-item,
+[data-theme='dark'] .admin-dashboard .detail-card,
+[data-theme='dark'] .admin-dashboard .analytics-card,
+[data-theme='dark'] .admin-dashboard .detail-item,
+[data-theme='dark'] .admin-dashboard .data-item,
+[data-theme='dark'] .admin-dashboard .search-section,
+[data-theme='dark'] .modal-content,
+[data-theme='dark'] .messaging-modal-content,
+[data-theme='dark'] .profile-field,
+[data-theme='dark'] .profile-info-section {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+[data-theme='dark'] .admin-dashboard h1,
+[data-theme='dark'] .admin-dashboard h2,
+[data-theme='dark'] .admin-dashboard h3,
+[data-theme='dark'] .admin-dashboard h4,
+[data-theme='dark'] .admin-dashboard label,
+[data-theme='dark'] .admin-dashboard p,
+[data-theme='dark'] .admin-dashboard .label,
+[data-theme='dark'] .admin-dashboard .value,
+[data-theme='dark'] .admin-dashboard .detail-item span,
+[data-theme='dark'] .admin-dashboard .data-item span,
+[data-theme='dark'] .listing-details-card .listing-details-info h1,
+[data-theme='dark'] .listing-details-card .details-asking-price,
+[data-theme='dark'] .listing-details-card .seller-details-card,
+[data-theme='dark'] .profile-card label,
+[data-theme='dark'] .profile-card p,
+[data-theme='dark'] .messaging-modal-content h2,
+[data-theme='dark'] .messaging-modal-content p,
+[data-theme='dark'] .message-bubble.received {
+  color: var(--text-primary);
+}
+[data-theme='dark'] .admin-dashboard .muted,
+[data-theme='dark'] .admin-dashboard small,
+[data-theme='dark'] .profile-card .profile-field span,
+[data-theme='dark'] .messaging-modal-content .message-time {
+  color: var(--text-secondary);
+}
+[data-theme='dark'] .listing-details-image-section,
+[data-theme='dark'] .details-condition-badge,
+[data-theme='dark'] .details-tag,
+[data-theme='dark'] .messages-page .conversation-details span,
+[data-theme='dark'] .messages-page .messages-eyebrow {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+[data-theme='dark'] .messaging-header,
+[data-theme='dark'] .messages-container,
+[data-theme='dark'] .message-form {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+[data-theme='dark'] .message-bubble.received {
+  background: var(--bg-secondary);
+}
+.profile-actions,
+.listing-details-actions,
+.action-buttons,
+.form-actions,
+.post-detail-actions,
+.filter-buttons,
+.category-navigation,
+.tags-selection,
+.reply-options,
+.photo-actions,
+.modal-actions,
+.nav-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.profile-actions > button,
+.listing-details-actions > button,
+.action-buttons > button,
+.form-actions > button,
+.post-detail-actions > button {
+  min-width: 0;
+}
+.price-inputs,
+.message-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.price-inputs > *,
+.message-form > input,
+.message-form > textarea {
+  min-width: 0;
+}
+.posts-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+.details-price-section,
+.seller-details-card,
+.conversation-details,
+.user-email,
+.message-bubble,
+.post-content,
+.listing-title {
+  overflow-wrap: anywhere;
+}
+.password-input-wrapper input {
+  padding-right: 3rem;
+}
+@media (max-width: 640px) {
+  .profile-actions,
+  .listing-details-actions,
+  .action-buttons,
+  .form-actions,
+  .post-detail-actions,
+  .message-form,
+  .price-inputs {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .profile-actions > button,
+  .listing-details-actions > button,
+  .action-buttons > button,
+  .form-actions > button,
+  .post-detail-actions > button,
+  .message-form > button {
+    width: 100%;
+  }
+  .settings-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .theme-options {
+    flex-direction: column;
+  }
+}

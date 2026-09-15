@@ -1,25 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import DashboardOverview from '../components/Admin/DashboardOverview';
 import ReportsManagement from '../components/Admin/ReportsManagement';
 import UsersManagement from '../components/Admin/UsersManagement';
 import ListingsManagement from '../components/Admin/ListingsManagement';
 import AnalyticsDashboard from '../components/Admin/AnalyticsDashboard';
-import { adminAPI } from '../services/adminAPI';
 import '../styles/Admin.css';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-
-  // Check if user is admin
-  useEffect(() => {
-    const role = localStorage.getItem('userRole');
-    if (role !== 'Admin') {
-      window.location.href = '/';
-    }
-  }, []);
 
   const handleRefresh = () => {
     setRefreshTrigger(prev => prev + 1);
