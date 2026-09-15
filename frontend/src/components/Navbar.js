@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import '../styles/Navbar.css';
 import ProfileDropdown from './ProfileDropdown';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, token } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleScrollToSection = (sectionId) => {
@@ -80,11 +82,6 @@ export default function Navbar() {
           <li>
             <Link to="/forum" className="nav-link">Forum</Link>
           </li>
-          {token && (
-            <li>
-              <Link to="/messages" className="nav-link">Messages</Link>
-            </li>
-          )}
           <li>
             <button
               type="button"
@@ -92,6 +89,17 @@ export default function Navbar() {
               onClick={() => handleScrollToSection('footer')}
             >
               About
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              className="nav-link nav-button-link theme-menu-button"
+              onClick={toggleTheme}
+              aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+              title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            >
+              {theme === 'light' ? '🌙' : '☀️'}
             </button>
           </li>
         </ul>

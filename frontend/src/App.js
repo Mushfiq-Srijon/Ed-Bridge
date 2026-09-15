@@ -35,6 +35,16 @@ function PrivateRoute({ children }) {
   return token ? children : <Navigate to="/login" />;
 }
 
+function AdminRoute({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  return user?.role === 'Admin' ? children : <Navigate to="/" replace />;
+}
+
 function App() {
   return (
     <Router>
@@ -52,8 +62,8 @@ function App() {
             <Route path="/forum" element={<ForumPage />} />
             <Route path="/messages" element={<PrivateRoute><MessagesPage /></PrivateRoute>} />
             <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
-            <Route path="/settings" element={<PrivateRoute><SettingsPage /></PrivateRoute>} />
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           </Routes>
         </AuthProvider>
       </ThemeProvider>

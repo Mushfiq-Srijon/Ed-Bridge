@@ -16,7 +16,8 @@
   background: white;
   border-bottom: 1px solid #e0e6ed;
   padding: 20px 0;
-  sticky: top;
+  position: sticky;
+  top: 0;
   z-index: 100;
 }
 

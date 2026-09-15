@@ -66,6 +66,15 @@ export default function ProfileDropdown() {
             💬 Messages
           </button>
 
+          {user?.role === 'Admin' && (
+            <button
+              className="dropdown-item"
+              onClick={() => handleMenuClick('/admin')}
+            >
+              🛡️ Admin Dashboard
+            </button>
+          )}
+
           <button
             className="dropdown-item"
             onClick={() => handleMenuClick('/profile')}

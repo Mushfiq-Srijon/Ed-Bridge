@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using EdBridge.API.Services;
 using EdBridge.API.DTOs;
+using System.Security.Claims;
 
 namespace EdBridge.API.Controllers
 {
@@ -86,6 +87,10 @@ namespace EdBridge.API.Controllers
         [HttpPut("users/{id}/suspend")]
         public async Task<IActionResult> SuspendUser(int id)
         {
+            var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
+            if (id == currentUserId)
+                return BadRequest(new { message = "An admin cannot suspend their own account" });
+
             var success = await _adminService.SuspendUserAsync(id);
             if (!success)
                 return NotFound(new { message = "User not found" });

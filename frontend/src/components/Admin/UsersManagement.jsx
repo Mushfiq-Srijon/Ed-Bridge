@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../../services/adminAPI';
+import { useAuth } from '../../context/AuthContext';
 
 export default function UsersManagement({ onRefresh, refreshTrigger }) {
   const [users, setUsers] = useState([]);
@@ -9,6 +10,8 @@ export default function UsersManagement({ onRefresh, refreshTrigger }) {
   const [statusFilter, setStatusFilter] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const { user: currentUser } = useAuth();
+  const isCurrentAdmin = selectedUser?.id === currentUser?.id;
 
   useEffect(() => {
     loadUsers();
@@ -162,9 +165,9 @@ export default function UsersManagement({ onRefresh, refreshTrigger }) {
                 <button
                   className="btn-suspend"
                   onClick={() => handleSuspend(selectedUser.id)}
-                  disabled={actionLoading}
+                  disabled={actionLoading || isCurrentAdmin}
                 >
-                  {actionLoading ? 'Processing...' : 'Suspend User'}
+                  {isCurrentAdmin ? 'Cannot Suspend Own Account' : actionLoading ? 'Processing...' : 'Suspend User'}
                 </button>
               )}
             </div>

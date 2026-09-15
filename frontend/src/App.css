@@ -36,3 +36,63 @@
     transform: rotate(360deg);
   }
 }
+
+[data-theme='dark'] .dropdown-menu {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+[data-theme='dark'] .dropdown-header,
+[data-theme='dark'] .dropdown-divider {
+  border-color: var(--border-color);
+  background: var(--border-color);
+}
+
+[data-theme='dark'] .dropdown-item {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .dropdown-item:hover {
+  background: var(--bg-secondary);
+}
+
+[data-theme='dark'] .admin-dashboard,
+[data-theme='dark'] .listing-details-page,
+[data-theme='dark'] .profile-page,
+[data-theme='dark'] .messages-page {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .admin-dashboard [class*='card'],
+[data-theme='dark'] .admin-dashboard [class*='item'],
+[data-theme='dark'] .admin-dashboard [class*='panel'],
+[data-theme='dark'] .listing-details-page [class*='card'],
+[data-theme='dark'] .profile-page [class*='card'],
+[data-theme='dark'] .messages-page [class*='card'] {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+[data-theme='dark'] .admin-dashboard h1,
+[data-theme='dark'] .admin-dashboard h2,
+[data-theme='dark'] .admin-dashboard h3,
+[data-theme='dark'] .admin-dashboard h4,
+[data-theme='dark'] .listing-details-page h1,
+[data-theme='dark'] .listing-details-page h2,
+[data-theme='dark'] .listing-details-page h3,
+[data-theme='dark'] .profile-page h1,
+[data-theme='dark'] .profile-page h2,
+[data-theme='dark'] .messages-page h1,
+[data-theme='dark'] .messages-page h2 {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .admin-dashboard p,
+[data-theme='dark'] .admin-dashboard label,
+[data-theme='dark'] .listing-details-page p,
+[data-theme='dark'] .profile-page p,
+[data-theme='dark'] .messages-page p {
+  color: var(--text-secondary);
+}
