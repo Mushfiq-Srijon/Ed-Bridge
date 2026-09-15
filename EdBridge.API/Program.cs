@@ -56,6 +56,7 @@ builder.Services.AddScoped<PostService>();
 builder.Services.AddScoped<MessageService>();
 builder.Services.AddScoped<ListingService>();
 builder.Services.AddScoped<NoteService>();
+builder.Services.AddScoped<AdminService>();
 // File upload size limit (50MB)
 builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
 {
