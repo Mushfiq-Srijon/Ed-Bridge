@@ -31,6 +31,9 @@ namespace EdBridge.API.Models
         [ForeignKey("ReplyId")]
         public Reply Reply { get; set; }
 
+        [ForeignKey("NoteId")]
+        public Note Note { get; set; }
+
         [ForeignKey("ResolvedByAdminId")]
         public User ResolvedByAdmin { get; set; }
     }

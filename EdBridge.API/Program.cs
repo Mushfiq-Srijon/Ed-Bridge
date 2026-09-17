@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using EdBridge.API.Data;
 using EdBridge.API.Services;
+using EdBridge.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -73,6 +74,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("AllowReact");
 app.UseAuthentication();
+app.UseMiddleware<SuspensionCheckMiddleware>();
 app.UseAuthorization();
 // Serve uploaded files
 app.UseStaticFiles();

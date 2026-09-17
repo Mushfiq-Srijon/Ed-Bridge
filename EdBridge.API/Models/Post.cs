@@ -12,6 +12,7 @@ namespace EdBridge.API.Models
         public int ViewCount { get; set; } = 0;
         public int UpvoteCount { get; set; } = 0;
         public int DownvoteCount { get; set; } = 0;
+        public string Status { get; set; } = "Active";
         
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }

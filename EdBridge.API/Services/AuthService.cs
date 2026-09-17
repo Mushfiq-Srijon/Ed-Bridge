@@ -45,11 +45,12 @@ namespace EdBridge.API.Services
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var claims = new List<System.Security.Claims.Claim>
-{
-    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, user.Id.ToString()),
-    new System.Security.Claims.Claim("email", user.Email),
-    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, user.Role)
-};
+            {
+                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new System.Security.Claims.Claim("email", user.Email),
+                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, user.Role),
+                new System.Security.Claims.Claim("suspended", user.IsSuspended.ToString())
+            };
 
             var token = new JwtSecurityToken(
                 issuer: jwtIssuer,
