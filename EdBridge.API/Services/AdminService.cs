@@ -50,29 +50,39 @@ namespace EdBridge.API.Services
 
         // ============ REPORTS MANAGEMENT ============
         public async Task<List<ReportListItemDto>> GetAllReportsAsync(string? status = null)
+{
+    var query = _db.Reports
+        .Include(r => r.Reporter)
+        .Include(r => r.Listing)
+        .Include(r => r.Post)
+        .Include(r => r.Reply)
+        .Include(r => r.Note)  // Add this too
+        .AsQueryable();
+
+    if (!string.IsNullOrEmpty(status))
+        query = query.Where(r => r.Status == status);
+
+    return await query
+        .OrderByDescending(r => r.CreatedAt)
+        .Select(r => new ReportListItemDto
         {
-            var query = _db.Reports.AsQueryable();
-
-            if (!string.IsNullOrEmpty(status))
-                query = query.Where(r => r.Status == status);
-
-            return await query
-                .OrderByDescending(r => r.CreatedAt)
-                .Select(r => new ReportListItemDto
-                {
-                    Id = r.Id,
-                    Type = r.ReportType,
-                    ReportedItemId = r.ListingId ?? r.PostId ?? r.ReplyId ?? 0,
-                    ReportedItemTitle = r.Listing != null ? r.Listing.Title : (r.Post != null ? r.Post.Title : "Unknown"),
-                    ReportedById = r.ReporterId,
-                    ReportedByEmail = r.Reporter.Email,
-                    Reason = r.Reason,
-                    Details = r.Reason,
-                    Status = r.Status,
-                    CreatedAt = r.CreatedAt
-                })
-                .ToListAsync();
-        }
+            Id = r.Id,
+            Type = r.ReportType,
+            ReportedItemId = r.ListingId ?? r.PostId ?? r.ReplyId ?? r.NoteId ?? 0,
+            ReportedItemTitle = r.Listing != null ? r.Listing.Title 
+                              : r.Post != null ? r.Post.Title 
+                              : r.Note != null ? r.Note.Title
+                              : r.Reply != null ? r.Reply.Content.Substring(0, Math.Min(50, r.Reply.Content.Length))
+                              : "Unknown",
+            ReportedById = r.ReporterId,
+            ReportedByEmail = r.Reporter.Email,
+            Reason = r.Reason,
+            Details = r.Reason,
+            Status = r.Status,
+            CreatedAt = r.CreatedAt
+        })
+        .ToListAsync();
+}
 
         public async Task<ReportDetailDto?> GetReportDetailAsync(int reportId)
         {

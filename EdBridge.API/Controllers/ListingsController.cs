@@ -5,6 +5,7 @@ using EdBridge.API.Data;
 using EdBridge.API.DTOs;
 using EdBridge.API.Models;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 
 namespace EdBridge.API.Controllers
 {
@@ -140,6 +141,56 @@ namespace EdBridge.API.Controllers
             await _db.SaveChangesAsync();
 
             return Ok(new { message = "Listing status updated", status = existing.Status });
+        }
+
+        [HttpPost("{id}/report")]
+[Authorize]
+public async Task<IActionResult> ReportListing(int id, [FromBody] ReportRequest req)
+{
+    try
+    {
+        if (string.IsNullOrWhiteSpace(req.Reason))
+            return BadRequest(new { message = "Reason is required" });
+
+        var listing = await _db.Listings.FindAsync(id);
+        if (listing == null) return NotFound(new { message = "Listing not found" });
+
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+
+        if (listing.UserId == userId)
+            return BadRequest(new { message = "You cannot report your own listing" });
+
+        var alreadyReported = await _db.Reports
+            .Where(r => r.ReporterId == userId && 
+                        r.ReportType == "Listing" && 
+                        r.ListingId == id)
+            .AnyAsync();
+
+        if (alreadyReported)
+            return BadRequest(new { message = "You have already reported this listing" });
+
+        _db.Reports.Add(new Report
+        {
+            ReporterId = userId,
+            ReportType = "Listing",
+            ListingId = id,
+            Reason = req.Reason,
+            Status = "Pending",
+            CreatedAt = DateTime.UtcNow
+        });
+
+        await _db.SaveChangesAsync();
+        return Ok(new { message = "Listing reported" });
+    }
+    catch (Exception ex)
+    {
+        return BadRequest(new { message = "Error: " + ex.Message });
+    }
+}
+
+        public class ReportRequest
+        {
+            public string Reason { get; set; } = string.Empty;
         }
 
         public class UpdateListingStatusRequest

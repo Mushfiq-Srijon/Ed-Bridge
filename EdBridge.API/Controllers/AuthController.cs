@@ -53,6 +53,9 @@ namespace EdBridge.API.Controllers
             if (user == null || !_authService.VerifyPassword(req.Password, user.PasswordHash))
                 return Unauthorized(new { message = "Invalid email or password" });
 
+            if (user.IsSuspended)
+                return Unauthorized(new { message = "Your account has been suspended. Please contact support." });
+
             var token = _authService.GenerateToken(user);
             return Ok(new
             {

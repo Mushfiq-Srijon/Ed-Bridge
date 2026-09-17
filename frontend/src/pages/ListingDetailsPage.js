@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { listingsAPI } from "../services/api";
+import { listingsAPI, reportAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import MessagingModal from "../components/Marketplace/MessagingModal";
 import "../styles/ListingDetails.css";
@@ -73,6 +73,7 @@ export default function ListingDetailsPage() {
     if (!reason || reason.trim() === '') return;
 
     try {
+      await reportAPI.reportListing(id, reason);
       alert('Listing reported successfully. Admin will review it.');
     } catch (error) {
       console.error('Failed to report listing:', error);
