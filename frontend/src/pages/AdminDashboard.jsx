@@ -3,6 +3,8 @@ import DashboardOverview from '../components/Admin/DashboardOverview';
 import ReportsManagement from '../components/Admin/ReportsManagement';
 import UsersManagement from '../components/Admin/UsersManagement';
 import ListingsManagement from '../components/Admin/ListingsManagement';
+import NotesManagement from '../components/Admin/NotesManagement';
+import ForumsManagement from '../components/Admin/ForumsManagement';
 import AnalyticsDashboard from '../components/Admin/AnalyticsDashboard';
 import '../styles/Admin.css';
 
@@ -44,31 +46,43 @@ export default function AdminDashboard() {
           className={`nav-tab ${activeTab === 'dashboard' ? 'active' : ''}`}
           onClick={() => setActiveTab('dashboard')}
         >
-          📊 Dashboard
+          Dashboard
         </button>
         <button
           className={`nav-tab ${activeTab === 'reports' ? 'active' : ''}`}
           onClick={() => setActiveTab('reports')}
         >
-          🚨 Reports
+          Reports
         </button>
         <button
           className={`nav-tab ${activeTab === 'users' ? 'active' : ''}`}
           onClick={() => setActiveTab('users')}
         >
-          👥 Users
+          Users
         </button>
         <button
           className={`nav-tab ${activeTab === 'listings' ? 'active' : ''}`}
           onClick={() => setActiveTab('listings')}
         >
-          📦 Listings
+          Listings
+        </button>
+        <button
+          className={`nav-tab ${activeTab === 'notes' ? 'active' : ''}`}
+          onClick={() => setActiveTab('notes')}
+        >
+          Notes
+        </button>
+        <button
+          className={`nav-tab ${activeTab === 'forums' ? 'active' : ''}`}
+          onClick={() => setActiveTab('forums')}
+        >
+          Forums
         </button>
         <button
           className={`nav-tab ${activeTab === 'analytics' ? 'active' : ''}`}
           onClick={() => setActiveTab('analytics')}
         >
-          📈 Analytics
+          Analytics
         </button>
       </nav>
 
@@ -85,6 +99,12 @@ export default function AdminDashboard() {
         )}
         {activeTab === 'listings' && (
           <ListingsManagement onRefresh={handleRefresh} refreshTrigger={refreshTrigger} />
+        )}
+        {activeTab === 'notes' && (
+          <NotesManagement onRefresh={handleRefresh} refreshTrigger={refreshTrigger} />
+        )}
+        {activeTab === 'forums' && (
+          <ForumsManagement onRefresh={handleRefresh} refreshTrigger={refreshTrigger} />
         )}
         {activeTab === 'analytics' && (
           <AnalyticsDashboard refreshTrigger={refreshTrigger} />

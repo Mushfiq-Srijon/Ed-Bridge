@@ -65,6 +65,30 @@ export default function DashboardOverview({ refreshTrigger }) {
           </div>
         </div>
 
+        {/* NOTES */}
+        <div className="stat-card notes">
+          <div className="stat-icon">📝</div>
+          <div className="stat-content">
+            <div className="stat-value">{dashboard.totalNotes}</div>
+            <div className="stat-label">Total Notes</div>
+            <div className="stat-subtext">
+              {dashboard.reportedNotes} reported
+            </div>
+          </div>
+        </div>
+
+        {/* FORUMS */}
+        <div className="stat-card forums">
+          <div className="stat-icon">💬</div>
+          <div className="stat-content">
+            <div className="stat-value">{dashboard.totalPosts}</div>
+            <div className="stat-label">Forum Posts</div>
+            <div className="stat-subtext">
+              {dashboard.reportedPosts} reported
+            </div>
+          </div>
+        </div>
+
         {/* REPORTS */}
         <div className="stat-card reports">
           <div className="stat-icon">🚨</div>
@@ -73,18 +97,6 @@ export default function DashboardOverview({ refreshTrigger }) {
             <div className="stat-label">Total Reports</div>
             <div className="stat-subtext">
               {dashboard.pendingReports} pending
-            </div>
-          </div>
-        </div>
-
-        {/* POSTS */}
-        <div className="stat-card posts">
-          <div className="stat-icon">💬</div>
-          <div className="stat-content">
-            <div className="stat-value">{dashboard.totalPosts}</div>
-            <div className="stat-label">Total Posts</div>
-            <div className="stat-subtext">
-              {dashboard.totalTransactions} reviews
             </div>
           </div>
         </div>

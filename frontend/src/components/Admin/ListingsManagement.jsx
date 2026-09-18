@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { BeatLoader } from 'react-spinners';
 import { adminAPI } from '../../services/adminAPI';
 
 export default function ListingsManagement({ onRefresh, refreshTrigger }) {
   const [listings, setListings] = useState([]);
+  const [listingCounts, setListingCounts] = useState({ All: 0, Active: 0, Sold: 0, Removed: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
@@ -12,12 +14,19 @@ export default function ListingsManagement({ onRefresh, refreshTrigger }) {
 
   useEffect(() => {
     loadListings();
-  }, [statusFilter, refreshTrigger]);
+  }, [statusFilter, search, refreshTrigger]);
 
   const loadListings = async () => {
     try {
       setLoading(true);
       setError('');
+      const allListings = await adminAPI.getListings(null, null);
+      setListingCounts({
+        All: allListings.length,
+        Active: allListings.filter(listing => listing.status === 'Active').length,
+        Sold: allListings.filter(listing => listing.status === 'Sold').length,
+        Removed: allListings.filter(listing => listing.status === 'Removed').length,
+      });
       const data = await adminAPI.getListings(search || null, statusFilter);
       setListings(data);
     } catch (err) {
@@ -46,7 +55,11 @@ export default function ListingsManagement({ onRefresh, refreshTrigger }) {
   };
 
   if (loading && !selectedListing) {
-    return <div className="loading-spinner">Loading listings...</div>;
+    return (
+      <div className="loading-spinner">
+        <BeatLoader color="#3b82f6" size={12} />
+      </div>
+    );
   }
 
   return (
@@ -70,25 +83,25 @@ export default function ListingsManagement({ onRefresh, refreshTrigger }) {
             className={`filter-btn ${!statusFilter ? 'active' : ''}`}
             onClick={() => setStatusFilter(null)}
           >
-            All ({listings.length})
+            All ({listingCounts.All})
           </button>
           <button
             className={`filter-btn ${statusFilter === 'Active' ? 'active' : ''}`}
             onClick={() => setStatusFilter('Active')}
           >
-            Active
+            Active ({listingCounts.Active})
           </button>
           <button
             className={`filter-btn ${statusFilter === 'Sold' ? 'active' : ''}`}
             onClick={() => setStatusFilter('Sold')}
           >
-            Sold
+            Sold ({listingCounts.Sold})
           </button>
           <button
             className={`filter-btn ${statusFilter === 'Removed' ? 'active' : ''}`}
             onClick={() => setStatusFilter('Removed')}
           >
-            Removed
+            Removed ({listingCounts.Removed})
           </button>
         </div>
       </div>

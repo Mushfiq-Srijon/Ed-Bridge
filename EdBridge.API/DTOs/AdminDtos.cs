@@ -16,6 +16,9 @@ namespace EdBridge.API.DTOs
         public int PendingReports { get; set; }
 
         public int TotalPosts { get; set; }
+        public int TotalNotes { get; set; }
+        public int ReportedNotes { get; set; }
+        public int ReportedPosts { get; set; }
         public int TotalTransactions { get; set; }
     }
 
@@ -68,9 +71,9 @@ namespace EdBridge.API.DTOs
         public int Id { get; set; }
         public string Email { get; set; }
         public string Name { get; set; }
-        public string Institution { get; set; }
-        public string EducationLevel { get; set; }
-        public string Phone { get; set; }
+        public string? Institution { get; set; }
+        public string? EducationLevel { get; set; }
+        public string? Phone { get; set; }
         public bool IsSuspended { get; set; }
         public DateTime CreatedAt { get; set; }
         public int ListingsCount { get; set; }
@@ -82,10 +85,10 @@ namespace EdBridge.API.DTOs
         public int Id { get; set; }
         public string Email { get; set; }
         public string Name { get; set; }
-        public string Institution { get; set; }
-        public string EducationLevel { get; set; }
-        public string Phone { get; set; }
-        public string ProfilePhotoPath { get; set; }
+        public string? Institution { get; set; }
+        public string? EducationLevel { get; set; }
+        public string? Phone { get; set; }
+        public string? ProfilePhotoPath { get; set; }
         public bool IsSuspended { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
@@ -127,8 +130,8 @@ namespace EdBridge.API.DTOs
         public string Title { get; set; }
         public string Content { get; set; }
         public int AuthorId { get; set; }
-        public string AuthorEmail { get; set; }
-        public string AuthorName { get; set; }
+        public string? AuthorEmail { get; set; }
+        public string? AuthorName { get; set; }
         public bool IsAnonymous { get; set; }
         public int ReportsCount { get; set; }
         public DateTime CreatedAt { get; set; }
@@ -175,6 +178,16 @@ namespace EdBridge.API.DTOs
         public List<ListingByStatusDto> ListingsByStatus { get; set; }
         public List<MostReportedListingDto> MostReportedListings { get; set; }
         public List<TopSellerDto> TopSellers { get; set; }
+        public int TotalUsers { get; set; }
+        public int SuspendedUsers { get; set; }
+        public int TotalReports { get; set; }
+        public int PendingReports { get; set; }
+        public int ResolvedReports { get; set; }
+        public int DismissedReports { get; set; }
+        public int TotalNotes { get; set; }
+        public int ReportedNotes { get; set; }
+        public int TotalPosts { get; set; }
+        public int ReportedPosts { get; set; }
     }
     public class AdminListingDetailDto
     {
@@ -189,9 +202,57 @@ namespace EdBridge.API.DTOs
         public string SellerEmail { get; set; }
         public string SellerName { get; set; }
         public string Area { get; set; }
-        public string ImagePath { get; set; }
+        public string? ImagePath { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+    }
+
+    // ============ NOTES MANAGEMENT ============
+    public class NoteListItemDto
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string CourseCode { get; set; }
+        public string Subject { get; set; }
+        public string? EducationLevel { get; set; }
+        public int AuthorId { get; set; }
+        public string AuthorEmail { get; set; }
+        public string AuthorName { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public int ReportsCount { get; set; }
+    }
+
+    public class AdminNoteDetailDto
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Content { get; set; }
+        public string CourseCode { get; set; }
+        public string Subject { get; set; }
+        public string? EducationLevel { get; set; }
+        public string? ClassName { get; set; }
+        public string? Department { get; set; }
+        public string? CourseTitle { get; set; }
+        public int AuthorId { get; set; }
+        public string AuthorEmail { get; set; }
+        public string AuthorName { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public int ReportsCount { get; set; }
+    }
+
+    // ============ FORUMS/POSTS MANAGEMENT ============
+    public class ForumPostListItemDto
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Content { get; set; }
+        public int AuthorId { get; set; }
+        public string? AuthorEmail { get; set; }
+        public string? AuthorName { get; set; }
+        public bool IsAnonymous { get; set; }
+        public int RepliesCount { get; set; }
+        public int ReportsCount { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
 }

@@ -2,6 +2,7 @@
 EdBridge.API/bin/
 EdBridge.API/obj/
 EdBridge.API/.vs/
+EdBridge.API/wwwroot/uploads/*
 *.db
 *.db-shm
 *.db-wal

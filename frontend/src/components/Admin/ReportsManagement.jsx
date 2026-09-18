@@ -1,18 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../../services/adminAPI';
+import { BeatLoader } from 'react-spinners';
 
 export default function ReportsManagement({ onRefresh, refreshTrigger }) {
   const [reports, setReports] = useState([]);
+  const [counts, setCounts] = useState({ All: 0, Pending: 0, Resolved: 0, Dismissed: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [statusFilter, setStatusFilter] = useState(null);
   const [selectedReport, setSelectedReport] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  useEffect(() => {
-    loadReports();
-  }, [statusFilter, refreshTrigger]);
+  // Load counts for all statuses
+  const loadCounts = async () => {
+    try {
+      const allReports = await adminAPI.getReports(null);
+      const pending = await adminAPI.getReports('Pending');
+      const resolved = await adminAPI.getReports('Resolved');
+      const dismissed = await adminAPI.getReports('Dismissed');
 
+      setCounts({
+        All: allReports.length,
+        Pending: pending.length,
+        Resolved: resolved.length,
+        Dismissed: dismissed.length
+      });
+    } catch (err) {
+      console.error('Failed to load counts:', err);
+    }
+  };
+
+  // Load filtered reports
   const loadReports = async () => {
     try {
       setLoading(true);
@@ -26,11 +44,17 @@ export default function ReportsManagement({ onRefresh, refreshTrigger }) {
     }
   };
 
+  useEffect(() => {
+    loadCounts();
+    loadReports();
+  }, [statusFilter, refreshTrigger]);
+
   const handleDismiss = async (reportId) => {
     try {
       setActionLoading(true);
       await adminAPI.dismissReport(reportId);
       setSelectedReport(null);
+      loadCounts();
       loadReports();
       onRefresh();
     } catch (err) {
@@ -46,6 +70,7 @@ export default function ReportsManagement({ onRefresh, refreshTrigger }) {
       const action = suspendUser ? 'ResolveSuspend' : 'Resolve';
       await adminAPI.resolveReport(reportId, action);
       setSelectedReport(null);
+      loadCounts();
       loadReports();
       onRefresh();
     } catch (err) {
@@ -56,7 +81,11 @@ export default function ReportsManagement({ onRefresh, refreshTrigger }) {
   };
 
   if (loading && !selectedReport) {
-    return <div className="loading-spinner">Loading reports...</div>;
+    return (
+      <div className="loading-spinner">
+        <BeatLoader color="#3b82f6" size={12} />
+      </div>
+    );
   }
 
   return (
@@ -71,25 +100,25 @@ export default function ReportsManagement({ onRefresh, refreshTrigger }) {
           className={`filter-btn ${!statusFilter ? 'active' : ''}`}
           onClick={() => setStatusFilter(null)}
         >
-          All Reports ({reports.length})
+          All Reports ({counts.All})
         </button>
         <button
           className={`filter-btn ${statusFilter === 'Pending' ? 'active' : ''}`}
           onClick={() => setStatusFilter('Pending')}
         >
-          Pending
+          Pending ({counts.Pending})
         </button>
         <button
           className={`filter-btn ${statusFilter === 'Resolved' ? 'active' : ''}`}
           onClick={() => setStatusFilter('Resolved')}
         >
-          Resolved
+          Resolved ({counts.Resolved})
         </button>
         <button
           className={`filter-btn ${statusFilter === 'Dismissed' ? 'active' : ''}`}
           onClick={() => setStatusFilter('Dismissed')}
         >
-          Dismissed
+          Dismissed ({counts.Dismissed})
         </button>
       </div>
 
@@ -97,7 +126,7 @@ export default function ReportsManagement({ onRefresh, refreshTrigger }) {
       {selectedReport ? (
         <div className="report-detail">
           <button className="back-btn" onClick={() => setSelectedReport(null)}>
-            ← Back
+            Back
           </button>
 
           <div className="detail-card">

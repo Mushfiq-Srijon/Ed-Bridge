@@ -136,26 +136,6 @@ namespace EdBridge.API.Controllers
             return Ok(new { message = "Listing removed" });
         }
 
-        // ============ POSTS ============
-        [HttpGet("posts/reported")]
-        public async Task<IActionResult> GetReportedPosts()
-        {
-            var posts = await _adminService.GetReportedPostsAsync();
-            return Ok(posts);
-        }
-
-        [HttpPut("posts/{id}/remove")]
-        public async Task<IActionResult> RemovePost(int id, [FromBody] PostActionDto action)
-        {
-            bool suspendAuthor = action.Action == "RemoveSuspend";
-            var success = await _adminService.RemovePostAsync(id, suspendAuthor);
-
-            if (!success)
-                return NotFound(new { message = "Post not found" });
-
-            return Ok(new { message = "Post removed" });
-        }
-
         // ============ ANALYTICS ============
         [HttpGet("analytics")]
         public async Task<IActionResult> GetAnalytics()
@@ -163,5 +143,54 @@ namespace EdBridge.API.Controllers
             var analytics = await _adminService.GetAnalyticsAsync();
             return Ok(analytics);
         }
+
+        // ============ NOTES ============
+        [HttpGet("notes")]
+        public async Task<IActionResult> GetNotes([FromQuery] string? search = null)
+        {
+            var notes = await _adminService.GetAllNotesAsync(search);
+            return Ok(notes);
+        }
+
+        [HttpGet("notes/{id}")]
+        public async Task<IActionResult> GetNoteDetail(int id)
+        {
+            var note = await _adminService.GetNoteDetailAsync(id);
+            if (note == null)
+                return NotFound(new { message = "Note not found" });
+
+            return Ok(note);
+        }
+
+        [HttpPut("notes/{id}/remove")]
+        public async Task<IActionResult> RemoveNote(int id)
+        {
+            var success = await _adminService.RemoveNoteAsync(id);
+            if (!success)
+                return NotFound(new { message = "Note not found" });
+
+            return Ok(new { message = "Note removed" });
+        }
+
+        // ============ FORUMS/POSTS ============
+        [HttpGet("posts")]
+        public async Task<IActionResult> GetAllPosts([FromQuery] string? search = null)
+        {
+            var posts = await _adminService.GetAllPostsAsync(search);
+            return Ok(posts);
+        }
+
+        [HttpPut("posts/{id}/remove")]
+        public async Task<IActionResult> RemoveForumPost(int id, [FromBody] PostActionDto action)
+        {
+            bool suspendAuthor = action.Action == "RemoveSuspend";
+            var success = await _adminService.RemoveForumPostAsync(id, suspendAuthor);
+
+            if (!success)
+                return NotFound(new { message = "Post not found" });
+
+            return Ok(new { message = "Post removed" });
+        }
     }
+
 }

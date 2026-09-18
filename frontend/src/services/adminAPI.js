@@ -3,10 +3,29 @@ const API_BASE = 'http://localhost:5180/api/admin';
 // Get token from localStorage
 const getAuthHeader = () => {
   const token = localStorage.getItem('token');
+  if (!token) {
+    throw new Error('Your session has expired. Please log in again.');
+  }
+
   return {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
   };
+};
+
+const handleResponse = async (res, message) => {
+  if (res.status === 401) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.assign('/login');
+    throw new Error('Your session has expired. Please log in again.');
+  }
+
+  if (!res.ok) {
+    throw new Error(message);
+  }
+
+  return res.json();
 };
 
 export const adminAPI = {
@@ -15,8 +34,7 @@ export const adminAPI = {
     const res = await fetch(`${API_BASE}/dashboard`, {
       headers: getAuthHeader()
     });
-    if (!res.ok) throw new Error('Failed to fetch dashboard');
-    return res.json();
+    return handleResponse(res, 'Failed to fetch dashboard');
   },
 
   // REPORTS
@@ -132,22 +150,78 @@ export const adminAPI = {
     return res.json();
   },
 
+  // ANALYTICS
+  getAnalytics: async () => {
+    const headers = getAuthHeader();
+    const [analyticsRes, dashboardRes, reportsRes] = await Promise.all([
+      fetch(`${API_BASE}/analytics`, { headers }),
+      fetch(`${API_BASE}/dashboard`, { headers }),
+      fetch(`${API_BASE}/reports`, { headers }),
+    ]);
+
+    const analytics = await handleResponse(analyticsRes, 'Failed to fetch analytics');
+    const dashboard = await handleResponse(dashboardRes, 'Failed to fetch dashboard');
+    const reports = await handleResponse(reportsRes, 'Failed to fetch reports');
+
+    return {
+      ...analytics,
+      totalUsers: dashboard.totalUsers,
+      suspendedUsers: dashboard.suspendedUsers,
+      totalReports: dashboard.totalReports,
+      pendingReports: dashboard.pendingReports,
+      totalNotes: dashboard.totalNotes,
+      reportedNotes: dashboard.reportedNotes,
+      totalPosts: dashboard.totalPosts,
+      reportedPosts: dashboard.reportedPosts,
+      resolvedReports: reports.filter(report => report.status === 'Resolved').length,
+      dismissedReports: reports.filter(report => report.status === 'Dismissed').length,
+    };
+  },
+
+  // Notes Management
+  getNotes: async (search = null) => {
+    const url = search
+      ? `${API_BASE}/notes?search=${encodeURIComponent(search)}`
+      : `${API_BASE}/notes`;
+    const res = await fetch(url, { headers: getAuthHeader() });
+    if (!res.ok) throw new Error('Failed to fetch notes');
+    return res.json();
+  },
+
+  getNoteDetail: async (noteId) => {
+    const res = await fetch(`${API_BASE}/notes/${noteId}`, {
+      headers: getAuthHeader(),
+    });
+    if (!res.ok) throw new Error('Failed to fetch note detail');
+    return res.json();
+  },
+
+  removeNote: async (noteId) => {
+    const res = await fetch(`${API_BASE}/notes/${noteId}/remove`, {
+      method: 'PUT',
+      headers: getAuthHeader(),
+    });
+    if (!res.ok) throw new Error('Failed to remove note');
+    return res.json();
+  },
+
+  // Forums/Posts Management
+  getPosts: async (search = null) => {
+    const url = search
+      ? `${API_BASE}/posts?search=${encodeURIComponent(search)}`
+      : `${API_BASE}/posts`;
+    const res = await fetch(url, { headers: getAuthHeader() });
+    if (!res.ok) throw new Error('Failed to fetch posts');
+    return res.json();
+  },
+
   removePost: async (postId, action) => {
     const res = await fetch(`${API_BASE}/posts/${postId}/remove`, {
       method: 'PUT',
       headers: getAuthHeader(),
-      body: JSON.stringify({ action })
+      body: JSON.stringify({ action }),
     });
     if (!res.ok) throw new Error('Failed to remove post');
     return res.json();
   },
-
-  // ANALYTICS
-  getAnalytics: async () => {
-    const res = await fetch(`${API_BASE}/analytics`, {
-      headers: getAuthHeader()
-    });
-    if (!res.ok) throw new Error('Failed to fetch analytics');
-    return res.json();
-  }
 };
