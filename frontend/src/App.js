@@ -36,13 +36,13 @@ function PrivateRoute({ children }) {
 }
 
 function AdminRoute({ children }) {
-  const { user, loading } = useAuth();
+  const { user, token, loading } = useAuth();
 
   if (loading) {
     return <div>Loading...</div>;
   }
 
-  return user?.role === 'Admin' ? children : <Navigate to="/" replace />;
+  return token && user?.role === 'Admin' ? children : <Navigate to="/login" replace />;
 }
 
 function App() {

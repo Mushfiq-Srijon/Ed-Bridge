@@ -35,9 +35,73 @@ export default function AnalyticsDashboard({ refreshTrigger }) {
     return <div>No data</div>;
   }
 
+  const toCount = value => Number.isFinite(Number(value)) ? Number(value) : 0;
+
+  const getBarWidth = (items, count) => {
+    const safeCount = toCount(count);
+    const total = items.reduce((sum, item) => sum + toCount(item.count), 0);
+    if (!total || !safeCount) return '0%';
+    return `${Math.max((safeCount / total) * 100, 2)}%`;
+  };
+
+  const renderBarChart = (items) => {
+
+    return (
+      <div className="chart-data">
+        {items.map(item => (
+          <div key={item.label} className="data-row">
+            <span className="data-label">{item.label}</span>
+            <div className="data-bar">
+              <div
+                className="bar-fill"
+                style={{ width: getBarWidth(items, item.count) }}
+              ></div>
+            </div>
+            <span className="data-value">{toCount(item.count)}</span>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="analytics-dashboard">
       <h2>Analytics & Insights</h2>
+
+      <div className="analytics-chart-grid">
+        <div className="analytics-card">
+          <h3>Users by Status</h3>
+          {renderBarChart([
+            { label: 'Active', count: Math.max(toCount(analytics.totalUsers) - toCount(analytics.suspendedUsers), 0) },
+            { label: 'Suspended', count: toCount(analytics.suspendedUsers) },
+          ])}
+        </div>
+
+        <div className="analytics-card">
+          <h3>Reports by Status</h3>
+          {renderBarChart([
+            { label: 'Pending', count: toCount(analytics.pendingReports) },
+            { label: 'Resolved', count: toCount(analytics.resolvedReports) },
+            { label: 'Dismissed', count: toCount(analytics.dismissedReports) },
+          ])}
+        </div>
+
+        <div className="analytics-card">
+          <h3>Notes Activity</h3>
+          {renderBarChart([
+            { label: 'All Notes', count: toCount(analytics.totalNotes) },
+            { label: 'Reported', count: toCount(analytics.reportedNotes) },
+          ])}
+        </div>
+
+        <div className="analytics-card">
+          <h3>Forum Activity</h3>
+          {renderBarChart([
+            { label: 'All Posts', count: toCount(analytics.totalPosts) },
+            { label: 'Reported', count: toCount(analytics.reportedPosts) },
+          ])}
+        </div>
+      </div>
 
       {/* LISTINGS BY CATEGORY */}
       <div className="analytics-card">
@@ -52,9 +116,7 @@ export default function AnalyticsDashboard({ refreshTrigger }) {
                 <div className="data-bar">
                   <div
                     className="bar-fill"
-                    style={{
-                      width: `${(item.count / Math.max(...analytics.listingsByCategory.map(x => x.count))) * 100}%`
-                    }}
+                    style={{ width: getBarWidth(analytics.listingsByCategory, item.count) }}
                   ></div>
                 </div>
                 <span className="data-value">{item.count}</span>
@@ -77,9 +139,7 @@ export default function AnalyticsDashboard({ refreshTrigger }) {
                 <div className="data-bar">
                   <div
                     className="bar-fill"
-                    style={{
-                      width: `${(item.count / Math.max(...analytics.listingsByStatus.map(x => x.count))) * 100}%`
-                    }}
+                    style={{ width: getBarWidth(analytics.listingsByStatus, item.count) }}
                   ></div>
                 </div>
                 <span className="data-value">{item.count}</span>

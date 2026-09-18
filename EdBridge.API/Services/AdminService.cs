@@ -14,75 +14,41 @@ namespace EdBridge.API.Services
             _db = db;
         }
 
-        // ============ DASHBOARD ============
-        public async Task<DashboardSummaryDto> GetDashboardSummaryAsync()
-        {
-            var totalUsers = await _db.Users.CountAsync();
-            var suspendedUsers = await _db.Users.CountAsync(u => u.IsSuspended);
-
-            var totalListings = await _db.Listings.CountAsync();
-            var activeListings = await _db.Listings.CountAsync(l => l.Status == "Active");
-            var underInvestigationListings = await _db.Listings.CountAsync(l => l.Status == "Under Investigation");
-            var soldListings = await _db.Listings.CountAsync(l => l.Status == "Sold");
-            var removedListings = await _db.Listings.CountAsync(l => l.Status == "Removed");
-
-            var totalReports = await _db.Reports.CountAsync();
-            var pendingReports = await _db.Reports.CountAsync(r => r.Status == "Pending");
-
-            var totalPosts = await _db.Posts.CountAsync();
-            var totalTransactions = await _db.Reviews.CountAsync();
-
-            return new DashboardSummaryDto
-            {
-                TotalUsers = totalUsers,
-                SuspendedUsers = suspendedUsers,
-                TotalListings = totalListings,
-                ActiveListings = activeListings,
-                UnderInvestigationListings = underInvestigationListings,
-                SoldListings = soldListings,
-                RemovedListings = removedListings,
-                TotalReports = totalReports,
-                PendingReports = pendingReports,
-                TotalPosts = totalPosts,
-                TotalTransactions = totalTransactions
-            };
-        }
-
         // ============ REPORTS MANAGEMENT ============
         public async Task<List<ReportListItemDto>> GetAllReportsAsync(string? status = null)
-{
-    var query = _db.Reports
-        .Include(r => r.Reporter)
-        .Include(r => r.Listing)
-        .Include(r => r.Post)
-        .Include(r => r.Reply)
-        .Include(r => r.Note)  // Add this too
-        .AsQueryable();
-
-    if (!string.IsNullOrEmpty(status))
-        query = query.Where(r => r.Status == status);
-
-    return await query
-        .OrderByDescending(r => r.CreatedAt)
-        .Select(r => new ReportListItemDto
         {
-            Id = r.Id,
-            Type = r.ReportType,
-            ReportedItemId = r.ListingId ?? r.PostId ?? r.ReplyId ?? r.NoteId ?? 0,
-            ReportedItemTitle = r.Listing != null ? r.Listing.Title 
-                              : r.Post != null ? r.Post.Title 
-                              : r.Note != null ? r.Note.Title
-                              : r.Reply != null ? r.Reply.Content.Substring(0, Math.Min(50, r.Reply.Content.Length))
-                              : "Unknown",
-            ReportedById = r.ReporterId,
-            ReportedByEmail = r.Reporter.Email,
-            Reason = r.Reason,
-            Details = r.Reason,
-            Status = r.Status,
-            CreatedAt = r.CreatedAt
-        })
-        .ToListAsync();
-}
+            var query = _db.Reports
+                .Include(r => r.Reporter)
+                .Include(r => r.Listing)
+                .Include(r => r.Post)
+                .Include(r => r.Reply)
+                .Include(r => r.Note)  // Add this too
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(status))
+                query = query.Where(r => r.Status == status);
+
+            return await query
+                .OrderByDescending(r => r.CreatedAt)
+                .Select(r => new ReportListItemDto
+                {
+                    Id = r.Id,
+                    Type = r.ReportType,
+                    ReportedItemId = r.ListingId ?? r.PostId ?? r.ReplyId ?? r.NoteId ?? 0,
+                    ReportedItemTitle = r.Listing != null ? r.Listing.Title
+                                      : r.Post != null ? r.Post.Title
+                                      : r.Note != null ? r.Note.Title
+                                      : r.Reply != null ? r.Reply.Content.Substring(0, Math.Min(50, r.Reply.Content.Length))
+                                      : "Unknown",
+                    ReportedById = r.ReporterId,
+                    ReportedByEmail = r.Reporter.Email,
+                    Reason = r.Reason,
+                    Details = r.Reason,
+                    Status = r.Status,
+                    CreatedAt = r.CreatedAt
+                })
+                .ToListAsync();
+        }
 
         public async Task<ReportDetailDto?> GetReportDetailAsync(int reportId)
         {
@@ -346,8 +312,8 @@ namespace EdBridge.API.Services
                     Title = r.Post.Title,
                     Content = r.Post.Content,
                     AuthorId = r.Post.UserId,
-                    AuthorEmail = r.Post.Author.Email,
-                    AuthorName = r.Post.Author.Name,
+                    AuthorEmail = r.Post.Author == null ? null : r.Post.Author.Email,
+                    AuthorName = r.Post.Author == null ? null : r.Post.Author.Name,
                     IsAnonymous = r.Post.IsAnonymous,
                     ReportsCount = r.Post.Replies.Count,
                     CreatedAt = r.Post.CreatedAt
@@ -368,7 +334,8 @@ namespace EdBridge.API.Services
 
             if (suspendAuthor)
             {
-                post.Author.IsSuspended = true;
+                if (post.Author != null)
+                    post.Author.IsSuspended = true;
             }
 
             await _db.SaveChangesAsync();
@@ -427,13 +394,185 @@ namespace EdBridge.API.Services
                 })
                 .ToListAsync();
 
+            var totalUsers = await _db.Users.CountAsync();
+            var suspendedUsers = await _db.Users.CountAsync(u => u.IsSuspended);
+            var totalReports = await _db.Reports.CountAsync();
+            var pendingReports = await _db.Reports.CountAsync(r => r.Status == "Pending");
+            var resolvedReports = await _db.Reports.CountAsync(r => r.Status == "Resolved");
+            var dismissedReports = await _db.Reports.CountAsync(r => r.Status == "Dismissed");
+            var totalNotes = await _db.Notes.CountAsync();
+            var reportedNotes = await _db.Reports.CountAsync(r => r.ReportType == "Note");
+            var totalPosts = await _db.Posts.CountAsync();
+            var reportedPosts = await _db.Reports.CountAsync(r => r.ReportType == "Post");
+
             return new AnalyticsDto
             {
                 ListingsByCategory = listingsByCategory,
                 ListingsByStatus = listingsByStatus,
                 MostReportedListings = mostReportedListings,
-                TopSellers = topSellers
+                TopSellers = topSellers,
+                TotalUsers = totalUsers,
+                SuspendedUsers = suspendedUsers,
+                TotalReports = totalReports,
+                PendingReports = pendingReports,
+                ResolvedReports = resolvedReports,
+                DismissedReports = dismissedReports,
+                TotalNotes = totalNotes,
+                ReportedNotes = reportedNotes,
+                TotalPosts = totalPosts,
+                ReportedPosts = reportedPosts
+            };
+        }
+        // ============ NOTES MANAGEMENT ============
+        public async Task<List<NoteListItemDto>> GetAllNotesAsync(string? search = null)
+        {
+            var query = _db.Notes.AsQueryable();
+
+            if (!string.IsNullOrEmpty(search))
+                query = query.Where(n => n.Title.Contains(search) || n.CourseCode.Contains(search));
+
+            return await query
+                .OrderByDescending(n => n.CreatedAt)
+                .Select(n => new NoteListItemDto
+                {
+                    Id = n.Id,
+                    Title = n.Title,
+                    CourseCode = n.CourseCode,
+                    Subject = n.Subject,
+                    EducationLevel = n.EducationLevel,
+                    AuthorId = n.UserId,
+                    AuthorEmail = n.Author.Email,
+                    AuthorName = n.Author.Name,
+                    CreatedAt = n.CreatedAt,
+                    ReportsCount = n.Reports.Count
+                })
+                .ToListAsync();
+        }
+
+        public async Task<AdminNoteDetailDto?> GetNoteDetailAsync(int noteId)
+        {
+            var note = await _db.Notes
+                .Include(n => n.Author)
+                .Include(n => n.Reports)
+                .FirstOrDefaultAsync(n => n.Id == noteId);
+
+            if (note == null) return null;
+
+            return new AdminNoteDetailDto
+            {
+                Id = note.Id,
+                Title = note.Title,
+                Content = note.Content,
+                CourseCode = note.CourseCode,
+                Subject = note.Subject,
+                EducationLevel = note.EducationLevel,
+                ClassName = note.ClassName,
+                Department = note.Department,
+                CourseTitle = note.CourseTitle,
+                AuthorId = note.UserId,
+                AuthorEmail = note.Author.Email,
+                AuthorName = note.Author.Name,
+                CreatedAt = note.CreatedAt,
+                ReportsCount = note.Reports.Count
+            };
+        }
+
+        public async Task<bool> RemoveNoteAsync(int noteId)
+        {
+            var note = await _db.Notes.FindAsync(noteId);
+            if (note == null) return false;
+
+            _db.Notes.Remove(note);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+        // ============ FORUMS/POSTS MANAGEMENT ============
+        public async Task<List<ForumPostListItemDto>> GetAllPostsAsync(string? search = null)
+        {
+            var query = _db.Posts.AsQueryable();
+
+            if (!string.IsNullOrEmpty(search))
+                query = query.Where(p => p.Title.Contains(search) || p.Content.Contains(search));
+
+            return await query
+                .OrderByDescending(p => p.CreatedAt)
+                .Select(p => new ForumPostListItemDto
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Content = p.Content,
+                    AuthorId = p.UserId,
+                    AuthorEmail = p.Author == null ? null : p.Author.Email,
+                    AuthorName = p.Author == null ? null : p.Author.Name,
+                    IsAnonymous = p.IsAnonymous,
+                    RepliesCount = p.Replies.Count,
+                    ReportsCount = p.Reports.Count,
+                    CreatedAt = p.CreatedAt
+                })
+                .ToListAsync();
+        }
+
+        public async Task<bool> RemoveForumPostAsync(int postId, bool suspendAuthor = false)
+        {
+            var post = await _db.Posts
+                .Include(p => p.Author)
+                .FirstOrDefaultAsync(p => p.Id == postId);
+
+            if (post == null) return false;
+
+            post.Status = "Removed";
+            post.UpdatedAt = DateTime.UtcNow;
+
+            if (suspendAuthor)
+            {
+                if (post.Author != null)
+                    post.Author.IsSuspended = true;
+            }
+
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+        // Update dashboard to include notes/posts
+        public async Task<DashboardSummaryDto> GetDashboardSummaryAsync()
+        {
+            var totalUsers = await _db.Users.CountAsync();
+            var suspendedUsers = await _db.Users.CountAsync(u => u.IsSuspended);
+
+            var totalListings = await _db.Listings.CountAsync();
+            var activeListings = await _db.Listings.CountAsync(l => l.Status == "Active");
+            var underInvestigationListings = await _db.Listings.CountAsync(l => l.Status == "Under Investigation");
+            var soldListings = await _db.Listings.CountAsync(l => l.Status == "Sold");
+            var removedListings = await _db.Listings.CountAsync(l => l.Status == "Removed");
+
+            var totalReports = await _db.Reports.CountAsync();
+            var pendingReports = await _db.Reports.CountAsync(r => r.Status == "Pending");
+
+            var totalPosts = await _db.Posts.CountAsync();
+            var totalNotes = await _db.Notes.CountAsync();
+            var reportedNotes = await _db.Reports.CountAsync(r => r.ReportType == "Note");
+            var reportedPosts = await _db.Reports.CountAsync(r => r.ReportType == "Post");
+            var totalTransactions = await _db.Reviews.CountAsync();
+
+            return new DashboardSummaryDto
+            {
+                TotalUsers = totalUsers,
+                SuspendedUsers = suspendedUsers,
+                TotalListings = totalListings,
+                ActiveListings = activeListings,
+                UnderInvestigationListings = underInvestigationListings,
+                SoldListings = soldListings,
+                RemovedListings = removedListings,
+                TotalReports = totalReports,
+                PendingReports = pendingReports,
+                TotalPosts = totalPosts,
+                TotalNotes = totalNotes,
+                ReportedNotes = reportedNotes,
+                ReportedPosts = reportedPosts,
+                TotalTransactions = totalTransactions
             };
         }
     }
+
 }

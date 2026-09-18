@@ -6,10 +6,10 @@ namespace EdBridge.API.Models
     {
         public int Id { get; set; }
 
-        public string Title { get; set; }
-        public string Content { get; set; }
-        public string Subject { get; set; }
-        public string CourseCode { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Content { get; set; } = string.Empty;
+        public string Subject { get; set; } = string.Empty;
+        public string CourseCode { get; set; } = string.Empty;
 
         // File uploads
         public string? PdfPath { get; set; }
@@ -32,12 +32,14 @@ namespace EdBridge.API.Models
         public int UserId { get; set; }
 
         [ForeignKey("UserId")]
-        public User Author { get; set; }
+        public User Author { get; set; } = null!;
 
         public ICollection<NoteSubjectTag> NoteSubjectTags { get; set; } = new List<NoteSubjectTag>();
 
         public ICollection<NoteComment> Comments { get; set; } = new List<NoteComment>();
 
         public ICollection<NoteRating> Ratings { get; set; } = new List<NoteRating>();
+
+        public ICollection<Report> Reports { get; set; } = new List<Report>();
     }
 }

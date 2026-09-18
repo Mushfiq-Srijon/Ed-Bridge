@@ -27,5 +27,6 @@ namespace EdBridge.API.Models
         public ICollection<PostUpvote> Upvotes { get; set; } = new List<PostUpvote>();
         public ICollection<PostDownvote> Downvotes { get; set; } = new List<PostDownvote>();
         public ICollection<PostFollow> Followers { get; set; } = new List<PostFollow>();
+        public ICollection<Report> Reports { get; set; } = new List<Report>();
     }
 }

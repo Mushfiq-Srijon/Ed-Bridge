@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../../services/adminAPI';
 import { useAuth } from '../../context/AuthContext';
+import { BeatLoader } from 'react-spinners';
 
 export default function UsersManagement({ onRefresh, refreshTrigger }) {
   const [users, setUsers] = useState([]);
+  const [counts, setCounts] = useState({ All: 0, Active: 0, Suspended: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
@@ -13,10 +15,24 @@ export default function UsersManagement({ onRefresh, refreshTrigger }) {
   const { user: currentUser } = useAuth();
   const isCurrentAdmin = selectedUser?.id === currentUser?.id;
 
-  useEffect(() => {
-    loadUsers();
-  }, [statusFilter, refreshTrigger]);
+  // Load counts for all statuses
+  const loadCounts = async () => {
+    try {
+      const allUsers = await adminAPI.getUsers(search || null, null);
+      const active = await adminAPI.getUsers(search || null, 'active');
+      const suspended = await adminAPI.getUsers(search || null, 'suspended');
 
+      setCounts({
+        All: allUsers.length,
+        Active: active.length,
+        Suspended: suspended.length
+      });
+    } catch (err) {
+      console.error('Failed to load counts:', err);
+    }
+  };
+
+  // Load filtered users
   const loadUsers = async () => {
     try {
       setLoading(true);
@@ -30,6 +46,11 @@ export default function UsersManagement({ onRefresh, refreshTrigger }) {
     }
   };
 
+  useEffect(() => {
+    loadCounts();
+    loadUsers();
+  }, [statusFilter, refreshTrigger]);
+
   const handleSearch = (e) => {
     setSearch(e.target.value);
   };
@@ -39,6 +60,7 @@ export default function UsersManagement({ onRefresh, refreshTrigger }) {
       setActionLoading(true);
       await adminAPI.suspendUser(userId);
       setSelectedUser(null);
+      loadCounts();
       loadUsers();
       onRefresh();
     } catch (err) {
@@ -53,6 +75,7 @@ export default function UsersManagement({ onRefresh, refreshTrigger }) {
       setActionLoading(true);
       await adminAPI.reinstateUser(userId);
       setSelectedUser(null);
+      loadCounts();
       loadUsers();
       onRefresh();
     } catch (err) {
@@ -63,7 +86,11 @@ export default function UsersManagement({ onRefresh, refreshTrigger }) {
   };
 
   if (loading && !selectedUser) {
-    return <div className="loading-spinner">Loading users...</div>;
+    return (
+      <div className="loading-spinner">
+        <BeatLoader color="#3b82f6" size={12} />
+      </div>
+    );
   }
 
   return (
@@ -79,7 +106,7 @@ export default function UsersManagement({ onRefresh, refreshTrigger }) {
           placeholder="Search by email or name..."
           value={search}
           onChange={handleSearch}
-          onKeyUp={() => loadUsers()}
+          onKeyUp={() => { loadCounts(); loadUsers(); }}
           className="search-input"
         />
         <div className="filter-tabs">
@@ -87,19 +114,19 @@ export default function UsersManagement({ onRefresh, refreshTrigger }) {
             className={`filter-btn ${!statusFilter ? 'active' : ''}`}
             onClick={() => setStatusFilter(null)}
           >
-            All Users ({users.length})
+            All Users ({counts.All})
           </button>
           <button
             className={`filter-btn ${statusFilter === 'active' ? 'active' : ''}`}
             onClick={() => setStatusFilter('active')}
           >
-            Active
+            Active ({counts.Active})
           </button>
           <button
             className={`filter-btn ${statusFilter === 'suspended' ? 'active' : ''}`}
             onClick={() => setStatusFilter('suspended')}
           >
-            Suspended
+            Suspended ({counts.Suspended})
           </button>
         </div>
       </div>
@@ -108,7 +135,7 @@ export default function UsersManagement({ onRefresh, refreshTrigger }) {
       {selectedUser ? (
         <div className="user-detail">
           <button className="back-btn" onClick={() => setSelectedUser(null)}>
-            ← Back
+            Back
           </button>
 
           <div className="detail-card">

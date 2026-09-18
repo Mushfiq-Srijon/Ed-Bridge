@@ -26,6 +26,13 @@ export const apiCall = async (endpoint, method = 'GET', body = null) => {
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
 
+    if (response.status === 401 && endpoint !== '/auth/login') {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.assign('/login');
+      throw new Error('Your session has expired. Please log in again.');
+    }
+
     if (!response.ok) {
       const responseText = await response.text();
       let errorMessage = `API Error: ${response.status}`;
