@@ -6,3 +6,127 @@
 html {
   scroll-behavior: smooth;
 }
+
+.about-section {
+  padding: 6rem 2rem;
+  background: var(--bg-secondary);
+  scroll-margin-top: 80px;
+}
+
+.about-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.about-heading {
+  max-width: 750px;
+  margin: 0 auto 3rem;
+  text-align: center;
+}
+
+.about-label {
+  display: inline-block;
+  margin-bottom: 0.8rem;
+  color: #7c3aed;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.about-heading h2 {
+  margin: 0 0 1rem;
+  color: var(--text-primary);
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.about-heading p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.about-content {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.about-card {
+  padding: 1.8rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: 0 8px 25px var(--shadow-color);
+}
+
+.about-card h3 {
+  margin: 0 0 0.8rem;
+  color: var(--text-primary);
+  font-size: 1.15rem;
+}
+
+.about-card p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.about-impact {
+  margin-top: 2rem;
+  padding: 2rem;
+  text-align: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+}
+
+.about-impact h3 {
+  margin: 0 0 0.6rem;
+  color: var(--text-primary);
+  font-size: 1.3rem;
+}
+
+.about-impact p {
+  max-width: 700px;
+  margin: 0 auto 1.3rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.impact-tags {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.impact-tags span {
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+  background: rgba(139, 92, 246, 0.1);
+  color: #7c3aed;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .about-section {
+    padding: 4rem 1rem;
+  }
+
+  .about-heading h2 {
+    font-size: 2rem;
+  }
+
+  .about-content {
+    grid-template-columns: 1fr;
+  }
+
+  .about-card,
+  .about-impact {
+    padding: 1.4rem;
+  }
+}

@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+
 import NotesList from '../components/Notes/NotesList';
 import NoteDetail from '../components/Notes/NoteDetail';
 import CreateNote from '../components/Notes/CreateNote';
@@ -6,6 +8,17 @@ import CreateNote from '../components/Notes/CreateNote';
 export default function NotesPage() {
   const [view, setView] = useState('list');
   const [selectedNoteId, setSelectedNoteId] = useState(null);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.openNoteId) {
+      setSelectedNoteId(location.state.openNoteId);
+      setView('detail');
+
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const handleCreateNote = () => {
     setView('create');

@@ -34,11 +34,15 @@ namespace EdBridge.API.Controllers
         public async Task<IActionResult> GetNote(int id)
         {
             int? userId = null;
+
             if (User.Identity != null && User.Identity.IsAuthenticated)
                 userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
 
             var note = await _noteService.GetNoteByIdAsync(id, userId);
-            if (note == null) return NotFound(new { message = "Note not found" });
+
+            if (note == null)
+                return NotFound(new { message = "Note not found" });
+
             return Ok(note);
         }
 
@@ -85,8 +89,10 @@ namespace EdBridge.API.Controllers
             {
                 if (string.IsNullOrWhiteSpace(req.Department))
                     return BadRequest(new { message = "Department is required" });
+
                 if (string.IsNullOrWhiteSpace(req.CourseTitle))
                     return BadRequest(new { message = "Course title is required" });
+
                 if (string.IsNullOrWhiteSpace(req.YearSemester))
                     return BadRequest(new { message = "Year/Semester is required" });
             }
@@ -109,10 +115,13 @@ namespace EdBridge.API.Controllers
             }
 
             var subjectName = "General";
+
             if (req.SubjectTagIds != null && req.SubjectTagIds.Any())
             {
                 var firstSubject = await _db.SubjectTags.FindAsync(req.SubjectTagIds.First());
-                if (firstSubject != null) subjectName = firstSubject.Name;
+
+                if (firstSubject != null)
+                    subjectName = firstSubject.Name;
             }
 
             var note = new Note
@@ -132,25 +141,55 @@ namespace EdBridge.API.Controllers
                 UserId = userId
             };
 
-            var createdNote = await _noteService.CreateNoteAsync(note, req.SubjectTagIds ?? new List<int>());
-            var noteDto = await _noteService.GetNoteByIdAsync(createdNote.Id, userId);
+            var createdNote = await _noteService.CreateNoteAsync(
+                note,
+                req.SubjectTagIds ?? new List<int>()
+            );
 
-            return Ok(new { message = "Note created", noteId = createdNote.Id, note = noteDto });
+            var noteDto = await _noteService.GetNoteByIdAsync(
+                createdNote.Id,
+                userId
+            );
+
+            return Ok(new
+            {
+                message = "Note created",
+                noteId = createdNote.Id,
+                note = noteDto
+            });
         }
 
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> UpdateNote(int id, [FromBody] UpdateNoteRequest req)
+        public async Task<IActionResult> UpdateNote(
+            int id,
+            [FromBody] UpdateNoteRequest req)
         {
             var note = await _db.Notes.FindAsync(id);
-            if (note == null) return NotFound(new { message = "Note not found" });
 
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            if (note.UserId != userId && User.FindFirst(ClaimTypes.Role)?.Value != "Admin")
+            if (note == null)
+                return NotFound(new { message = "Note not found" });
+
+            var userId = int.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0"
+            );
+
+            if (note.UserId != userId &&
+                User.FindFirst(ClaimTypes.Role)?.Value != "Admin")
                 return Forbid();
 
-            var updated = await _noteService.UpdateNoteAsync(id, req.Title, req.Content, req.CourseCode);
-            return Ok(new { message = "Note updated", note = updated });
+            var updated = await _noteService.UpdateNoteAsync(
+                id,
+                req.Title,
+                req.Content,
+                req.CourseCode
+            );
+
+            return Ok(new
+            {
+                message = "Note updated",
+                note = updated
+            });
         }
 
         [HttpDelete("{id}")]
@@ -158,13 +197,20 @@ namespace EdBridge.API.Controllers
         public async Task<IActionResult> DeleteNote(int id)
         {
             var note = await _db.Notes.FindAsync(id);
-            if (note == null) return NotFound(new { message = "Note not found" });
 
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            if (note.UserId != userId && User.FindFirst(ClaimTypes.Role)?.Value != "Admin")
+            if (note == null)
+                return NotFound(new { message = "Note not found" });
+
+            var userId = int.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0"
+            );
+
+            if (note.UserId != userId &&
+                User.FindFirst(ClaimTypes.Role)?.Value != "Admin")
                 return Forbid();
 
             await _noteService.DeleteNoteAsync(id);
+
             return Ok(new { message = "Note deleted" });
         }
 
@@ -172,16 +218,28 @@ namespace EdBridge.API.Controllers
         public async Task<IActionResult> DownloadNote(int id)
         {
             var note = await _db.Notes.FindAsync(id);
-            if (note == null) return NotFound(new { message = "Note not found" });
+
+            if (note == null)
+                return NotFound(new { message = "Note not found" });
 
             if (string.IsNullOrEmpty(note.PdfPath))
             {
-                // No PDF — just increment count
                 await _noteService.IncrementDownloadAsync(id);
-                return Ok(new { message = "No PDF available", downloadCount = note.DownloadCount + 1 });
+
+                return Ok(new
+                {
+                    message = "No PDF available",
+                    downloadCount = note.DownloadCount + 1
+                });
             }
 
-            var filePath = Path.Combine(_env.WebRootPath ?? "wwwroot", note.PdfPath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+            var filePath = Path.Combine(
+                _env.WebRootPath ?? "wwwroot",
+                note.PdfPath.Replace(
+                    "/",
+                    Path.DirectorySeparatorChar.ToString()
+                )
+            );
 
             if (!System.IO.File.Exists(filePath))
                 return NotFound(new { message = "PDF file not found on server" });
@@ -189,41 +247,76 @@ namespace EdBridge.API.Controllers
             await _noteService.IncrementDownloadAsync(id);
 
             var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
+
             var fileName = $"{note.Title.Replace(" ", "_")}.pdf";
-            return File(fileBytes, "application/pdf", fileName);
+
+            return File(
+                fileBytes,
+                "application/pdf",
+                fileName
+            );
         }
 
         [HttpPost("{id}/comment")]
         [Authorize]
-        public async Task<IActionResult> AddComment(int id, [FromBody] AddCommentRequest req)
+        public async Task<IActionResult> AddComment(
+            int id,
+            [FromBody] AddCommentRequest req)
         {
             if (string.IsNullOrWhiteSpace(req.CommentText))
                 return BadRequest(new { message = "Comment cannot be empty" });
 
             var note = await _db.Notes.FindAsync(id);
-            if (note == null) return NotFound(new { message = "Note not found" });
 
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            var comment = await _noteService.AddCommentAsync(id, userId, req.CommentText);
+            if (note == null)
+                return NotFound(new { message = "Note not found" });
 
-            return Ok(new { message = "Comment added", comment });
+            var userId = int.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0"
+            );
+
+            var comment = await _noteService.AddCommentAsync(
+                id,
+                userId,
+                req.CommentText
+            );
+
+            return Ok(new
+            {
+                message = "Comment added",
+                comment
+            });
         }
 
         [HttpPost("{id}/rate")]
         [Authorize]
-        public async Task<IActionResult> RateNote(int id, [FromBody] RateNoteRequest req)
+        public async Task<IActionResult> RateNote(
+            int id,
+            [FromBody] RateNoteRequest req)
         {
             if (req.Rating < 1 || req.Rating > 5)
-                return BadRequest(new { message = "Rating must be between 1 and 5" });
+                return BadRequest(new
+                {
+                    message = "Rating must be between 1 and 5"
+                });
 
             var note = await _db.Notes.FindAsync(id);
-            if (note == null) return NotFound(new { message = "Note not found" });
 
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            if (note == null)
+                return NotFound(new { message = "Note not found" });
+
+            var userId = int.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0"
+            );
 
             try
             {
-                var result = await _noteService.RateNoteAsync(id, userId, req.Rating);
+                var result = await _noteService.RateNoteAsync(
+                    id,
+                    userId,
+                    req.Rating
+                );
+
                 return Ok(result);
             }
             catch (InvalidOperationException ex)
@@ -234,26 +327,39 @@ namespace EdBridge.API.Controllers
 
         [HttpPost("{id}/report")]
         [Authorize]
-        public async Task<IActionResult> ReportNote(int id, [FromBody] ReportNoteRequest req)
+        public async Task<IActionResult> ReportNote(
+            int id,
+            [FromBody] ReportNoteRequest req)
         {
             if (string.IsNullOrWhiteSpace(req.Reason))
                 return BadRequest(new { message = "Reason is required" });
 
             var note = await _db.Notes.FindAsync(id);
-            if (note == null) return NotFound(new { message = "Note not found" });
 
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            if (note == null)
+                return NotFound(new { message = "Note not found" });
+
+            var userId = int.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0"
+            );
 
             if (note.UserId == userId)
-                return BadRequest(new { message = "You cannot report your own note" });
+                return BadRequest(new
+                {
+                    message = "You cannot report your own note"
+                });
 
             var alreadyReported = await _db.Reports.AnyAsync(r =>
                 r.ReporterId == userId &&
                 r.ReportType == "Note" &&
-                r.NoteId == id);
+                r.NoteId == id
+            );
 
             if (alreadyReported)
-                return BadRequest(new { message = "You have already reported this note" });
+                return BadRequest(new
+                {
+                    message = "You have already reported this note"
+                });
 
             _db.Reports.Add(new Report
             {
@@ -266,7 +372,125 @@ namespace EdBridge.API.Controllers
             });
 
             await _db.SaveChangesAsync();
+
             return Ok(new { message = "Report submitted" });
+        }
+
+        // ==============================
+        // SAVED NOTES
+        // ==============================
+
+        [HttpPost("{id}/save")]
+        [Authorize]
+        public async Task<IActionResult> SaveNote(int id)
+        {
+            var userId = int.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0"
+            );
+
+            var note = await _db.Notes.FindAsync(id);
+
+            if (note == null)
+                return NotFound(new { message = "Note not found" });
+
+            var alreadySaved = await _db.SavedNotes.AnyAsync(s =>
+                s.UserId == userId &&
+                s.NoteId == id
+            );
+
+            if (alreadySaved)
+                return BadRequest(new
+                {
+                    message = "Note is already saved"
+                });
+
+            _db.SavedNotes.Add(new SavedNote
+            {
+                UserId = userId,
+                NoteId = id,
+                SavedAt = DateTime.UtcNow
+            });
+
+            await _db.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Note saved successfully"
+            });
+        }
+
+        [HttpDelete("{id}/save")]
+        [Authorize]
+        public async Task<IActionResult> UnsaveNote(int id)
+        {
+            var userId = int.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0"
+            );
+
+            var savedNote = await _db.SavedNotes.FirstOrDefaultAsync(s =>
+                s.UserId == userId &&
+                s.NoteId == id
+            );
+
+            if (savedNote == null)
+                return NotFound(new
+                {
+                    message = "Saved note not found"
+                });
+
+            _db.SavedNotes.Remove(savedNote);
+
+            await _db.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Note removed from saved items"
+            });
+        }
+
+        [HttpGet("saved")]
+        [Authorize]
+        public async Task<IActionResult> GetSavedNotes()
+        {
+            var userId = int.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0"
+            );
+
+            var savedNotes = await _db.SavedNotes
+                .Where(s => s.UserId == userId)
+                .Include(s => s.Note)
+                    .ThenInclude(n => n.Author)
+                .OrderByDescending(s => s.SavedAt)
+                .Select(s => new
+                {
+                    s.Note.Id,
+                    s.Note.Title,
+                    s.Note.Content,
+                    s.Note.Subject,
+                    s.Note.CourseCode,
+                    s.Note.PdfPath,
+                    s.Note.ThumbnailPath,
+                    s.Note.EducationLevel,
+                    s.Note.ClassName,
+                    s.Note.Group,
+                    s.Note.Department,
+                    s.Note.CourseTitle,
+                    s.Note.YearSemester,
+                    s.Note.ViewCount,
+                    s.Note.DownloadCount,
+                    s.Note.CreatedAt,
+
+                    Author = new
+                    {
+                        s.Note.Author.Id,
+                        s.Note.Author.Name
+                    },
+
+                    SavedAt = s.SavedAt
+                })
+                .ToListAsync();
+
+            return Ok(savedNotes);
         }
     }
 
