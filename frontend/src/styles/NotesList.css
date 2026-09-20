@@ -1,106 +1,98 @@
 .notes-list-page {
   min-height: 100vh;
   padding: 6rem 2rem 4rem;
-  background:
-    radial-gradient(circle at top left, rgba(139, 92, 246, 0.12), transparent 35%),
-    var(--bg-secondary);
+  background: var(--bg-secondary);
 }
 
-/* Header */
-.notes-list-page h1 {
+.notes-list-header {
   max-width: 1200px;
-  margin: 0 auto 0.6rem;
-  color: var(--text-primary);
-  font-size: 2.7rem;
-  font-weight: 800;
-  letter-spacing: -0.8px;
+  margin: 0 auto 2rem;
 }
 
-/* Small intro under heading */
-.notes-list-page h1::after {
-  content: "Find, explore and share useful academic notes.";
-  display: block;
-  margin-top: 0.6rem;
+.notes-list-header h1 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.5px;
+}
+
+.notes-list-header p {
   color: var(--text-secondary);
   font-size: 1rem;
-  font-weight: 400;
-  letter-spacing: 0;
+  margin: 0 0 1.5rem;
 }
 
-/* Create Note button */
-.notes-list-page > button {
-  display: block;
+.notes-list-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
   max-width: 1200px;
-  margin: 1.5rem auto 2rem;
-  padding: 0.85rem 1.5rem;
-  border: none;
-  border-radius: 12px;
+  margin: 0 auto 1.5rem;
+}
+
+.btn-create-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.4rem;
   background: linear-gradient(135deg, #8b5cf6, #6d28d9);
   color: white;
+  border: none;
+  border-radius: 12px;
   font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(109, 40, 217, 0.25);
-  transition: all 0.25s ease;
+  box-shadow: 0 4px 14px rgba(109, 40, 217, 0.3);
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-.notes-list-page > button:hover {
+.btn-create-note:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(109, 40, 217, 0.35);
+  box-shadow: 0 8px 20px rgba(109, 40, 217, 0.4);
 }
 
-/* Notes grid */
 .notes-grid {
   max-width: 1200px;
-  margin: 2rem auto 0;
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.5rem;
-  align-items: stretch;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.4rem;
 }
 
-/* Empty state */
-.notes-grid > p {
+.notes-empty {
   grid-column: 1 / -1;
   text-align: center;
-  padding: 3rem 1rem;
+  padding: 4rem 2rem;
   color: var(--text-secondary);
-  background: var(--bg-primary);
-  border-radius: 18px;
-  border: 1px solid rgba(139, 92, 246, 0.12);
+  background: var(--bg-card);
+  border-radius: 16px;
+  border: 1px dashed var(--border-color);
 }
 
-/* Tablet */
+.notes-empty span {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.notes-loading {
+  text-align: center;
+  padding: 4rem;
+  color: var(--text-secondary);
+}
+
 @media (max-width: 1024px) {
-  .notes-list-page {
-    padding: 5rem 1.5rem 3rem;
-  }
-
-  .notes-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  .notes-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* Mobile */
-@media (max-width: 768px) {
-  .notes-list-page {
-    padding: 4rem 1rem 2rem;
-  }
-
-  .notes-list-page h1 {
-    font-size: 2rem;
-  }
-
-  .notes-list-page h1::after {
-    font-size: 0.9rem;
-  }
-
-  .notes-list-page > button {
-    width: 100%;
-  }
-
-  .notes-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
+@media (max-width: 640px) {
+  .notes-list-page { padding: 5rem 1rem 3rem; }
+  .notes-grid { grid-template-columns: 1fr; }
+  .notes-list-header h1 { font-size: 1.8rem; }
+  .notes-list-top-bar { flex-direction: column; align-items: stretch; }
+  .btn-create-note { justify-content: center; }
 }

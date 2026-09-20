@@ -13,20 +13,27 @@ export default function NoteSearch({
       <div className="search-box">
         <input
           type="text"
-          placeholder="Search by title, author, or course code..."
+          placeholder="Search by title, author or course code..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
         />
       </div>
 
       <div className="filter-group">
-        <label>Subject</label>
-
+        <label>Subject:</label>
         <div className="filter-buttons">
-          <button onClick={() => onSubjectChange(null)}>All</button>
-
+          <button
+            className={!selectedSubject ? 'active' : ''}
+            onClick={() => onSubjectChange(null)}
+          >
+            All
+          </button>
           {subjects.map((subject) => (
-            <button key={subject} onClick={() => onSubjectChange(subject)}>
+            <button
+              key={subject}
+              className={selectedSubject === subject ? 'active' : ''}
+              onClick={() => onSubjectChange(subject)}
+            >
               {subject}
             </button>
           ))}
