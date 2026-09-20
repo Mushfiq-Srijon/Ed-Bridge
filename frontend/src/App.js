@@ -13,6 +13,7 @@ import ForumPage from './pages/ForumPage';
 import MessagesPage from './pages/MessagesPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
+import Bookmarks from './pages/Bookmarks';
 import AdminDashboard from './pages/AdminDashboard';
 
 import './App.css';
@@ -62,6 +63,14 @@ function App() {
             <Route path="/forum" element={<ForumPage />} />
             <Route path="/messages" element={<PrivateRoute><MessagesPage /></PrivateRoute>} />
             <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+            <Route
+  path="/bookmarks"
+  element={
+    <PrivateRoute>
+      <Bookmarks />
+    </PrivateRoute>
+  }
+/>
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           </Routes>

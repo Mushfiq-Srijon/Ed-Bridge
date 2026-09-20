@@ -25,6 +25,7 @@ namespace EdBridge.API.Data
         public DbSet<ReplyUpvote> ReplyUpvotes { get; set; }
         public DbSet<PostFollow> PostFollows { get; set; }
         public DbSet<PostView> PostViews { get; set; }
+        public DbSet<SavedNote> SavedNotes { get; set; }
 protected override void OnModelCreating(ModelBuilder modelBuilder)
 {
     base.OnModelCreating(modelBuilder);
@@ -43,6 +44,22 @@ protected override void OnModelCreating(ModelBuilder modelBuilder)
 
     modelBuilder.Entity<ReplyDownvote>()
         .HasKey(x => new { x.ReplyId, x.UserId });
+
+        modelBuilder.Entity<SavedNote>()
+    .HasOne(x => x.User)
+    .WithMany(x => x.SavedNotes)
+    .HasForeignKey(x => x.UserId)
+    .OnDelete(DeleteBehavior.Cascade);
+
+modelBuilder.Entity<SavedNote>()
+    .HasOne(x => x.Note)
+    .WithMany(x => x.SavedByUsers)
+    .HasForeignKey(x => x.NoteId)
+    .OnDelete(DeleteBehavior.Cascade);
+
+modelBuilder.Entity<SavedNote>()
+    .HasIndex(x => new { x.UserId, x.NoteId })
+    .IsUnique();
 }
     }
 }

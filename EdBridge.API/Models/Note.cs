@@ -41,5 +41,8 @@ namespace EdBridge.API.Models
         public ICollection<NoteRating> Ratings { get; set; } = new List<NoteRating>();
 
         public ICollection<Report> Reports { get; set; } = new List<Report>();
+    
+    public ICollection<SavedNote> SavedByUsers { get; set; } = new List<SavedNote>();
+    
     }
 }

@@ -28,7 +28,8 @@ namespace EdBridge.API.Models
         
         // Navigation properties (relationships)
         public ICollection<Listing> Listings { get; set; } = new List<Listing>();
-        public ICollection<Note> Notes { get; set; } = new List<Note>();
-        public ICollection<Post> Posts { get; set; } = new List<Post>();
+public ICollection<Note> Notes { get; set; } = new List<Note>();
+public ICollection<Post> Posts { get; set; } = new List<Post>();
+public ICollection<SavedNote> SavedNotes { get; set; } = new List<SavedNote>();
     }
 }
