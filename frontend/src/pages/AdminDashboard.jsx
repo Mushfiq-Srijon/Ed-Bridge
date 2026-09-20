@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import DashboardOverview from '../components/Admin/DashboardOverview';
 import ReportsManagement from '../components/Admin/ReportsManagement';
 import UsersManagement from '../components/Admin/UsersManagement';
@@ -12,6 +13,19 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [error, setError] = useState('');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const { theme } = useTheme();
+
+  // Keeping the navigation data in one place makes the control plane easier to
+  // scan and prevents each tab from drifting into a different visual pattern.
+  const tabs = [
+    { id: 'dashboard', label: 'Overview', icon: '⌂' },
+    { id: 'reports', label: 'Reports', icon: '!' },
+    { id: 'users', label: 'Users', icon: '◉' },
+    { id: 'listings', label: 'Listings', icon: '▣' },
+    { id: 'notes', label: 'Notes', icon: '≡' },
+    { id: 'forums', label: 'Forums', icon: '◌' },
+    { id: 'analytics', label: 'Analytics', icon: '↗' },
+  ];
 
   const handleRefresh = () => {
     setRefreshTrigger(prev => prev + 1);
@@ -19,16 +33,30 @@ export default function AdminDashboard() {
 
   return (
     <div className="admin-dashboard">
-      {/* HEADER */}
+      <div className="admin-grid" aria-hidden="true" />
+
+      {/* Command-center header: visual only, all existing actions remain intact. */}
       <header className="admin-header">
         <div className="admin-header-content">
-          <div className="admin-logo">
-            <span className="admin-icon">⚙️</span>
-            <h1>Admin Dashboard</h1>
+          <div className="admin-brand-block">
+            <div className="admin-logo">
+              <span className="admin-icon" aria-hidden="true">⌘</span>
+              <div>
+                <span className="admin-kicker">ED-BRIDGE / CONTROL PLANE</span>
+                <h1>Admin Dashboard</h1>
+              </div>
+            </div>
+            <p className="admin-header-caption">Moderate the learning network. Keep the signal clean.</p>
           </div>
-          <button className="refresh-btn" onClick={handleRefresh}>
-            🔄 Refresh
-          </button>
+          <div className="admin-header-actions">
+            <span className="theme-status" title={`Current theme: ${theme}`}>
+              <span className="status-dot" /> {theme} mode
+            </span>
+            <button className="refresh-btn" onClick={handleRefresh}>
+              <span className="refresh-symbol" aria-hidden="true">↻</span>
+              Sync data
+            </button>
+          </div>
         </div>
       </header>
 
@@ -40,54 +68,30 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* NAVIGATION TABS */}
-      <nav className="admin-nav">
-        <button
-          className={`nav-tab ${activeTab === 'dashboard' ? 'active' : ''}`}
-          onClick={() => setActiveTab('dashboard')}
-        >
-          Dashboard
-        </button>
-        <button
-          className={`nav-tab ${activeTab === 'reports' ? 'active' : ''}`}
-          onClick={() => setActiveTab('reports')}
-        >
-          Reports
-        </button>
-        <button
-          className={`nav-tab ${activeTab === 'users' ? 'active' : ''}`}
-          onClick={() => setActiveTab('users')}
-        >
-          Users
-        </button>
-        <button
-          className={`nav-tab ${activeTab === 'listings' ? 'active' : ''}`}
-          onClick={() => setActiveTab('listings')}
-        >
-          Listings
-        </button>
-        <button
-          className={`nav-tab ${activeTab === 'notes' ? 'active' : ''}`}
-          onClick={() => setActiveTab('notes')}
-        >
-          Notes
-        </button>
-        <button
-          className={`nav-tab ${activeTab === 'forums' ? 'active' : ''}`}
-          onClick={() => setActiveTab('forums')}
-        >
-          Forums
-        </button>
-        <button
-          className={`nav-tab ${activeTab === 'analytics' ? 'active' : ''}`}
-          onClick={() => setActiveTab('analytics')}
-        >
-          Analytics
-        </button>
+      {/* Navigation stays keyboard-friendly while gaining a compact terminal-like treatment. */}
+      <nav className="admin-nav" aria-label="Admin sections">
+        <div className="admin-nav-inner">
+          <span className="nav-label">MODULES</span>
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              className={`nav-tab ${activeTab === tab.id ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab.id)}
+              aria-current={activeTab === tab.id ? 'page' : undefined}
+            >
+              <span className="nav-tab-icon" aria-hidden="true">{tab.icon}</span>
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </div>
       </nav>
 
       {/* CONTENT */}
       <main className="admin-content">
+        <div className="admin-content-meta">
+          <span className="breadcrumb">/ admin / {tabs.find(tab => tab.id === activeTab)?.label.toLowerCase()}</span>
+          <span className="live-indicator"><span className="status-dot" /> SYSTEM ONLINE</span>
+        </div>
         {activeTab === 'dashboard' && (
           <DashboardOverview refreshTrigger={refreshTrigger} />
         )}

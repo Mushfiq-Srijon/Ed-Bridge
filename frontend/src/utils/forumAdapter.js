@@ -19,8 +19,8 @@ export const transformReply = (reply) => ({
 
   isMarkedBest: reply.isBestAnswer || false,
 
-  userHasUpvoted: false,
-  userHasDownvoted: false,
+  userHasUpvoted: Boolean(reply.userHasUpvoted ?? reply.UserHasUpvoted),
+  userHasDownvoted: Boolean(reply.userHasDownvoted ?? reply.UserHasDownvoted),
 });
 
 
@@ -58,8 +58,8 @@ export const transformPost = (post) => ({
 
   replies: (post.replies || []).map(transformReply),
 
-  userHasUpvoted: false,
-  userHasDownvoted: false,
+  userHasUpvoted: Boolean(post.userHasUpvoted ?? post.UserHasUpvoted),
+  userHasDownvoted: Boolean(post.userHasDownvoted ?? post.UserHasDownvoted),
 
   userIsFollowing: false,
 

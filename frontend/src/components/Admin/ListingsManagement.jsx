@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { BeatLoader } from 'react-spinners';
 import { adminAPI } from '../../services/adminAPI';
+import AdminLoading from './AdminLoading';
 
 export default function ListingsManagement({ onRefresh, refreshTrigger }) {
   const [listings, setListings] = useState([]);
@@ -11,9 +11,11 @@ export default function ListingsManagement({ onRefresh, refreshTrigger }) {
   const [statusFilter, setStatusFilter] = useState(null);
   const [selectedListing, setSelectedListing] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   useEffect(() => {
-    loadListings();
+    const searchTimer = setTimeout(() => loadListings(), 280);
+    return () => clearTimeout(searchTimer);
   }, [statusFilter, search, refreshTrigger]);
 
   const loadListings = async () => {
@@ -33,6 +35,7 @@ export default function ListingsManagement({ onRefresh, refreshTrigger }) {
       setError(err.message);
     } finally {
       setLoading(false);
+      setHasLoaded(true);
     }
   };
 
@@ -54,11 +57,9 @@ export default function ListingsManagement({ onRefresh, refreshTrigger }) {
     }
   };
 
-  if (loading && !selectedListing) {
+  if (loading && !selectedListing && !hasLoaded) {
     return (
-      <div className="loading-spinner">
-        <BeatLoader color="#3b82f6" size={12} />
-      </div>
+      <AdminLoading label="Loading listings" />
     );
   }
 
@@ -75,9 +76,9 @@ export default function ListingsManagement({ onRefresh, refreshTrigger }) {
           placeholder="Search by title..."
           value={search}
           onChange={handleSearch}
-          onKeyUp={() => loadListings()}
           className="search-input"
         />
+        {loading && <span className="admin-search-status">Updating results...</span>}
         <div className="filter-tabs">
           <button
             className={`filter-btn ${!statusFilter ? 'active' : ''}`}

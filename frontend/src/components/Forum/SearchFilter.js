@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { forumAPI } from '../../services/api';
 
+// A sentinel keeps the custom filter distinct from real subject names.
+export const OTHER_SUBJECT_FILTER = '__other_subject__';
+
 export default function SearchFilter({
   searchQuery,
   onSearchChange,
   selectedSubject,
+  customSubject,
   onSubjectChange,
 }) {
   const [subjects, setSubjects] = useState([]);
+  const [otherSubject, setOtherSubject] = useState(customSubject || '');
 
   useEffect(() => {
     loadSubjects();
@@ -16,13 +21,19 @@ export default function SearchFilter({
   const loadSubjects = async () => {
     try {
       const data = await forumAPI.getSubjects();
-      console.log('Subjects data:', data);
-      console.log('Type:', typeof data, 'Is Array:', Array.isArray(data));
       setSubjects(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to load subjects:', error);
       setSubjects([]);
     }
+  };
+
+  const isOtherSelected = selectedSubject === OTHER_SUBJECT_FILTER;
+
+  const handleOtherChange = (event) => {
+    const value = event.target.value;
+    setOtherSubject(value);
+    onSubjectChange(OTHER_SUBJECT_FILTER, value);
   };
 
   return (
@@ -43,7 +54,7 @@ export default function SearchFilter({
           <div className="filter-buttons">
             <button
               className={`filter-btn ${!selectedSubject ? 'active' : ''}`}
-              onClick={() => onSubjectChange(null)}
+              onClick={() => onSubjectChange(null, '')}
             >
               All Subjects
             </button>
@@ -52,15 +63,37 @@ export default function SearchFilter({
                 <button
                   key={subject.id}
                   className={`filter-btn ${selectedSubject === subject.name ? 'active' : ''}`}
-                  onClick={() => onSubjectChange(subject.name)}
+                  onClick={() => onSubjectChange(subject.name, '')}
                 >
                   {subject.name}
                 </button>
               ))
             ) : (
-              <p style={{ color: '#999' }}>Loading subjects...</p>
+              <p className="filter-loading">Loading subjects...</p>
             )}
+            <button
+              type="button"
+              className={`filter-btn filter-btn-other ${isOtherSelected ? 'active' : ''}`}
+              onClick={() => onSubjectChange(OTHER_SUBJECT_FILTER, otherSubject)}
+              aria-pressed={isOtherSelected}
+            >
+              Other
+            </button>
           </div>
+          {isOtherSelected && (
+            <div className="other-filter-control">
+              <input
+                type="text"
+                value={otherSubject}
+                onChange={handleOtherChange}
+                className="other-filter-input"
+                placeholder="Type a subject to filter, e.g. Linear Algebra"
+                aria-label="Custom subject filter"
+                autoFocus
+              />
+              <span className="other-filter-hint">Matches subject names and tags as you type.</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

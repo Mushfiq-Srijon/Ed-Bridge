@@ -10,6 +10,8 @@ export default function CreatePostModal({ onClose, onCreate }) {
   });
 
   const [subjects, setSubjects] = useState([]);
+  const [customSubject, setCustomSubject] = useState('');
+  const [isOtherSubjectSelected, setIsOtherSubjectSelected] = useState(false);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -45,6 +47,11 @@ export default function CreatePostModal({ onClose, onCreate }) {
     }));
   };
 
+  const handleOtherSubjectToggle = () => {
+    setIsOtherSubjectSelected(prev => !prev);
+    setErrors(prev => ({ ...prev, subject: '' }));
+  };
+
   const validateForm = () => {
     const newErrors = {};
 
@@ -60,7 +67,7 @@ export default function CreatePostModal({ onClose, onCreate }) {
       newErrors.content = 'Please provide more details (at least 20 characters)';
     }
 
-    if (formData.subjectTagIds.length === 0) {
+    if (formData.subjectTagIds.length === 0 && !(isOtherSubjectSelected && customSubject.trim())) {
       newErrors.subject = 'Please select at least one subject';
     }
 
@@ -80,6 +87,7 @@ export default function CreatePostModal({ onClose, onCreate }) {
       title: formData.title,
       content: formData.content,
       subjectTagIds: formData.subjectTagIds,
+      customSubject: isOtherSubjectSelected ? customSubject.trim() : '',
       isAnonymous: formData.isAnonymous,
     });
   };
@@ -130,20 +138,47 @@ export default function CreatePostModal({ onClose, onCreate }) {
             <label>Subjects * (Select at least one)</label>
             <div className="tags-selection">
               {Array.isArray(subjects) && subjects.length > 0 ? (
-                subjects.map(subject => (
+                <>
+                  {subjects.map(subject => (
+                    <button
+                      key={subject.id}
+                      type="button"
+                      className={`tag-btn ${formData.subjectTagIds.includes(subject.id) ? 'active' : ''}`}
+                      onClick={() => handleSubjectToggle(subject.id)}
+                      aria-pressed={formData.subjectTagIds.includes(subject.id)}
+                    >
+                      {subject.name}
+                    </button>
+                  ))}
                   <button
-                    key={subject.id}
                     type="button"
-                    className={`tag-btn ${formData.subjectTagIds.includes(subject.id) ? 'active' : ''}`}
-                    onClick={() => handleSubjectToggle(subject.id)}
+                    className={`tag-btn tag-btn-other ${isOtherSubjectSelected ? 'active' : ''}`}
+                    onClick={handleOtherSubjectToggle}
+                    aria-pressed={isOtherSubjectSelected}
                   >
-                    {subject.name}
+                    Other
                   </button>
-                ))
+                </>
               ) : (
                 <p style={{ color: '#999', fontSize: '14px' }}>Loading subjects...</p>
               )}
             </div>
+            {isOtherSubjectSelected && (
+              <input
+                type="text"
+                className={`custom-subject-input ${errors.subject ? 'input-error' : ''}`}
+                value={customSubject}
+                onChange={(event) => {
+                  setCustomSubject(event.target.value);
+                  if (event.target.value.trim()) {
+                    setErrors(prev => ({ ...prev, subject: '' }));
+                  }
+                }}
+                placeholder="Add your subject, e.g. Linear Algebra"
+                maxLength="80"
+                autoFocus
+              />
+            )}
             {errors.subject && <span className="error-text">⚠️ {errors.subject}</span>}
           </div>
 

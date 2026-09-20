@@ -55,6 +55,30 @@ namespace EdBridge.API.Controllers
             if (string.IsNullOrWhiteSpace(req.Title) || string.IsNullOrWhiteSpace(req.Content))
                 return BadRequest(new { message = "Title and content are required" });
 
+            var subjectTagIds = req.SubjectTagIds?.Distinct().ToList() ?? new List<int>();
+
+            // Store custom subjects in the shared subject table so they behave
+            // like predefined subjects in filters and future discussions.
+            if (!string.IsNullOrWhiteSpace(req.CustomSubject))
+            {
+                var customSubjectName = req.CustomSubject.Trim();
+                var customSubject = await _db.SubjectTags
+                    .FirstOrDefaultAsync(subject => subject.Name.ToLower() == customSubjectName.ToLower());
+
+                if (customSubject == null)
+                {
+                    customSubject = new SubjectTag { Name = customSubjectName };
+                    _db.SubjectTags.Add(customSubject);
+                    await _db.SaveChangesAsync();
+                }
+
+                if (!subjectTagIds.Contains(customSubject.Id))
+                    subjectTagIds.Add(customSubject.Id);
+            }
+
+            if (subjectTagIds.Count == 0)
+                return BadRequest(new { message = "At least one subject is required" });
+
             var post = new Post
             {
                 Title = req.Title,
@@ -63,7 +87,7 @@ namespace EdBridge.API.Controllers
                 UserId = userId
             };
 
-            var createdPost = await _postService.CreatePostAsync(post, req.SubjectTagIds);
+            var createdPost = await _postService.CreatePostAsync(post, subjectTagIds);
 
             // Load related data
             await _db.Entry(createdPost).Reference(p => p.Author).LoadAsync();
@@ -377,6 +401,7 @@ namespace EdBridge.API.Controllers
         public string Content { get; set; } = string.Empty;
         public bool IsAnonymous { get; set; }
         public List<int> SubjectTagIds { get; set; } = new();
+        public string? CustomSubject { get; set; }
     }
 
     public class UpdatePostRequest

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../../services/adminAPI';
-import { BeatLoader } from 'react-spinners';
+import AdminLoading from './AdminLoading';
 
 export default function ReportsManagement({ onRefresh, refreshTrigger }) {
   const [reports, setReports] = useState([]);
@@ -81,11 +81,7 @@ export default function ReportsManagement({ onRefresh, refreshTrigger }) {
   };
 
   if (loading && !selectedReport) {
-    return (
-      <div className="loading-spinner">
-        <BeatLoader color="#3b82f6" size={12} />
-      </div>
-    );
+    return <AdminLoading label="Loading reports" />;
   }
 
   return (

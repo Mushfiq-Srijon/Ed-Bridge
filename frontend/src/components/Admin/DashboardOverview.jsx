@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../../services/adminAPI';
+import AdminLoading from './AdminLoading';
 
 export default function DashboardOverview({ refreshTrigger }) {
   const [dashboard, setDashboard] = useState(null);
@@ -25,7 +26,7 @@ export default function DashboardOverview({ refreshTrigger }) {
   };
 
   if (loading) {
-    return <div className="loading-spinner">Loading...</div>;
+    return <AdminLoading label="Loading overview" />;
   }
 
   if (error) {

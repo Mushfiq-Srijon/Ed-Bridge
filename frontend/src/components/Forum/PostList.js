@@ -25,6 +25,9 @@ export default function PostList({ posts, onPostDeleted }) {
 
   const handleCloseDetail = () => {
     setSelectedPost(null);
+    // Re-fetch after returning so a vote made in the detail view immediately
+    // participates in the score-based discussion order.
+    if (onPostDeleted) onPostDeleted();
   };
 
   const handlePostDeleted = () => {
