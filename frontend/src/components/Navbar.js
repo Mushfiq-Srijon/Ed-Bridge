@@ -86,7 +86,7 @@ export default function Navbar() {
             <button
               type="button"
               className="nav-link nav-button-link"
-              onClick={() => handleScrollToSection('footer')}
+              onClick={() => handleScrollToSection('about')}
             >
               About
             </button>

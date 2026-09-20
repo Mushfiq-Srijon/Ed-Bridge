@@ -8,12 +8,22 @@ const API_BASE = 'http://localhost:5180';
 
 function StarRating({ value, onChange, readOnly = false }) {
   const [hovered, setHovered] = useState(0);
+
   return (
-    <div style={{ display: 'flex', gap: '4px', cursor: readOnly ? 'default' : 'pointer' }}>
+    <div
+      style={{
+        display: 'flex',
+        gap: '4px',
+        cursor: readOnly ? 'default' : 'pointer'
+      }}
+    >
       {[1, 2, 3, 4, 5].map((star) => (
         <span
           key={star}
-          style={{ fontSize: '24px', color: (hovered || value) >= star ? '#f5a623' : '#ccc' }}
+          style={{
+            fontSize: '24px',
+            color: (hovered || value) >= star ? '#f5a623' : '#ccc'
+          }}
           onMouseEnter={() => !readOnly && setHovered(star)}
           onMouseLeave={() => !readOnly && setHovered(0)}
           onClick={() => !readOnly && onChange && onChange(star)}
@@ -55,13 +65,18 @@ export default function NoteDetail({ noteId, onBack }) {
     try {
       setLoading(true);
       setError('');
+
       const data = await notesAPI.getById(noteId);
       const formatted = transformNote(data);
+
       setNote(formatted);
       setEditTitle(formatted.title);
       setEditContent(formatted.content);
       setEditCourseCode(formatted.courseCode);
-      if (data.userRating) setUserRating(data.userRating);
+
+      if (data.userRating) {
+        setUserRating(data.userRating);
+      }
     } catch (err) {
       setError(err.message || 'Failed to load note');
     } finally {
@@ -69,20 +84,35 @@ export default function NoteDetail({ noteId, onBack }) {
     }
   };
 
-  const isOwner = Boolean(user) && Boolean(note) && note.authorId === user.id;
+  const isOwner =
+    Boolean(user) &&
+    Boolean(note) &&
+    note.authorId === user.id;
 
   const handleSaveEdit = async () => {
-    if (!editTitle.trim() || !editContent.trim() || !editCourseCode.trim()) {
+    if (
+      !editTitle.trim() ||
+      !editContent.trim() ||
+      !editCourseCode.trim()
+    ) {
       alert('Title, content, and course code cannot be empty');
       return;
     }
+
     try {
       await notesAPI.update(note.id, {
         title: editTitle,
         content: editContent,
         courseCode: editCourseCode,
       });
-      setNote((prev) => ({ ...prev, title: editTitle, content: editContent, courseCode: editCourseCode }));
+
+      setNote((prev) => ({
+        ...prev,
+        title: editTitle,
+        content: editContent,
+        courseCode: editCourseCode,
+      }));
+
       setIsEditing(false);
     } catch (err) {
       alert(err.message || 'Failed to update note');
@@ -90,7 +120,10 @@ export default function NoteDetail({ noteId, onBack }) {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this note?')) return;
+    if (!window.confirm('Are you sure you want to delete this note?')) {
+      return;
+    }
+
     try {
       await notesAPI.delete(note.id);
       onBack();
@@ -102,10 +135,15 @@ export default function NoteDetail({ noteId, onBack }) {
   const handleDownload = async () => {
     try {
       const result = await notesAPI.download(note.id);
+
       if (result && !result.downloaded) {
         alert(result.message || 'No PDF available for this note.');
       }
-      setNote((prev) => ({ ...prev, downloads: prev.downloads + 1 }));
+
+      setNote((prev) => ({
+        ...prev,
+        downloads: prev.downloads + 1,
+      }));
     } catch (err) {
       alert(err.message || 'Failed to download');
     }
@@ -113,13 +151,23 @@ export default function NoteDetail({ noteId, onBack }) {
 
   const handleAddComment = async () => {
     if (!commentText.trim()) return;
+
     setCommentSubmitting(true);
+
     try {
-      const res = await notesAPI.addComment(note.id, commentText);
+      const res = await notesAPI.addComment(
+        note.id,
+        commentText
+      );
+
       setNote((prev) => ({
         ...prev,
-        comments: [res.comment, ...(prev.comments || [])],
+        comments: [
+          res.comment,
+          ...(prev.comments || [])
+        ],
       }));
+
       setCommentText('');
     } catch (err) {
       alert(err.message || 'Failed to add comment');
@@ -129,11 +177,18 @@ export default function NoteDetail({ noteId, onBack }) {
   };
 
   const handleRate = async (star) => {
-    if (!user) { alert('Please login to rate'); return; }
+    if (!user) {
+      alert('Please login to rate');
+      return;
+    }
+
     setRatingSubmitting(true);
+
     try {
       const res = await notesAPI.rate(note.id, star);
+
       setUserRating(star);
+
       setNote((prev) => ({
         ...prev,
         averageRating: res.averageRating,
@@ -147,11 +202,18 @@ export default function NoteDetail({ noteId, onBack }) {
   };
 
   const handleReport = async () => {
-    if (!reportReason.trim()) { alert('Please enter a reason'); return; }
+    if (!reportReason.trim()) {
+      alert('Please enter a reason');
+      return;
+    }
+
     setReportSubmitting(true);
+
     try {
       await notesAPI.report(note.id, reportReason);
+
       alert('Report submitted successfully');
+
       setShowReportModal(false);
       setReportReason('');
     } catch (err) {
@@ -161,8 +223,23 @@ export default function NoteDetail({ noteId, onBack }) {
     }
   };
 
-  if (loading) return <div className="note-detail-page"><button onClick={onBack}>← Back</button><p>Loading...</p></div>;
-  if (error || !note) return <div className="note-detail-page"><button onClick={onBack}>← Back</button><p>{error || 'Note not found.'}</p></div>;
+  if (loading) {
+    return (
+      <div className="note-detail-page">
+        <button onClick={onBack}>← Back</button>
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (error || !note) {
+    return (
+      <div className="note-detail-page">
+        <button onClick={onBack}>← Back</button>
+        <p>{error || 'Note not found.'}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="note-detail-page">
@@ -173,20 +250,31 @@ export default function NoteDetail({ noteId, onBack }) {
         <img
           src={`${API_BASE}/${note.thumbnailPath}`}
           alt="Note thumbnail"
-          style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', borderRadius: '8px', marginBottom: '16px' }}
+          style={{
+            width: '100%',
+            maxHeight: '200px',
+            objectFit: 'cover',
+            borderRadius: '8px',
+            marginBottom: '16px'
+          }}
         />
       )}
 
       {/* Title */}
       {isEditing ? (
-        <input type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} placeholder="Note title" />
+        <input
+          type="text"
+          value={editTitle}
+          onChange={(e) => setEditTitle(e.target.value)}
+          placeholder="Note title"
+        />
       ) : (
         <h1>{note.title}</h1>
       )}
 
       <p>By {note.author?.name || 'Unknown'}</p>
 
-      {/* Education info */}
+      {/* Education information */}
       {note.educationLevel && (
         <p>
           📚 {note.educationLevel}
@@ -200,84 +288,199 @@ export default function NoteDetail({ noteId, onBack }) {
 
       {/* Course code */}
       {isEditing ? (
-        <input type="text" value={editCourseCode} onChange={(e) => setEditCourseCode(e.target.value)} placeholder="Course code" />
+        <input
+          type="text"
+          value={editCourseCode}
+          onChange={(e) => setEditCourseCode(e.target.value)}
+          placeholder="Course code"
+        />
       ) : (
         <p>{note.courseCode}</p>
       )}
 
       {/* Tags */}
-      <div>{(note.tags || []).map((tag) => <span key={tag}>#{tag} </span>)}</div>
+      <div>
+        {(note.tags || []).map((tag) => (
+          <span key={tag}>#{tag} </span>
+        ))}
+      </div>
 
       {/* Stats */}
-      <p>👁️ {note.views} views | ⬇️ {note.downloads} downloads</p>
+      <p>
+        👁️ {note.views} views | ⬇️ {note.downloads} downloads
+      </p>
 
-      {/* Rating display */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '8px 0' }}>
-        <StarRating value={Math.round(note.averageRating || 0)} readOnly />
-        <span>{note.averageRating ? `${note.averageRating} / 5` : 'No ratings yet'}
-          {note.ratingCount > 0 && ` (${note.ratingCount} ratings)`}
+      {/* Rating */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          margin: '8px 0'
+        }}
+      >
+        <StarRating
+          value={Math.round(note.averageRating || 0)}
+          readOnly
+        />
+
+        <span>
+          {note.averageRating
+            ? `${note.averageRating} / 5`
+            : 'No ratings yet'}
+
+          {note.ratingCount > 0 &&
+            ` (${note.ratingCount} ratings)`}
         </span>
       </div>
 
       {/* User rating */}
       {user && !isOwner && (
         <div style={{ margin: '8px 0' }}>
-          <p style={{ marginBottom: '4px' }}>Your rating:</p>
-          <StarRating value={userRating} onChange={handleRate} readOnly={ratingSubmitting} />
+          <p style={{ marginBottom: '4px' }}>
+            Your rating:
+          </p>
+
+          <StarRating
+            value={userRating}
+            onChange={handleRate}
+            readOnly={ratingSubmitting}
+          />
         </div>
       )}
 
       <p>{note.createdAt}</p>
+
       <hr />
 
       {/* Content */}
       {isEditing ? (
         <div>
-          <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} rows="10" />
-          <button onClick={handleSaveEdit}>Save Changes</button>
-          <button onClick={() => setIsEditing(false)}>Cancel</button>
+          <textarea
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            rows="10"
+          />
+
+          <button onClick={handleSaveEdit}>
+            Save Changes
+          </button>
+
+          <button onClick={() => setIsEditing(false)}>
+            Cancel
+          </button>
         </div>
       ) : (
-        <div><p style={{ whiteSpace: 'pre-wrap' }}>{note.content}</p></div>
+        <div>
+          <p style={{ whiteSpace: 'pre-wrap' }}>
+            {note.content}
+          </p>
+        </div>
       )}
 
       <hr />
 
       {/* Actions */}
       <div className="note-actions">
-        <button onClick={handleDownload}>
-          {note.hasPdf ? '⬇️ Download PDF' : '⬇️ Download (No PDF)'}
+
+        {/* Save Note */}
+        <button
+          className="save-note-button"
+          onClick={() =>
+            alert('Save Note feature coming soon!')
+          }
+        >
+          🔖 Save Note
         </button>
 
+        {/* Download */}
+        <button onClick={handleDownload}>
+          {note.hasPdf
+            ? '⬇️ Download PDF'
+            : '⬇️ Download (No PDF)'}
+        </button>
+
+        {/* Report */}
         {user && !isOwner && (
-          <button onClick={() => setShowReportModal(true)}>🚩 Report</button>
+          <button
+            onClick={() => setShowReportModal(true)}
+          >
+            🚩 Report
+          </button>
         )}
 
+        {/* Owner actions */}
         {isOwner && !isEditing && (
           <>
-            <button onClick={() => setIsEditing(true)}>✏️ Edit</button>
-            <button onClick={handleDelete}>🗑️ Delete</button>
+            <button onClick={() => setIsEditing(true)}>
+              ✏️ Edit
+            </button>
+
+            <button onClick={handleDelete}>
+              🗑️ Delete
+            </button>
           </>
         )}
       </div>
 
       {/* Report Modal */}
       {showReportModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ background: '#fff', padding: '24px', borderRadius: '8px', width: '400px' }}>
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}
+        >
+          <div
+            style={{
+              background: '#fff',
+              padding: '24px',
+              borderRadius: '8px',
+              width: '400px'
+            }}
+          >
             <h3>Report Note</h3>
-            <p>Why are you reporting this note?</p>
+
+            <p>
+              Why are you reporting this note?
+            </p>
+
             <textarea
               value={reportReason}
-              onChange={(e) => setReportReason(e.target.value)}
+              onChange={(e) =>
+                setReportReason(e.target.value)
+              }
               rows="4"
-              style={{ width: '100%', marginBottom: '12px' }}
+              style={{
+                width: '100%',
+                marginBottom: '12px'
+              }}
               placeholder="Enter reason..."
             />
-            <button onClick={handleReport} disabled={reportSubmitting}>
-              {reportSubmitting ? 'Submitting...' : 'Submit Report'}
+
+            <button
+              onClick={handleReport}
+              disabled={reportSubmitting}
+            >
+              {reportSubmitting
+                ? 'Submitting...'
+                : 'Submit Report'}
             </button>
-            <button onClick={() => setShowReportModal(false)} style={{ marginLeft: '8px' }}>Cancel</button>
+
+            <button
+              onClick={() => setShowReportModal(false)}
+              style={{ marginLeft: '8px' }}
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}
@@ -292,13 +495,24 @@ export default function NoteDetail({ noteId, onBack }) {
           <div style={{ marginBottom: '16px' }}>
             <textarea
               value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
+              onChange={(e) =>
+                setCommentText(e.target.value)
+              }
               rows="3"
               placeholder="Write a comment..."
               style={{ width: '100%' }}
             />
-            <button onClick={handleAddComment} disabled={commentSubmitting || !commentText.trim()}>
-              {commentSubmitting ? 'Posting...' : 'Post Comment'}
+
+            <button
+              onClick={handleAddComment}
+              disabled={
+                commentSubmitting ||
+                !commentText.trim()
+              }
+            >
+              {commentSubmitting
+                ? 'Posting...'
+                : 'Post Comment'}
             </button>
           </div>
         )}
@@ -307,12 +521,28 @@ export default function NoteDetail({ noteId, onBack }) {
           <p>No comments yet.</p>
         ) : (
           (note.comments || []).map((c) => (
-            <div key={c.id} style={{ borderBottom: '1px solid #eee', padding: '8px 0' }}>
+            <div
+              key={c.id}
+              style={{
+                borderBottom: '1px solid #eee',
+                padding: '8px 0'
+              }}
+            >
               <strong>{c.authorName}</strong>
-              <span style={{ fontSize: '12px', color: '#888', marginLeft: '8px' }}>
+
+              <span
+                style={{
+                  fontSize: '12px',
+                  color: '#888',
+                  marginLeft: '8px'
+                }}
+              >
                 {new Date(c.createdAt).toLocaleDateString()}
               </span>
-              <p style={{ margin: '4px 0' }}>{c.commentText}</p>
+
+              <p style={{ margin: '4px 0' }}>
+                {c.commentText}
+              </p>
             </div>
           ))
         )}
