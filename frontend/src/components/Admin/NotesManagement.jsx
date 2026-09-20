@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../../services/adminAPI';
+import AdminLoading from './AdminLoading';
 
 export default function NotesManagement({ onRefresh, refreshTrigger }) {
     const [notes, setNotes] = useState([]);
@@ -9,6 +10,7 @@ export default function NotesManagement({ onRefresh, refreshTrigger }) {
     const [search, setSearch] = useState('');
     const [selectedNote, setSelectedNote] = useState(null);
     const [actionLoading, setActionLoading] = useState(false);
+    const [hasLoaded, setHasLoaded] = useState(false);
     const [statusFilter, setStatusFilter] = useState('All');
 
     const loadCounts = async () => {
@@ -35,12 +37,17 @@ export default function NotesManagement({ onRefresh, refreshTrigger }) {
             setError(err.message);
         } finally {
             setLoading(false);
+            setHasLoaded(true);
         }
     };
 
-    useEffect(() => {
-        loadCounts();
-        loadNotes();
+  useEffect(() => {
+        const searchTimer = setTimeout(() => {
+            loadCounts();
+            loadNotes();
+        }, 280);
+
+        return () => clearTimeout(searchTimer);
     }, [search, refreshTrigger]);
 
     const handleSearch = (e) => {
@@ -62,8 +69,8 @@ export default function NotesManagement({ onRefresh, refreshTrigger }) {
         }
     };
 
-    if (loading && !selectedNote) {
-        return <div className="loading-spinner">Loading notes...</div>;
+    if (loading && !selectedNote && !hasLoaded) {
+        return <AdminLoading label="Loading notes" />;
     }
 
     const displayNotes = statusFilter === 'Reported'
@@ -84,6 +91,7 @@ export default function NotesManagement({ onRefresh, refreshTrigger }) {
                     onChange={handleSearch}
                     className="search-input"
                 />
+                {loading && <span className="admin-search-status">Updating results...</span>}
             </div>
 
             <div className="filter-tabs">

@@ -9,6 +9,8 @@ namespace EdBridge.API.DTOs
         public int ViewCount { get; set; }
         public int UpvoteCount { get; set; }
         public int DownvoteCount { get; set; }
+        public bool UserHasUpvoted { get; set; }
+        public bool UserHasDownvoted { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public int UserId { get; set; }
@@ -31,6 +33,8 @@ namespace EdBridge.API.DTOs
         public bool IsBestAnswer { get; set; }
         public int UpvoteCount { get; set; }
         public int DownvoteCount { get; set; }
+        public bool UserHasUpvoted { get; set; }
+        public bool UserHasDownvoted { get; set; }
         public DateTime CreatedAt { get; set; }
         public UserDto Author { get; set; } = new();
     }
@@ -50,6 +54,10 @@ namespace EdBridge.API.DTOs
         public int UpvoteCount { get; set; }
 
         public int DownvoteCount { get; set; }
+
+        public bool UserHasUpvoted { get; set; }
+
+        public bool UserHasDownvoted { get; set; }
 
         public DateTime CreatedAt { get; set; }
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PostList from '../components/Forum/PostList';
 import CreatePostModal from '../components/Forum/CreatePostModal';
-import SearchFilter from '../components/Forum/SearchFilter';
+import SearchFilter, { OTHER_SUBJECT_FILTER } from '../components/Forum/SearchFilter';
 import { forumAPI } from '../services/api';
 import { transformPost } from '../utils/forumAdapter';
 import '../styles/Forum.css';
@@ -13,10 +13,20 @@ export default function ForumPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const [selectedSubject, setSelectedSubject] = useState(null);
+  const [customSubjectFilter, setCustomSubjectFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Forum discussions are ranked by community score, with newer discussions
+  // winning ties. Keeping this rule in the UI also makes newly-created posts
+  // and filtered results feel consistent before the next server refresh.
+  const sortPosts = (items) => [...items].sort((a, b) => {
+    const scoreDifference = (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes);
+    if (scoreDifference !== 0) return scoreDifference;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 
   useEffect(() => {
     loadPosts();
@@ -29,7 +39,7 @@ export default function ForumPage() {
 
       const data = await forumAPI.getPosts();
 
-      const formattedPosts = data.map(transformPost);
+      const formattedPosts = sortPosts(data.map(transformPost));
 
       setPosts(formattedPosts);
       setFilteredPosts(formattedPosts);
@@ -44,15 +54,16 @@ export default function ForumPage() {
 
   const handleSearch = (query) => {
     setSearchQuery(query);
-    filterPosts(query, selectedSubject);
+    filterPosts(query, selectedSubject, customSubjectFilter);
   };
 
-  const handleSubjectFilter = (subject) => {
+  const handleSubjectFilter = (subject, customSubject = '') => {
     setSelectedSubject(subject);
-    filterPosts(searchQuery, subject);
+    setCustomSubjectFilter(customSubject);
+    filterPosts(searchQuery, subject, customSubject);
   };
 
-  const filterPosts = (query, subject) => {
+  const filterPosts = (query, subject, customSubject = '') => {
     let filtered = [...posts];
 
     if (query) {
@@ -65,7 +76,16 @@ export default function ForumPage() {
       );
     }
 
-    if (subject) {
+    if (subject === OTHER_SUBJECT_FILTER) {
+      const lowerCustomSubject = customSubject.trim().toLowerCase();
+
+      if (lowerCustomSubject) {
+        filtered = filtered.filter((post) => {
+          const subjectAndTags = [post.subject, ...(post.tags || [])].join(' ').toLowerCase();
+          return subjectAndTags.includes(lowerCustomSubject);
+        });
+      }
+    } else if (subject) {
       filtered = filtered.filter(
         (post) =>
           post.subject === subject ||
@@ -73,7 +93,7 @@ export default function ForumPage() {
       );
     }
 
-    setFilteredPosts(filtered);
+    setFilteredPosts(sortPosts(filtered));
   };
 
   const handleCreatePost = async (postData) => {
@@ -82,8 +102,18 @@ export default function ForumPage() {
 
       const newPost = transformPost(response.post);
 
-      setPosts((prev) => [newPost, ...prev]);
-      setFilteredPosts((prev) => [newPost, ...prev]);
+      const nextPosts = sortPosts([...posts, newPost]);
+      setPosts(nextPosts);
+      setFilteredPosts(sortPosts(nextPosts.filter(post => {
+        const lowerQuery = searchQuery.toLowerCase();
+        const matchesSearch = !lowerQuery || post.title.toLowerCase().includes(lowerQuery) || post.content.toLowerCase().includes(lowerQuery);
+        const lowerCustomSubject = customSubjectFilter.trim().toLowerCase();
+        const subjectAndTags = [post.subject, ...(post.tags || [])].join(' ').toLowerCase();
+        const matchesSubject = selectedSubject === OTHER_SUBJECT_FILTER
+          ? !lowerCustomSubject || subjectAndTags.includes(lowerCustomSubject)
+          : !selectedSubject || post.subject === selectedSubject || post.tags.includes(selectedSubject);
+        return matchesSearch && matchesSubject;
+      })));
 
       setIsCreateModalOpen(false);
 
@@ -154,6 +184,7 @@ export default function ForumPage() {
           searchQuery={searchQuery}
           onSearchChange={handleSearch}
           selectedSubject={selectedSubject}
+          customSubject={customSubjectFilter}
           onSubjectChange={handleSubjectFilter}
         />
       </section>

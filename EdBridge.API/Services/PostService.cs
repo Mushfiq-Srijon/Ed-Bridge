@@ -46,6 +46,25 @@ namespace EdBridge.API.Services
             if (post == null)
                 return null;
 
+            var userHasUpvoted = currentUserId.HasValue && await _db.PostUpvotes
+                .AnyAsync(upvote => upvote.PostId == id && upvote.UserId == currentUserId.Value);
+            var userHasDownvoted = currentUserId.HasValue && await _db.PostDownvotes
+                .AnyAsync(downvote => downvote.PostId == id && downvote.UserId == currentUserId.Value);
+
+            var replyIds = post.Replies.Select(reply => reply.Id).ToList();
+            var upvotedReplyIds = currentUserId.HasValue
+                ? (await _db.ReplyUpvotes
+                    .Where(upvote => replyIds.Contains(upvote.ReplyId) && upvote.UserId == currentUserId.Value)
+                    .Select(upvote => upvote.ReplyId)
+                    .ToListAsync()).ToHashSet()
+                : new HashSet<int>();
+            var downvotedReplyIds = currentUserId.HasValue
+                ? (await _db.ReplyDownvotes
+                    .Where(downvote => replyIds.Contains(downvote.ReplyId) && downvote.UserId == currentUserId.Value)
+                    .Select(downvote => downvote.ReplyId)
+                    .ToListAsync()).ToHashSet()
+                : new HashSet<int>();
+
             // Only increment view count if:
             // 1. User is viewing someone else's post
             // 2. User hasn't viewed this post before
@@ -76,6 +95,8 @@ namespace EdBridge.API.Services
                 ViewCount = post.ViewCount,
                 UpvoteCount = post.UpvoteCount,
                 DownvoteCount = post.DownvoteCount,
+                UserHasUpvoted = userHasUpvoted,
+                UserHasDownvoted = userHasDownvoted,
                 CreatedAt = post.CreatedAt,
                 UpdatedAt = post.UpdatedAt,
                 UserId = post.UserId,
@@ -93,6 +114,8 @@ namespace EdBridge.API.Services
                         IsBestAnswer = r.IsBestAnswer,
                         UpvoteCount = r.UpvoteCount,
                         DownvoteCount = r.DownvoteCount,
+                        UserHasUpvoted = upvotedReplyIds.Contains(r.Id),
+                        UserHasDownvoted = downvotedReplyIds.Contains(r.Id),
                         CreatedAt = r.CreatedAt,
                         Author = r.IsAnonymous
                             ? new UserDto { Id = 0, Name = "Anonymous", Email = string.Empty }
@@ -119,7 +142,8 @@ namespace EdBridge.API.Services
         public async Task<List<PostDto>> GetAllPostsAsync(int page = 1, int pageSize = 10)
         {
             var posts = await _db.Posts
-                .OrderByDescending(p => p.CreatedAt)
+                .OrderByDescending(p => p.UpvoteCount - p.DownvoteCount)
+                .ThenByDescending(p => p.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Include(p => p.Author)
@@ -149,7 +173,8 @@ namespace EdBridge.API.Services
             var lower = query.ToLower();
             var posts = await _db.Posts
                 .Where(p => p.Title.ToLower().Contains(lower) || p.Content.ToLower().Contains(lower))
-                .OrderByDescending(p => p.CreatedAt)
+                .OrderByDescending(p => p.UpvoteCount - p.DownvoteCount)
+                .ThenByDescending(p => p.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Include(p => p.Author)
@@ -178,7 +203,8 @@ namespace EdBridge.API.Services
         {
             return await _db.Posts
                 .Where(p => p.PostSubjectTags.Any(pst => pst.SubjectTagId == subjectTagId))
-                .OrderByDescending(p => p.CreatedAt)
+                .OrderByDescending(p => p.UpvoteCount - p.DownvoteCount)
+                .ThenByDescending(p => p.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Include(p => p.Author)

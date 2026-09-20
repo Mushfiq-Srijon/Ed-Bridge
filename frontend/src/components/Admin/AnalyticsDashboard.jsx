@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../../services/adminAPI';
+import AdminLoading from './AdminLoading';
 
 export default function AnalyticsDashboard({ refreshTrigger }) {
   const [analytics, setAnalytics] = useState(null);
@@ -24,7 +25,7 @@ export default function AnalyticsDashboard({ refreshTrigger }) {
   };
 
   if (loading) {
-    return <div className="loading-spinner">Loading analytics...</div>;
+    return <AdminLoading label="Loading analytics" />;
   }
 
   if (error) {

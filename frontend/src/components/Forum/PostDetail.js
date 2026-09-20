@@ -10,11 +10,15 @@ export default function PostDetail({ post, onBack, onDeleted }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(post.title);
   const [editContent, setEditContent] = useState(post.content);
+  const [voteLoading, setVoteLoading] = useState(false);
 
   const isOwner = user && currentPost.authorId === user.id;
 
   const handleUpvote = async () => {
+    if (voteLoading) return;
+
     try {
+      setVoteLoading(true);
       if (currentPost.userHasUpvoted) {
         await forumAPI.removeUpvote(currentPost.id);
         setCurrentPost((prev) => ({
@@ -36,11 +40,16 @@ export default function PostDetail({ post, onBack, onDeleted }) {
     } catch (error) {
       console.error('Failed to update vote:', error);
       alert(error.message || 'Failed to update vote');
+    } finally {
+      setVoteLoading(false);
     }
   };
 
   const handleDownvote = async () => {
+    if (voteLoading) return;
+
     try {
+      setVoteLoading(true);
       if (currentPost.userHasDownvoted) {
         await forumAPI.removeDownvote(currentPost.id);
         setCurrentPost((prev) => ({
@@ -62,6 +71,8 @@ export default function PostDetail({ post, onBack, onDeleted }) {
     } catch (error) {
       console.error('Failed to update downvote:', error);
       alert(error.message || 'Failed to update downvote');
+    } finally {
+      setVoteLoading(false);
     }
   };
 
@@ -271,6 +282,7 @@ export default function PostDetail({ post, onBack, onDeleted }) {
         <button
           className={'action-btn upvote-btn ' + (currentPost.userHasUpvoted ? 'active' : '')}
           onClick={handleUpvote}
+          disabled={voteLoading}
         >
           👍 Upvote ({currentPost.upvotes})
         </button>
@@ -278,6 +290,7 @@ export default function PostDetail({ post, onBack, onDeleted }) {
         <button
           className={'action-btn downvote-btn ' + (currentPost.userHasDownvoted ? 'active' : '')}
           onClick={handleDownvote}
+          disabled={voteLoading}
         >
           👎 Downvote ({currentPost.downvotes})
         </button>

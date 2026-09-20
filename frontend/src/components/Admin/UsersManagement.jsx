@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../../services/adminAPI';
 import { useAuth } from '../../context/AuthContext';
-import { BeatLoader } from 'react-spinners';
+import AdminLoading from './AdminLoading';
 
 export default function UsersManagement({ onRefresh, refreshTrigger }) {
   const [users, setUsers] = useState([]);
@@ -12,6 +12,7 @@ export default function UsersManagement({ onRefresh, refreshTrigger }) {
   const [statusFilter, setStatusFilter] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
   const { user: currentUser } = useAuth();
   const isCurrentAdmin = selectedUser?.id === currentUser?.id;
 
@@ -43,13 +44,20 @@ export default function UsersManagement({ onRefresh, refreshTrigger }) {
       setError(err.message);
     } finally {
       setLoading(false);
+      setHasLoaded(true);
     }
   };
 
   useEffect(() => {
-    loadCounts();
-    loadUsers();
-  }, [statusFilter, refreshTrigger]);
+    // Debouncing keeps the input mounted while the API catches up, so typing
+    // naturally remains in one uninterrupted focus session.
+    const searchTimer = setTimeout(() => {
+      loadCounts();
+      loadUsers();
+    }, 280);
+
+    return () => clearTimeout(searchTimer);
+  }, [search, statusFilter, refreshTrigger]);
 
   const handleSearch = (e) => {
     setSearch(e.target.value);
@@ -85,11 +93,9 @@ export default function UsersManagement({ onRefresh, refreshTrigger }) {
     }
   };
 
-  if (loading && !selectedUser) {
+  if (loading && !selectedUser && !hasLoaded) {
     return (
-      <div className="loading-spinner">
-        <BeatLoader color="#3b82f6" size={12} />
-      </div>
+      <AdminLoading label="Loading users" />
     );
   }
 
@@ -106,9 +112,9 @@ export default function UsersManagement({ onRefresh, refreshTrigger }) {
           placeholder="Search by email or name..."
           value={search}
           onChange={handleSearch}
-          onKeyUp={() => { loadCounts(); loadUsers(); }}
           className="search-input"
         />
+        {loading && <span className="admin-search-status">Updating results...</span>}
         <div className="filter-tabs">
           <button
             className={`filter-btn ${!statusFilter ? 'active' : ''}`}

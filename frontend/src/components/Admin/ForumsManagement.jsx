@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../../services/adminAPI';
+import AdminLoading from './AdminLoading';
 
 export default function ForumsManagement({ onRefresh, refreshTrigger }) {
     const [posts, setPosts] = useState([]);
@@ -10,6 +11,7 @@ export default function ForumsManagement({ onRefresh, refreshTrigger }) {
     const [selectedPost, setSelectedPost] = useState(null);
     const [actionLoading, setActionLoading] = useState(false);
     const [statusFilter, setStatusFilter] = useState('All');
+    const [hasLoaded, setHasLoaded] = useState(false);
 
     const loadCounts = async () => {
         try {
@@ -35,12 +37,17 @@ export default function ForumsManagement({ onRefresh, refreshTrigger }) {
             setError(err.message);
         } finally {
             setLoading(false);
+            setHasLoaded(true);
         }
     };
 
     useEffect(() => {
-        loadCounts();
-        loadPosts();
+        const searchTimer = setTimeout(() => {
+            loadCounts();
+            loadPosts();
+        }, 280);
+
+        return () => clearTimeout(searchTimer);
     }, [search, refreshTrigger]);
 
     const handleSearch = (e) => {
@@ -63,8 +70,8 @@ export default function ForumsManagement({ onRefresh, refreshTrigger }) {
         }
     };
 
-    if (loading && !selectedPost) {
-        return <div className="loading-spinner">Loading forum posts...</div>;
+    if (loading && !selectedPost && !hasLoaded) {
+        return <AdminLoading label="Loading forum posts" />;
     }
 
     const displayPosts = statusFilter === 'Reported'
@@ -85,6 +92,7 @@ export default function ForumsManagement({ onRefresh, refreshTrigger }) {
                     onChange={handleSearch}
                     className="search-input"
                 />
+                {loading && <span className="admin-search-status">Updating results...</span>}
             </div>
 
             <div className="filter-tabs">
