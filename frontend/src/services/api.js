@@ -524,8 +524,8 @@ export const listingsAPI = {
   },
 
   // Get one listing
-  getById: (id, countView = true) =>
-  apiCall(`/notes/${id}?countView=${countView}`),
+getById: (id) =>
+  apiCall(`/listings/${id}`),
 
   // Get categories
   getCategories: () =>

@@ -13,6 +13,8 @@ namespace EdBridge.API.Controllers
     [Route("api/[controller]")]
     public class ListingsController : ControllerBase
     {
+        private const decimal MaximumListingPrice = 10000m;
+        private const int MaximumImageDataUrlLength = 600000;
         private readonly ListingService _listingService;
         private readonly AppDbContext _db;
 
@@ -20,6 +22,20 @@ namespace EdBridge.API.Controllers
         {
             _listingService = listingService;
             _db = db;
+        }
+
+        private static string? GetPriceValidationError(decimal originalPrice, decimal askingPrice)
+        {
+            if (originalPrice <= 0 || askingPrice <= 0)
+                return "Prices must be greater than 0.";
+
+            if (originalPrice > MaximumListingPrice || askingPrice > MaximumListingPrice)
+                return "Original and asking prices cannot be more than 10,000 Tk.";
+
+            if (askingPrice > originalPrice)
+                return "Asking price cannot be higher than the original price.";
+
+            return null;
         }
 
         [HttpGet]
@@ -66,6 +82,49 @@ namespace EdBridge.API.Controllers
             if (string.IsNullOrWhiteSpace(req.Title) || string.IsNullOrWhiteSpace(req.Description))
                 return BadRequest(new { message = "Title and description are required" });
 
+            var priceValidationError = GetPriceValidationError(req.OriginalPrice, req.AskingPrice);
+            if (priceValidationError != null)
+                return BadRequest(new { message = priceValidationError });
+
+            if (req.ImageUrl?.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase) == true &&
+                req.ImageUrl.Length > MaximumImageDataUrlLength)
+            {
+                return BadRequest(new
+                {
+                    message = "The uploaded image is too large. Please choose a smaller image."
+                });
+            }
+
+            var subjectTagIds = req.SubjectTagIds?.Distinct().ToList() ?? new List<int>();
+
+            if (!string.IsNullOrWhiteSpace(req.CustomSubject))
+            {
+                var customSubjectName = req.CustomSubject.Trim();
+                if (customSubjectName.Length < 2)
+                    return BadRequest(new { message = "A custom subject must contain at least 2 characters." });
+
+                var customSubject = await _db.SubjectTags
+                    .FirstOrDefaultAsync(subject => subject.Name.ToLower() == customSubjectName.ToLower());
+
+                if (customSubject == null)
+                {
+                    customSubject = new SubjectTag { Name = customSubjectName };
+                    _db.SubjectTags.Add(customSubject);
+                    await _db.SaveChangesAsync();
+                }
+
+                if (!subjectTagIds.Contains(customSubject.Id))
+                    subjectTagIds.Add(customSubject.Id);
+            }
+
+            if (subjectTagIds.Count == 0)
+                return BadRequest(new { message = "At least one subject is required." });
+
+            var validSubjectCount = await _db.SubjectTags
+                .CountAsync(subject => subjectTagIds.Contains(subject.Id));
+            if (validSubjectCount != subjectTagIds.Count)
+                return BadRequest(new { message = "One or more selected subjects are invalid." });
+
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
 
             var listing = new Listing
@@ -82,7 +141,7 @@ namespace EdBridge.API.Controllers
                 UserId = userId
             };
 
-            var created = await _listingService.CreateListingAsync(listing, req.SubjectTagIds);
+            var created = await _listingService.CreateListingAsync(listing, subjectTagIds);
             var dto = await _listingService.GetListingByIdAsync(created.Id);
 
             return Ok(new { message = "Listing created", listingId = created.Id, listing = dto });
@@ -98,6 +157,10 @@ namespace EdBridge.API.Controllers
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
             if (existing.UserId != userId && User.FindFirst(ClaimTypes.Role)?.Value != "Admin")
                 return Forbid();
+
+            var priceValidationError = GetPriceValidationError(req.OriginalPrice, req.AskingPrice);
+            if (priceValidationError != null)
+                return BadRequest(new { message = priceValidationError });
 
             var updated = await _listingService.UpdateListingAsync(id, req);
             return Ok(new { message = "Listing updated", listing = updated });

@@ -376,3 +376,79 @@
     font-size: 25px;
   }
 }
+
+/* Theme-safe listing detail design and uncropped product images. */
+.listing-details-page {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.listing-details-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 30px var(--shadow-color);
+}
+
+.listing-details-image-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 480px;
+  background: var(--bg-secondary);
+}
+
+.listing-details-image {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: contain;
+  background: var(--bg-secondary);
+}
+
+.details-condition-badge {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.details-category {
+  background: color-mix(in srgb, var(--accent-color) 16%, var(--bg-secondary));
+  color: var(--accent-color);
+}
+
+.listing-details-info h1,
+.details-asking-price,
+.details-description h2,
+.seller-details-name,
+.listing-not-found h2 {
+  color: var(--text-primary);
+}
+
+.details-original-price,
+.details-location,
+.details-education,
+.details-description p,
+.listing-not-found p {
+  color: var(--text-secondary);
+}
+
+.details-tag,
+.seller-details-card {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.details-description {
+  border-color: var(--border-color);
+}
+
+.back-to-marketplace {
+  color: var(--accent-color);
+}
+
+@media (max-width: 850px) {
+  .listing-details-image-section {
+    min-height: 360px;
+  }
+}

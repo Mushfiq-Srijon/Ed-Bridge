@@ -61,7 +61,7 @@ export default function MarketplacePage() {
       alert("Listing created successfully!");
     } catch (error) {
       console.error("Failed to create listing:", error);
-      alert(error.message || "Failed to create listing");
+      throw error;
     }
   };
 
