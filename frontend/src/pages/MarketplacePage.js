@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 import MarketplaceSearch from "../components/Marketplace/MarketplaceSearch";
@@ -8,6 +8,7 @@ import CreateListingModal from "../components/Marketplace/CreateListingModal";
 
 import { listingsAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import Pagination from "../components/Pagination";
 
 import "../styles/Marketplace.css";
 
@@ -30,26 +31,57 @@ export default function MarketplacePage() {
 
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalListings, setTotalListings] = useState(0);
+  const [availableCategories, setAvailableCategories] = useState(["All"]);
+  const [availableAreas, setAvailableAreas] = useState(["All"]);
   const [error, setError] = useState(null);
+  const resultsRef = useRef(null);
 
   useEffect(() => {
-    loadListings();
+    const timeoutId = window.setTimeout(() => loadListings(currentPage), searchTerm ? 300 : 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [filters, searchTerm, sortOption, currentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
   }, [filters, searchTerm, sortOption]);
 
-  const loadListings = async () => {
+  useEffect(() => {
+    const loadFilterOptions = async () => {
+      try {
+        const [categories, areas] = await Promise.all([
+          listingsAPI.getCategories(),
+          listingsAPI.getAreas(),
+        ]);
+        setAvailableCategories(["All", ...(categories || [])]);
+        setAvailableAreas(["All", ...(areas || [])]);
+      } catch (optionError) {
+        console.error("Failed to load marketplace filter options:", optionError);
+      }
+    };
+
+    loadFilterOptions();
+  }, []);
+
+  const loadListings = async (page = 1) => {
     try {
-      setLoading(true);
+      setLoading((previous) => previous && listings.length === 0);
+      setRefreshing(true);
       const result = await listingsAPI.getAll(
         { ...filters, search: searchTerm, sort: sortOption },
-        1,
-        50
+        page,
+        6
       );
-      setListings(result.items);
+      setListings(result.items || []);
+      setTotalListings(result.total || 0);
       setError(null);
     } catch (err) {
       setError("Could not load listings. Please try again.");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -57,7 +89,8 @@ export default function MarketplacePage() {
     try {
       await listingsAPI.create(listingData);
       setIsCreateModalOpen(false);
-      await loadListings();
+      setCurrentPage(1);
+      await loadListings(1);
       alert("Listing created successfully!");
     } catch (error) {
       console.error("Failed to create listing:", error);
@@ -65,33 +98,14 @@ export default function MarketplacePage() {
     }
   };
 
-  const categories = useMemo(() => {
-    const uniqueCategories = [
-      ...new Set(listings.map((listing) => listing.category)),
-    ];
-
-    return ["All", ...uniqueCategories];
-  }, [listings]);
-
-  const areas = useMemo(() => {
-    const uniqueAreas = [
-      ...new Set(listings.map((listing) => listing.area)),
-    ];
-
-    return ["All", ...uniqueAreas];
-  }, [listings]);
-
-  const filteredListings = useMemo(() => {
-    return listings;
-  }, [listings]);
+  const categories = availableCategories;
+  const areas = availableAreas;
+  const filteredListings = useMemo(() => listings, [listings]);
+  const totalPages = Math.max(1, Math.ceil(totalListings / 6));
 
   const handleListingClick = (listing) => {
     navigate(`/marketplace/listing/${listing.id}`);
   };
-
-  if (loading) {
-    return <div className="marketplace-loading">Loading listings...</div>;
-  }
 
   if (error) {
     return <div className="marketplace-error">{error}</div>;
@@ -171,7 +185,7 @@ export default function MarketplacePage() {
           />
 
           {/* Listings */}
-          <section className="marketplace-results">
+          <section className="marketplace-results" ref={resultsRef}>
 
             <div className="results-header">
 
@@ -209,16 +223,37 @@ export default function MarketplacePage() {
 
             </div>
 
-            {filteredListings.length > 0 ? (
+            {loading && filteredListings.length === 0 ? (
+              <div className="marketplace-loading-card">
+                <div className="marketplace-spinner" aria-hidden="true" />
+                <p>Finding the best materials...</p>
+              </div>
+            ) : filteredListings.length > 0 ? (
 
-              <div className="listing-grid">
-                {filteredListings.map((listing) => (
-                  <ListingCard
-                    key={listing.id}
-                    listing={listing}
-                    onClick={handleListingClick}
-                  />
-                ))}
+              <div className={`listing-results-shell ${refreshing ? 'is-refreshing' : ''}`}>
+                {refreshing && (
+                  <div className="listing-refresh-indicator" aria-live="polite">
+                    <span className="marketplace-spinner small" aria-hidden="true" />
+                    Updating listings
+                  </div>
+                )}
+                <div className="listing-grid">
+                  {filteredListings.map((listing) => (
+                    <ListingCard
+                      key={listing.id}
+                      listing={listing}
+                      onClick={handleListingClick}
+                    />
+                  ))}
+                </div>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={(page) => {
+                    setCurrentPage(page);
+                    resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
+                />
               </div>
 
             ) : (

@@ -210,10 +210,22 @@ namespace EdBridge.API.Services
     if (note == null)
         return null;
 
-    if (countView && (viewerUserId == null || viewerUserId != note.UserId))
+    if (countView && viewerUserId.HasValue && viewerUserId.Value != note.UserId)
     {
-        note.ViewCount++;
-        await _db.SaveChangesAsync();
+        var hasViewed = await _db.NoteViews.AnyAsync(view =>
+            view.NoteId == id && view.UserId == viewerUserId.Value);
+
+        if (!hasViewed)
+        {
+            _db.NoteViews.Add(new NoteView
+            {
+                NoteId = id,
+                UserId = viewerUserId.Value,
+                ViewedAt = DateTime.UtcNow
+            });
+            note.ViewCount++;
+            await _db.SaveChangesAsync();
+        }
     }
     
             var ratings = note.Ratings

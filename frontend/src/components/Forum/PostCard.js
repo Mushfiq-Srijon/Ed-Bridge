@@ -1,6 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { forumAPI } from '../../services/api';
 
 export default function PostCard({ post, onSelect }) {
+  const [isSaved, setIsSaved] = useState(Boolean(post.userHasSaved));
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async (event) => {
+    event.stopPropagation();
+    if (saving) return;
+
+    try {
+      setSaving(true);
+      if (isSaved) await forumAPI.unsave(post.id);
+      else await forumAPI.save(post.id);
+      setIsSaved((saved) => !saved);
+    } catch (error) {
+      alert(error.message || 'Unable to update saved item.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="post-card" onClick={() => onSelect(post)}>
       <div className="post-stats">
@@ -37,7 +57,12 @@ export default function PostCard({ post, onSelect }) {
         </div>
       </div>
 
-      <button className="btn-open">View Discussion →</button>
+      <div className="post-card-actions">
+        <button className="btn-open" onClick={() => onSelect(post)}>View Discussion →</button>
+        <button className={`post-save-button ${isSaved ? 'is-saved' : ''}`} onClick={handleSave} disabled={saving}>
+          {isSaved ? '🔖 Saved' : '🔖 Save'}
+        </button>
+      </div>
     </div>
   );
 }

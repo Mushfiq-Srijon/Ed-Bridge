@@ -61,6 +61,72 @@ namespace EdBridge.API.Controllers
             return Ok(listing);
         }
 
+        [HttpPost("{id}/save")]
+        [Authorize]
+        public async Task<IActionResult> SaveListing(int id)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            if (!await _db.Listings.AnyAsync(listing => listing.Id == id))
+                return NotFound(new { message = "Listing not found" });
+
+            if (await _db.SavedListings.AnyAsync(saved => saved.ListingId == id && saved.UserId == userId))
+                return Ok(new { message = "Listing is already saved" });
+
+            _db.SavedListings.Add(new SavedListing { ListingId = id, UserId = userId, SavedAt = DateTime.UtcNow });
+            await _db.SaveChangesAsync();
+            return Ok(new { message = "Listing saved successfully" });
+        }
+
+        [HttpDelete("{id}/save")]
+        [Authorize]
+        public async Task<IActionResult> UnsaveListing(int id)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            var saved = await _db.SavedListings.FirstOrDefaultAsync(item => item.ListingId == id && item.UserId == userId);
+            if (saved == null)
+                return NotFound(new { message = "Saved listing not found" });
+
+            _db.SavedListings.Remove(saved);
+            await _db.SaveChangesAsync();
+            return Ok(new { message = "Listing removed from saved items" });
+        }
+
+        [HttpGet("saved")]
+        [Authorize]
+        public async Task<IActionResult> GetSavedListings()
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            var savedListings = await _db.SavedListings
+                .Where(saved => saved.UserId == userId)
+                .Include(saved => saved.Listing)
+                    .ThenInclude(listing => listing.Owner)
+                .Include(saved => saved.Listing)
+                    .ThenInclude(listing => listing.ListingSubjectTags)
+                        .ThenInclude(tag => tag.SubjectTag)
+                .OrderByDescending(saved => saved.SavedAt)
+                .Select(saved => new
+                {
+                    saved.Listing.Id,
+                    saved.Listing.Title,
+                    saved.Listing.Description,
+                    saved.Listing.Condition,
+                    saved.Listing.OriginalPrice,
+                    saved.Listing.AskingPrice,
+                    saved.Listing.Category,
+                    saved.Listing.Area,
+                    saved.Listing.EducationLevel,
+                    saved.Listing.ImageUrl,
+                    saved.Listing.Status,
+                    saved.Listing.CreatedAt,
+                    Seller = new { saved.Listing.Owner.Id, saved.Listing.Owner.Name, saved.Listing.Owner.Institution },
+                    SubjectTags = saved.Listing.ListingSubjectTags.Select(tag => tag.SubjectTag.Name).ToList(),
+                    SavedAt = saved.SavedAt
+                })
+                .ToListAsync();
+
+            return Ok(savedListings);
+        }
+
         [HttpGet("categories")]
         [AllowAnonymous]
         public async Task<IActionResult> GetCategories()

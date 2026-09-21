@@ -84,6 +84,12 @@ export const authAPI = {
   updateProfile: (data) =>
     apiCall('/auth/profile', 'PUT', data),
 
+  changePassword: (data) =>
+    apiCall('/auth/password', 'PUT', data),
+
+  deleteAccount: () =>
+    apiCall('/auth/account', 'DELETE'),
+
   uploadProfilePhoto: async (file) => {
     const formData = new FormData();
 
@@ -441,6 +447,12 @@ export const forumAPI = {
   // Get subjects
   getSubjects: () =>
     apiCall('/posts/subjects'),
+
+  save: (id) => apiCall(`/posts/${id}/save`, 'POST'),
+
+  unsave: (id) => apiCall(`/posts/${id}/save`, 'DELETE'),
+
+  getSaved: () => apiCall('/posts/saved'),
 };
 
 
@@ -535,6 +547,12 @@ getById: (id) =>
   getAreas: () =>
     apiCall('/listings/areas'),
 
+  save: (id) => apiCall(`/listings/${id}/save`, 'POST'),
+
+  unsave: (id) => apiCall(`/listings/${id}/save`, 'DELETE'),
+
+  getSaved: () => apiCall('/listings/saved'),
+
   // Create listing
   create: (data) =>
     apiCall(
@@ -583,6 +601,12 @@ getById: (id) =>
     apiCall(
       '/messages/conversations'
     ),
+
+  getUnreadConversationCount: () =>
+    apiCall('/messages/unread-count'),
+
+  markConversationRead: (listingId) =>
+    apiCall(`/messages/listing/${listingId}/read`, 'PUT'),
 
   // Update listing status
   updateStatus: (
@@ -683,4 +707,8 @@ export const reportAPI = {
         reason,
       }
     ),
+};
+
+export const userAPI = {
+  getDashboard: () => apiCall('/user/dashboard'),
 };

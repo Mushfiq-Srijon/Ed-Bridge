@@ -15,6 +15,7 @@ import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import Bookmarks from './pages/Bookmarks';
 import AdminDashboard from './pages/AdminDashboard';
+import MyDashboard from './pages/MyDashboard';
 
 import './App.css';
 
@@ -72,6 +73,7 @@ function App() {
   }
 />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/dashboard" element={<PrivateRoute><MyDashboard /></PrivateRoute>} />
             <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           </Routes>
         </AuthProvider>

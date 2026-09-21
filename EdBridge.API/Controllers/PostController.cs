@@ -247,6 +247,69 @@ namespace EdBridge.API.Controllers
             return Ok(new { message = "Post unfollowed" });
         }
 
+        [HttpPost("{id}/save")]
+        [Authorize]
+        public async Task<IActionResult> SavePost(int id)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            if (!await _db.Posts.AnyAsync(post => post.Id == id))
+                return NotFound(new { message = "Post not found" });
+
+            if (await _db.SavedPosts.AnyAsync(saved => saved.PostId == id && saved.UserId == userId))
+                return Ok(new { message = "Post is already saved" });
+
+            _db.SavedPosts.Add(new SavedPost { PostId = id, UserId = userId, SavedAt = DateTime.UtcNow });
+            await _db.SaveChangesAsync();
+            return Ok(new { message = "Post saved successfully" });
+        }
+
+        [HttpDelete("{id}/save")]
+        [Authorize]
+        public async Task<IActionResult> UnsavePost(int id)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            var saved = await _db.SavedPosts.FirstOrDefaultAsync(item => item.PostId == id && item.UserId == userId);
+            if (saved == null)
+                return NotFound(new { message = "Saved post not found" });
+
+            _db.SavedPosts.Remove(saved);
+            await _db.SaveChangesAsync();
+            return Ok(new { message = "Post removed from saved items" });
+        }
+
+        [HttpGet("saved")]
+        [Authorize]
+        public async Task<IActionResult> GetSavedPosts()
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            var savedPosts = await _db.SavedPosts
+                .Where(saved => saved.UserId == userId)
+                .Include(saved => saved.Post)
+                    .ThenInclude(post => post.Author)
+                .Include(saved => saved.Post)
+                    .ThenInclude(post => post.PostSubjectTags)
+                        .ThenInclude(tag => tag.SubjectTag)
+                .OrderByDescending(saved => saved.SavedAt)
+                .Select(saved => new
+                {
+                    saved.Post.Id,
+                    saved.Post.Title,
+                    saved.Post.Content,
+                    saved.Post.IsAnonymous,
+                    saved.Post.ViewCount,
+                    saved.Post.UpvoteCount,
+                    saved.Post.DownvoteCount,
+                    saved.Post.CreatedAt,
+                    saved.Post.UserId,
+                    Author = new { saved.Post.Author.Id, saved.Post.Author.Name },
+                    Tags = saved.Post.PostSubjectTags.Select(tag => tag.SubjectTag.Name).ToList(),
+                    SavedAt = saved.SavedAt
+                })
+                .ToListAsync();
+
+            return Ok(savedPosts);
+        }
+
         [HttpPost("{postId}/replies/{replyId}/upvote")]
         [Authorize]
         public async Task<IActionResult> UpvoteReply(int postId, int replyId)

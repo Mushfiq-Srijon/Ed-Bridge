@@ -20,6 +20,7 @@
 
 .navbar-logo {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 0.5rem;
   font-size: 1.8rem;
@@ -27,16 +28,23 @@
   color: white;
   text-decoration: none;
   letter-spacing: -1px;
+  min-width: max-content;
+  overflow: visible;
 }
 
 .logo-text {
+  display: inline-block;
+  white-space: nowrap;
+  padding-right: 0.12em;
   background: white;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   font-size: 2rem;
-  font-weight: 900;
-  letter-spacing: 1px;
+  font-weight: 850;
+  letter-spacing: -0.06em;
+  font-family: "Avenir Next", "Segoe UI Variable", Inter, "Segoe UI", sans-serif;
+  font-style: normal;
   animation: gradientShift 3s ease-in-out infinite;
 }
 
@@ -170,23 +178,62 @@
   cursor: pointer;
 }
 
+.mobile-auth-links { display: none; }
+
 @media (max-width: 768px) {
+  .navbar-container { gap: 0.75rem; padding: 0 1rem; }
+  .navbar-logo .logo-text { font-size: 1.5rem; }
   .nav-menu {
     display: none;
     position: absolute;
-    top: 60px;
+    top: 100%;
     left: 0;
     right: 0;
-    background: rgba(15, 23, 42, 0.95);
+    background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(20px);
     flex-direction: column;
     padding: 2rem;
     gap: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid #dbeafe;
   }
+
+  .nav-menu .nav-link,
+  .nav-menu .nav-button-link { color: #1e3a8a; }
+
+  .nav-menu .nav-link:hover,
+  .nav-menu .nav-button-link:hover { color: #1d4ed8; }
 
   .nav-menu.active {
     display: flex;
+  }
+
+  .mobile-auth-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    margin-top: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #dbeafe;
+  }
+
+  .mobile-auth-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 750;
+  }
+
+  .mobile-auth-login {
+    border: 1px solid #2563eb;
+    color: #1d4ed8;
+  }
+
+  .mobile-auth-signup {
+    background: #ffffff;
+    color: #1d4ed8;
   }
 
   .mobile-toggle {
@@ -196,10 +243,32 @@
   .nav-buttons {
     display: none;
   }
+
+  [data-theme='dark'] .nav-menu {
+    background: rgba(10, 24, 56, 0.98);
+    border-bottom-color: rgba(147, 197, 253, 0.2);
+  }
+
+  [data-theme='dark'] .nav-menu .nav-link,
+  [data-theme='dark'] .nav-menu .nav-button-link { color: #e8f1ff; }
+
+  [data-theme='dark'] .nav-menu .nav-link:hover,
+  [data-theme='dark'] .nav-menu .nav-button-link:hover { color: #93c5fd; }
+
+  [data-theme='dark'] .mobile-auth-links { border-top-color: rgba(147, 197, 253, 0.2); }
+
+  [data-theme='dark'] .mobile-auth-login {
+    border-color: rgba(147, 197, 253, 0.62);
+    color: #e8f1ff;
+  }
 }
 
 .nav-username {
   color: white;
   font-weight: 600;
   padding: 0.7rem 1rem;
+}
+
+[data-theme='light'] .navbar {
+  background: linear-gradient(135deg, rgba(15, 58, 143, .96), rgba(37, 99, 235, .94));
 }

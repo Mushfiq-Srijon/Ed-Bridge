@@ -182,6 +182,64 @@ namespace EdBridge.API.Controllers
 
             return Ok(new { message = "Profile photo removed" });
         }
+
+        [HttpPut("password")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest req)
+        {
+            if (string.IsNullOrWhiteSpace(req.CurrentPassword) || string.IsNullOrWhiteSpace(req.NewPassword))
+                return BadRequest(new { message = "Current and new passwords are required" });
+
+            if (req.NewPassword.Length < 6)
+                return BadRequest(new { message = "New password must be at least 6 characters" });
+
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            var user = await _db.Users.FindAsync(userId);
+
+            if (user == null)
+                return NotFound(new { message = "User not found" });
+
+            if (!_authService.VerifyPassword(req.CurrentPassword, user.PasswordHash))
+                return BadRequest(new { message = "Current password is incorrect" });
+
+            user.PasswordHash = _authService.HashPassword(req.NewPassword);
+            user.UpdatedAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync();
+
+            return Ok(new { message = "Password changed successfully" });
+        }
+
+        [HttpDelete("account")]
+        [Authorize]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            var user = await _db.Users.FindAsync(userId);
+
+            if (user == null)
+                return NotFound(new { message = "User not found" });
+
+            // Remove direct, user-owned records first so the operation remains
+            // safe even when a deployment uses restrictive foreign keys.
+            _db.Messages.RemoveRange(_db.Messages.Where(message => message.SenderId == userId || message.ReceiverId == userId));
+            _db.SavedNotes.RemoveRange(_db.SavedNotes.Where(saved => saved.UserId == userId));
+            _db.SavedListings.RemoveRange(_db.SavedListings.Where(saved => saved.UserId == userId));
+            _db.SavedPosts.RemoveRange(_db.SavedPosts.Where(saved => saved.UserId == userId));
+            _db.NoteRatings.RemoveRange(_db.NoteRatings.Where(rating => rating.UserId == userId));
+            _db.NoteComments.RemoveRange(_db.NoteComments.Where(comment => comment.UserId == userId));
+            _db.PostUpvotes.RemoveRange(_db.PostUpvotes.Where(vote => vote.UserId == userId));
+            _db.PostDownvotes.RemoveRange(_db.PostDownvotes.Where(vote => vote.UserId == userId));
+            _db.ReplyUpvotes.RemoveRange(_db.ReplyUpvotes.Where(vote => vote.UserId == userId));
+            _db.ReplyDownvotes.RemoveRange(_db.ReplyDownvotes.Where(vote => vote.UserId == userId));
+            _db.PostFollows.RemoveRange(_db.PostFollows.Where(follow => follow.UserId == userId));
+            _db.PostViews.RemoveRange(_db.PostViews.Where(view => view.UserId == userId));
+            _db.NoteViews.RemoveRange(_db.NoteViews.Where(view => view.UserId == userId));
+
+            _db.Users.Remove(user);
+            await _db.SaveChangesAsync();
+
+            return Ok(new { message = "Account deleted successfully" });
+        }
     }
 
     public class RegisterRequest
@@ -195,5 +253,11 @@ namespace EdBridge.API.Controllers
     {
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+    }
+
+    public class ChangePasswordRequest
+    {
+        public string CurrentPassword { get; set; } = string.Empty;
+        public string NewPassword { get; set; } = string.Empty;
     }
 }

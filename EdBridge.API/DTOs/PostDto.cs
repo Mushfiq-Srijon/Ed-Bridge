@@ -59,6 +59,8 @@ namespace EdBridge.API.DTOs
 
         public bool UserHasDownvoted { get; set; }
 
+        public bool UserHasSaved { get; set; }
+
         public DateTime CreatedAt { get; set; }
 
         public DateTime? UpdatedAt { get; set; }

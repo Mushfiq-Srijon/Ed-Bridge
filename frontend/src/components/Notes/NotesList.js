@@ -3,6 +3,7 @@ import NoteCard from './NoteCard';
 import NoteSearch from './NoteSearch';
 import { notesAPI } from '../../services/api';
 import { transformNote } from '../../utils/noteAdapter';
+import Pagination from '../Pagination';
 import '../../styles/NotesList.css';
 
 export default function NotesList({ onViewNote, onCreateNote }) {
@@ -13,6 +14,8 @@ export default function NotesList({ onViewNote, onCreateNote }) {
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 6;
 
   useEffect(() => {
     loadNotes();
@@ -23,7 +26,7 @@ export default function NotesList({ onViewNote, onCreateNote }) {
     try {
       setLoading(true);
       setError('');
-      const data = await notesAPI.getAll();
+      const data = await notesAPI.getAll(1, 100);
       const formatted = data.map(transformNote);
       setNotes(formatted);
       setFilteredNotes(formatted);
@@ -62,13 +65,21 @@ export default function NotesList({ onViewNote, onCreateNote }) {
 
   const handleSearch = (query) => {
     setSearchTerm(query);
+    setCurrentPage(1);
     filterNotes(query, selectedSubject);
   };
 
   const handleSubjectFilter = (subject) => {
     setSelectedSubject(subject);
+    setCurrentPage(1);
     filterNotes(searchTerm, subject);
   };
+
+  const totalPages = Math.max(1, Math.ceil(filteredNotes.length / pageSize));
+  const visibleNotes = filteredNotes.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   if (loading) {
     return (
@@ -119,7 +130,7 @@ export default function NotesList({ onViewNote, onCreateNote }) {
             <p>No notes found.</p>
           </div>
         ) : (
-          filteredNotes.map((note) => (
+          visibleNotes.map((note) => (
             <NoteCard
               key={note.id}
               note={note}
@@ -128,6 +139,12 @@ export default function NotesList({ onViewNote, onCreateNote }) {
           ))
         )}
       </div>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 }

@@ -87,6 +87,7 @@ export default function MessagesPage() {
                     <small>{conversation.content}</small>
                   </span>
                   <span className="conversation-time">
+                    {!conversation.isRead && <b className="conversation-unread-dot" aria-label="Unread conversation">●</b>}
                     {new Date(conversation.createdAt).toLocaleDateString()}
                   </span>
                 </button>

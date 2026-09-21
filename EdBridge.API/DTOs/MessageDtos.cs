@@ -11,6 +11,7 @@ namespace EdBridge.API.DTOs
         public string ReceiverName { get; set; } = string.Empty;
         public int ListingId { get; set; }
         public string ListingTitle { get; set; } = string.Empty;
+        public bool IsRead { get; set; }
     }
 
     public class SendMessageRequest

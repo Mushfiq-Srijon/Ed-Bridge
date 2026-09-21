@@ -35,7 +35,8 @@ namespace EdBridge.API.Services
                 ReceiverId = m.ReceiverId,
                 ReceiverName = m.Receiver.Name,
                 ListingId = m.ListingId,
-                ListingTitle = m.Listing?.Title ?? ""
+                ListingTitle = m.Listing?.Title ?? "",
+                IsRead = m.IsRead
             }).ToList();
         }
 
@@ -81,7 +82,8 @@ namespace EdBridge.API.Services
                 ReceiverId = message.ReceiverId,
                 ReceiverName = message.Receiver.Name,
                 ListingId = message.ListingId,
-                ListingTitle = listing.Title
+                ListingTitle = listing.Title,
+                IsRead = message.IsRead
             };
         }
 
@@ -115,8 +117,32 @@ namespace EdBridge.API.Services
                 ReceiverId = m.ReceiverId,
                 ReceiverName = m.Receiver.Name,
                 ListingId = m.ListingId,
-                ListingTitle = m.Listing?.Title ?? ""
+                ListingTitle = m.Listing?.Title ?? "",
+                IsRead = m.IsRead
             }).ToList();
+        }
+
+        public async Task MarkListingMessagesReadAsync(int listingId, int userId)
+        {
+            var unreadMessages = await _db.Messages
+                .Where(message => message.ListingId == listingId && message.ReceiverId == userId && !message.IsRead)
+                .ToListAsync();
+
+            if (unreadMessages.Count == 0) return;
+
+            unreadMessages.ForEach(message => message.IsRead = true);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task<int> GetUnreadConversationCountAsync(int userId)
+        {
+            return await _db.Messages
+                .Where(message => message.ReceiverId == userId && !message.IsRead)
+                // The navbar badge represents people to respond to, not the
+                // number of individual unread messages they sent.
+                .Select(message => message.SenderId)
+                .Distinct()
+                .CountAsync();
         }
     }
 }

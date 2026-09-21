@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../styles/ProfileDropdown.css';
 
-export default function ProfileDropdown() {
+export default function ProfileDropdown({ unreadConversations = 0 }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const { user, logout } = useAuth();
@@ -63,7 +63,7 @@ export default function ProfileDropdown() {
             className="dropdown-item"
             onClick={() => handleMenuClick('/messages')}
           >
-            💬 Messages
+            💬 Messages {unreadConversations > 0 && <span className="message-count">({unreadConversations})</span>}
           </button>
 
           {user?.role === 'Admin' && (
@@ -87,13 +87,6 @@ export default function ProfileDropdown() {
             onClick={() => handleMenuClick('/dashboard')}
           >
             📊 My Dashboard
-          </button>
-
-          <button
-            className="dropdown-item"
-            onClick={() => handleMenuClick('/my-listings')}
-          >
-            📦 My Listings
           </button>
 
           <button

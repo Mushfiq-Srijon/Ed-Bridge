@@ -13,6 +13,8 @@ export default function ListingDetailsPage() {
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isMessagingOpen, setIsMessagingOpen] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
 
   useEffect(() => {
     listingsAPI.getById(id)
@@ -66,6 +68,24 @@ export default function ListingDetailsPage() {
       return;
     }
     setIsMessagingOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      setSaveLoading(true);
+      if (isSaved) await listingsAPI.unsave(id);
+      else await listingsAPI.save(id);
+      setIsSaved((saved) => !saved);
+    } catch (error) {
+      alert(error.message || 'Unable to update saved item.');
+    } finally {
+      setSaveLoading(false);
+    }
   };
 
   const handleReportListing = async () => {
@@ -220,6 +240,14 @@ export default function ListingDetailsPage() {
                     onClick={handleContactSeller}
                   >
                     💬 Contact Seller
+                  </button>
+
+                  <button
+                    className={`action-btn save-btn ${isSaved ? 'active' : ''}`}
+                    onClick={handleSave}
+                    disabled={saveLoading}
+                  >
+                    {isSaved ? '🔖 Saved' : '🔖 Save listing'}
                   </button>
 
                   <button

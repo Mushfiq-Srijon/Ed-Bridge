@@ -11,6 +11,8 @@ export default function PostDetail({ post, onBack, onDeleted }) {
   const [editTitle, setEditTitle] = useState(post.title);
   const [editContent, setEditContent] = useState(post.content);
   const [voteLoading, setVoteLoading] = useState(false);
+  const [isSaved, setIsSaved] = useState(Boolean(post.userHasSaved));
+  const [saveLoading, setSaveLoading] = useState(false);
 
   const isOwner = user && currentPost.authorId === user.id;
 
@@ -88,6 +90,21 @@ export default function PostDetail({ post, onBack, onDeleted }) {
     } catch (error) {
       console.error('Failed to update follow status:', error);
       alert(error.message || 'Failed to update follow status');
+    }
+  };
+
+  const handleSave = async () => {
+    if (saveLoading) return;
+
+    try {
+      setSaveLoading(true);
+      if (isSaved) await forumAPI.unsave(currentPost.id);
+      else await forumAPI.save(currentPost.id);
+      setIsSaved((saved) => !saved);
+    } catch (error) {
+      alert(error.message || 'Unable to update saved item.');
+    } finally {
+      setSaveLoading(false);
     }
   };
 
@@ -300,6 +317,14 @@ export default function PostDetail({ post, onBack, onDeleted }) {
           onClick={handleFollow}
         >
           🔔 Follow
+        </button>
+
+        <button
+          className={'action-btn save-btn ' + (isSaved ? 'active' : '')}
+          onClick={handleSave}
+          disabled={saveLoading}
+        >
+          {isSaved ? '🔖 Saved' : '🔖 Save'}
         </button>
 
         {!isOwner && (

@@ -133,3 +133,5 @@
     display: none;
   }
 }
+
+.conversation-unread-dot { color: #dc2626; margin-right: .35rem; font-size: .8rem; }
