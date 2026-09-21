@@ -277,3 +277,44 @@
     width: 100%;
   }
 }
+
+/* Marketplace contrast and keyboard visibility in both themes */
+.marketplace-page {
+  color: var(--text-primary);
+}
+
+.marketplace-page button:focus-visible,
+.marketplace-page select:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent-color) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.marketplace-page .category-navigation,
+.marketplace-page .no-results {
+  border: 1px solid var(--border-color);
+}
+
+.marketplace-page .category-button {
+  color: var(--text-primary);
+}
+
+.marketplace-page .category-button:hover {
+  background: var(--bg-secondary);
+}
+
+.marketplace-page .category-button.active,
+.marketplace-page .no-results button {
+  background: var(--accent-color);
+  color: #ffffff;
+}
+
+.marketplace-page .sort-select {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.marketplace-page .sort-select option {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}

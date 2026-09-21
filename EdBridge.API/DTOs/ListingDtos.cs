@@ -43,6 +43,7 @@ namespace EdBridge.API.DTOs
         public string? EducationLevel { get; set; }
         public string? ImageUrl { get; set; }
         public List<int> SubjectTagIds { get; set; } = new();
+        public string? CustomSubject { get; set; }
     }
 
     public class UpdateListingRequest

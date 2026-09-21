@@ -5,11 +5,18 @@ export default function ListingCard({ listing, onClick }) {
   return (
     <div className="listing-card" onClick={() => onClick(listing)}>
       <div className="listing-image-container">
-        <img
-          src={listing.image}
-          alt={listing.title}
-          className="listing-image"
-        />
+       <img
+  src={
+    listing.imageUrl ||
+    "https://via.placeholder.com/800x600?text=No+Image"
+  }
+  alt={listing.title}
+  className="listing-image"
+  onError={(event) => {
+    event.currentTarget.src =
+      "https://via.placeholder.com/800x600?text=Image+Unavailable";
+  }}
+/>
 
         <span className={`condition-badge ${listing.condition.toLowerCase().replace(" ", "-")}`}>
           {listing.condition}
@@ -40,7 +47,7 @@ export default function ListingCard({ listing, onClick }) {
         </div>
 
         <div className="listing-tags">
-          {listing.subjectTags.slice(0, 2).map((tag) => (
+          {(listing.subjectTags || []).slice(0, 2).map((tag) => (
             <span key={tag} className="subject-tag">
               {tag}
             </span>

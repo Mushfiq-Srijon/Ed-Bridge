@@ -72,3 +72,34 @@
 .price-inputs span {
   color: var(--text-secondary);
 }
+
+/* Keep filter controls readable when the active theme changes. */
+.marketplace-filters {
+  color: var(--text-primary);
+  box-shadow: 0 8px 24px var(--shadow-color);
+}
+
+.filters-header button {
+  color: var(--accent-color);
+}
+
+.filter-group label {
+  color: var(--text-primary);
+}
+
+.filter-group select,
+.filter-group input {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.filter-group select option {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 22%, transparent);
+}

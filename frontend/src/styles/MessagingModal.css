@@ -244,3 +244,52 @@
     max-width: 250px;
   }
 }
+
+/* Messaging is part of the listing experience; use the same theme tokens. */
+.messaging-modal-content,
+.messaging-header,
+.message-form {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.messaging-header h2 {
+  color: var(--text-primary);
+}
+
+.messaging-header p,
+.messages-loading,
+.no-messages p,
+.message-time {
+  color: var(--text-secondary);
+}
+
+.messages-container {
+  background: var(--bg-secondary);
+}
+
+.message-item.received .message-avatar {
+  background: var(--border-color);
+  color: var(--text-primary);
+}
+
+.message-item.received .message-bubble {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.message-input {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.message-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.message-input:disabled {
+  background: var(--bg-secondary);
+}

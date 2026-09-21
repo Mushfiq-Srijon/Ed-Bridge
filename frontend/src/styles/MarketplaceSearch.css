@@ -44,3 +44,25 @@
   color: var(--text-secondary);
   cursor: pointer;
 }
+
+.marketplace-search input {
+  border-color: color-mix(in srgb, #ffffff 35%, transparent);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.marketplace-search input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.9;
+}
+
+.marketplace-search input:focus {
+  border-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
+}
+
+.marketplace-search .search-icon,
+.marketplace-search .clear-search {
+  color: var(--text-secondary);
+}
