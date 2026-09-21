@@ -1,7 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
+import { listingsAPI } from "../../services/api";
 import "../../styles/ListingCard.css";
 
 export default function ListingCard({ listing, onClick }) {
+  const [isSaved, setIsSaved] = useState(Boolean(listing.isSaved));
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async (event) => {
+    event.stopPropagation();
+    if (saving) return;
+
+    try {
+      setSaving(true);
+      if (isSaved) await listingsAPI.unsave(listing.id);
+      else await listingsAPI.save(listing.id);
+      setIsSaved((saved) => !saved);
+    } catch (error) {
+      alert(error.message || "Unable to update saved item.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="listing-card" onClick={() => onClick(listing)}>
       <div className="listing-image-container">
@@ -63,6 +83,10 @@ export default function ListingCard({ listing, onClick }) {
             <span className="seller-name">{listing.seller?.name}</span>
           </div>
         </div>
+
+        <button className={`listing-save-button ${isSaved ? "is-saved" : ""}`} onClick={handleSave} disabled={saving}>
+          {isSaved ? "🔖 Saved" : "🔖 Save listing"}
+        </button>
       </div>
     </div>
   );

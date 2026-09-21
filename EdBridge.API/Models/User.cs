@@ -31,5 +31,7 @@ namespace EdBridge.API.Models
 public ICollection<Note> Notes { get; set; } = new List<Note>();
 public ICollection<Post> Posts { get; set; } = new List<Post>();
 public ICollection<SavedNote> SavedNotes { get; set; } = new List<SavedNote>();
+public ICollection<SavedListing> SavedListings { get; set; } = new List<SavedListing>();
+public ICollection<SavedPost> SavedPosts { get; set; } = new List<SavedPost>();
     }
 }

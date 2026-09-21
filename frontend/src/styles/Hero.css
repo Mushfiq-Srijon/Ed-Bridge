@@ -86,6 +86,16 @@
   flex-wrap: wrap;
 }
 
+.hero-buttons .btn { text-decoration: none; }
+
+.hero-note {
+  align-self: center;
+  max-width: 260px;
+  color: rgba(226, 232, 240, .72);
+  font-size: .9rem;
+  line-height: 1.5;
+}
+
 .btn {
   padding: 1.1rem 2.5rem;
   border-radius: 12px;
@@ -205,12 +215,15 @@
 
   .hero-buttons {
     flex-direction: column;
+    align-items: stretch;
   }
 
   .btn {
     width: 100%;
     justify-content: center;
   }
+
+  .hero-note { max-width: none; text-align: center; }
 
   .hero-visual {
     gap: 1rem;

@@ -12,7 +12,6 @@ export default function LoginForm() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    rememberMe: false,
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -20,10 +19,10 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: value
     }));
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
@@ -116,16 +115,8 @@ export default function LoginForm() {
         {errors.password && <span className="error-text">⚠️ {errors.password}</span>}
       </div>
 
-      <div className="form-group checkbox-group">
-        <input
-          type="checkbox"
-          id="rememberMe"
-          name="rememberMe"
-          checked={formData.rememberMe}
-          onChange={handleChange}
-          disabled={loading}
-        />
-        <label htmlFor="rememberMe">Remember me</label>
+      <div className="auth-form-helper">
+        <span>Secure sign-in to your Ed-Bridge account</span>
         <a href="#forgot" className="forgot-password">Forgot password?</a>
       </div>
 

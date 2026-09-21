@@ -61,6 +61,8 @@ export const transformPost = (post) => ({
   userHasUpvoted: Boolean(post.userHasUpvoted ?? post.UserHasUpvoted),
   userHasDownvoted: Boolean(post.userHasDownvoted ?? post.UserHasDownvoted),
 
+  userHasSaved: Boolean(post.userHasSaved ?? post.UserHasSaved),
+
   userIsFollowing: false,
 
   followers: post.followers || 0,

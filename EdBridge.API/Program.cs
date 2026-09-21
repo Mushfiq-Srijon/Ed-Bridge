@@ -8,6 +8,12 @@ using EdBridge.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Keep local API diagnostics on the console. The Windows EventLog provider
+// can be unavailable for non-elevated development processes and may turn a
+// normal request exception into a second logging failure.
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
 // Add DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(
@@ -71,7 +77,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// Redirect only when the current host is actually listening on HTTPS. This
+// keeps the documented local HTTP profile usable while preserving HTTPS
+// redirection for deployments that expose an HTTPS endpoint.
+if (app.Urls.Any(url => url.StartsWith("https://", StringComparison.OrdinalIgnoreCase)))
+{
+    app.UseHttpsRedirection();
+}
 app.UseCors("AllowReact");
 app.UseAuthentication();
 app.UseMiddleware<SuspensionCheckMiddleware>();

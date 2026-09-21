@@ -215,3 +215,22 @@
 .original-price {
   color: var(--text-secondary);
 }
+
+.listing-save-button {
+  width: 100%;
+  margin-top: 0.85rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--border-color);
+  border-radius: 9px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-weight: 700;
+  transition: 0.2s ease;
+}
+
+.listing-save-button:hover, .listing-save-button.is-saved {
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+  background: color-mix(in srgb, var(--accent-color) 10%, var(--bg-card));
+}

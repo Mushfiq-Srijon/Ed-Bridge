@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import '../styles/Hero.css';
 
 export default function Hero() {
@@ -13,8 +14,8 @@ export default function Hero() {
             Join a thriving community of students sharing knowledge, resources, and opportunities.
           </p>
           <div className="hero-buttons">
-            <button className="btn btn-primary">Start Learning</button>
-            <button className="btn btn-secondary">Browse Resources</button>
+            <Link className="btn btn-primary" to="/forum">Join the community <span aria-hidden="true">→</span></Link>
+            <span className="hero-note">One calm place for questions, notes, and useful academic finds.</span>
           </div>
         </div>
 

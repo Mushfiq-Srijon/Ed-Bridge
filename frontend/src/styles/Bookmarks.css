@@ -233,3 +233,30 @@
     grid-template-columns: 1fr;
   }
 }
+
+.saved-tabs { display: flex; gap: .65rem; flex-wrap: wrap; margin: 1.5rem 0 2rem; }
+.saved-tabs button { border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-secondary); border-radius: 999px; padding: .65rem 1rem; cursor: pointer; transition: .2s ease; }
+.saved-tabs button:hover, .saved-tabs button.active { background: var(--accent-color); border-color: var(--accent-color); color: #fff; }
+.saved-section { margin-top: 2rem; }
+.saved-section-heading { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem; }
+.saved-section-heading h2 { margin: 0; color: var(--text-primary); }
+.saved-section-heading span { color: var(--text-secondary); }
+.saved-items-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; }
+.saved-item-card { overflow: hidden; border: 1px solid var(--border-color); border-radius: 18px; background: var(--bg-card); box-shadow: var(--shadow-sm); }
+.saved-item-visual { height: 170px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: var(--bg-secondary); }
+.saved-item-visual img { width: 100%; height: 100%; object-fit: cover; }
+.saved-item-visual span { font-size: 3rem; }
+.saved-forum-visual { color: #fff; font-size: 3rem; background: linear-gradient(135deg, #2563eb, #4f46e5); }
+.saved-item-body { padding: 1rem; }
+.saved-item-type { color: var(--accent-color); font-size: .7rem; font-weight: 800; letter-spacing: .12em; }
+.saved-item-body h3 { margin: .4rem 0; color: var(--text-primary); }
+.saved-item-body p { min-height: 2.8em; margin: 0 0 .8rem; color: var(--text-secondary); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.saved-item-meta { display: flex; justify-content: space-between; gap: .5rem; color: var(--text-secondary); font-size: .82rem; }
+.saved-item-actions { display: flex; gap: .6rem; margin-top: 1rem; }
+.saved-item-actions button { flex: 1; }
+
+@media (max-width: 640px) {
+  .saved-items-grid { grid-template-columns: 1fr; }
+  .saved-item-visual { height: 190px; }
+  .saved-count { margin-top: 1rem; }
+}

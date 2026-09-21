@@ -26,8 +26,17 @@ namespace EdBridge.API.Controllers
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
 
+            await _messageService.MarkListingMessagesReadAsync(listingId, userId);
             var messages = await _messageService.GetMessagesForListingAsync(listingId, userId, page);
             return Ok(messages);
+        }
+
+        [HttpPut("listing/{listingId}/read")]
+        public async Task<IActionResult> MarkListingMessagesRead(int listingId)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            await _messageService.MarkListingMessagesReadAsync(listingId, userId);
+            return Ok(new { message = "Conversation marked as read" });
         }
 
         [HttpPost("listing/{listingId}")]
@@ -56,6 +65,14 @@ namespace EdBridge.API.Controllers
 
             var conversations = await _messageService.GetConversationsAsync(userId);
             return Ok(conversations);
+        }
+
+        [HttpGet("unread-count")]
+        public async Task<IActionResult> GetUnreadConversationCount()
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            var count = await _messageService.GetUnreadConversationCountAsync(userId);
+            return Ok(new { count });
         }
     }
 }

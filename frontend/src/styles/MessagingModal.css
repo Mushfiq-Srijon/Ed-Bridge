@@ -19,6 +19,7 @@
   flex-direction: column;
   box-shadow: -4px 0 12px rgba(0, 0, 0, 0.15);
   animation: slideInRight 0.3s ease-out;
+  border-left: 1px solid var(--border-color);
 }
 
 @keyframes slideInRight {
@@ -39,6 +40,7 @@
   justify-content: space-between;
   align-items: flex-start;
   background: white;
+  gap: 1rem;
 }
 
 .messaging-header h2 {
@@ -69,6 +71,8 @@
   border-radius: 6px;
   transition: all 0.2s ease;
 }
+
+.messaging-modal-content .modal-close { flex-shrink: 0; }
 
 .modal-close:hover {
   background: #f3f4f6;
@@ -235,6 +239,9 @@
   cursor: not-allowed;
 }
 
+.message-item.sent .message-bubble { border-bottom-right-radius: 4px; }
+.message-item.received .message-bubble { border-bottom-left-radius: 4px; }
+
 @media (max-width: 768px) {
   .messaging-modal-content {
     max-width: 100%;
@@ -243,6 +250,11 @@
   .message-bubble {
     max-width: 250px;
   }
+
+  .messaging-header { padding: 1rem; }
+  .messages-container { padding: 1rem; }
+  .message-form { padding: .8rem 1rem; }
+  .send-btn { padding-inline: .8rem; }
 }
 
 /* Messaging is part of the listing experience; use the same theme tokens. */

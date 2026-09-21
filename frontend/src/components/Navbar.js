@@ -1,15 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import '../styles/Navbar.css';
 import ProfileDropdown from './ProfileDropdown';
+import { listingsAPI } from '../services/api';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, token } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const [unreadConversations, setUnreadConversations] = useState(0);
+
+  useEffect(() => {
+    if (!token) {
+      setUnreadConversations(0);
+      return undefined;
+    }
+
+    let active = true;
+    const loadUnreadCount = async () => {
+      try {
+        const response = await listingsAPI.getUnreadConversationCount();
+        if (active) setUnreadConversations(response.count || 0);
+      } catch (error) {
+        console.error('Failed to load unread message count:', error);
+      }
+    };
+
+    loadUnreadCount();
+    const intervalId = window.setInterval(loadUnreadCount, 10000);
+    return () => {
+      active = false;
+      window.clearInterval(intervalId);
+    };
+  }, [token]);
 
   const handleScrollToSection = (sectionId) => {
     const scrollToSection = () => {
@@ -102,11 +128,29 @@ export default function Navbar() {
               {theme === 'light' ? '🌙' : '☀️'}
             </button>
           </li>
+          {!token && (
+            <li className="mobile-auth-links">
+              <Link
+                to="/login"
+                className="mobile-auth-link mobile-auth-login"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Login
+              </Link>
+              <Link
+                to="/register"
+                className="mobile-auth-link mobile-auth-signup"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Sign Up
+              </Link>
+            </li>
+          )}
         </ul>
 
         <div className="nav-buttons">
           {token && user ? (
-            <ProfileDropdown />
+            <ProfileDropdown unreadConversations={unreadConversations} />
           ) : (
             <>
               <Link to="/login" className="btn-login">Login</Link>

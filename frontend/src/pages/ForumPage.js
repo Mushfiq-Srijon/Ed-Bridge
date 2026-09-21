@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import PostList from '../components/Forum/PostList';
 import CreatePostModal from '../components/Forum/CreatePostModal';
 import SearchFilter, { OTHER_SUBJECT_FILTER } from '../components/Forum/SearchFilter';
+import Pagination from '../components/Pagination';
 import { forumAPI } from '../services/api';
 import { transformPost } from '../utils/forumAdapter';
 import '../styles/Forum.css';
 
 export default function ForumPage() {
+  const location = useLocation();
   const [posts, setPosts] = useState([]);
   const [filteredPosts, setFilteredPosts] = useState([]);
 
@@ -15,6 +18,9 @@ export default function ForumPage() {
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [customSubjectFilter, setCustomSubjectFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isPostDetailOpen, setIsPostDetailOpen] = useState(false);
+  const pageSize = 6;
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -37,7 +43,7 @@ export default function ForumPage() {
       setLoading(true);
       setError('');
 
-      const data = await forumAPI.getPosts();
+      const data = await forumAPI.getPosts(1, 100);
 
       const formattedPosts = sortPosts(data.map(transformPost));
 
@@ -54,12 +60,14 @@ export default function ForumPage() {
 
   const handleSearch = (query) => {
     setSearchQuery(query);
+    setCurrentPage(1);
     filterPosts(query, selectedSubject, customSubjectFilter);
   };
 
   const handleSubjectFilter = (subject, customSubject = '') => {
     setSelectedSubject(subject);
     setCustomSubjectFilter(customSubject);
+    setCurrentPage(1);
     filterPosts(searchQuery, subject, customSubject);
   };
 
@@ -205,10 +213,19 @@ export default function ForumPage() {
         </div>
 
         <PostList
-          posts={filteredPosts}
+          posts={filteredPosts.slice((currentPage - 1) * pageSize, currentPage * pageSize)}
           onSelectPost={() => { }}
           onPostDeleted={loadPosts}
+          onDetailStateChange={setIsPostDetailOpen}
+          initialPostId={location.state?.openPostId}
         />
+        {!isPostDetailOpen && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={Math.max(1, Math.ceil(filteredPosts.length / pageSize))}
+            onPageChange={setCurrentPage}
+          />
+        )}
       </main>
 
       {/* CREATE POST MODAL */}

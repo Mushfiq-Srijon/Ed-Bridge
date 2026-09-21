@@ -50,6 +50,8 @@ namespace EdBridge.API.Services
                 .AnyAsync(upvote => upvote.PostId == id && upvote.UserId == currentUserId.Value);
             var userHasDownvoted = currentUserId.HasValue && await _db.PostDownvotes
                 .AnyAsync(downvote => downvote.PostId == id && downvote.UserId == currentUserId.Value);
+            var userHasSaved = currentUserId.HasValue && await _db.SavedPosts
+                .AnyAsync(saved => saved.PostId == id && saved.UserId == currentUserId.Value);
 
             var replyIds = post.Replies.Select(reply => reply.Id).ToList();
             var upvotedReplyIds = currentUserId.HasValue
@@ -97,6 +99,7 @@ namespace EdBridge.API.Services
                 DownvoteCount = post.DownvoteCount,
                 UserHasUpvoted = userHasUpvoted,
                 UserHasDownvoted = userHasDownvoted,
+                UserHasSaved = userHasSaved,
                 CreatedAt = post.CreatedAt,
                 UpdatedAt = post.UpdatedAt,
                 UserId = post.UserId,

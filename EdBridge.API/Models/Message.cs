@@ -20,5 +20,7 @@ namespace EdBridge.API.Models
         public int ReceiverId { get; set; }
         [ForeignKey("ReceiverId")]
         public User Receiver { get; set; }
+
+        public bool IsRead { get; set; } = false;
     }
 }
