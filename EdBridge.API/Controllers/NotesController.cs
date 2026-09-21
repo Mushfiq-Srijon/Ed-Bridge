@@ -31,20 +31,20 @@ namespace EdBridge.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetNote(int id)
-        {
-            int? userId = null;
+public async Task<IActionResult> GetNote(int id, [FromQuery] bool countView = true)
+{
+    int? userId = null;
 
-            if (User.Identity != null && User.Identity.IsAuthenticated)
-                userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+    if (User.Identity != null && User.Identity.IsAuthenticated)
+        userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
 
-            var note = await _noteService.GetNoteByIdAsync(id, userId);
+    var note = await _noteService.GetNoteByIdAsync(id, userId, countView);
 
-            if (note == null)
-                return NotFound(new { message = "Note not found" });
+    if (note == null)
+        return NotFound(new { message = "Note not found" });
 
-            return Ok(note);
-        }
+    return Ok(note);
+}
 
         [HttpGet("search")]
         public async Task<IActionResult> SearchNotes([FromQuery] string query, [FromQuery] int page = 1)
@@ -215,47 +215,79 @@ namespace EdBridge.API.Controllers
         }
 
         [HttpGet("{id}/download")]
-        public async Task<IActionResult> DownloadNote(int id)
+public async Task<IActionResult> DownloadNote(int id)
+{
+    var note = await _db.Notes.FindAsync(id);
+
+    if (note == null)
+        return NotFound(new { message = "Note not found" });
+
+    // No PDF available
+    if (string.IsNullOrWhiteSpace(note.PdfPath))
+    {
+        return Ok(new
         {
-            var note = await _db.Notes.FindAsync(id);
+            downloaded = false,
+            message = "No PDF available for this note.",
+            downloadCount = note.DownloadCount
+        });
+    }
 
-            if (note == null)
-                return NotFound(new { message = "Note not found" });
+    var filePath = Path.Combine(
+        _env.WebRootPath ?? "wwwroot",
+        note.PdfPath.Replace(
+            "/",
+            Path.DirectorySeparatorChar.ToString()
+        )
+    );
 
-            if (string.IsNullOrEmpty(note.PdfPath))
+    // PDF path exists in database, but actual file is missing
+    if (!System.IO.File.Exists(filePath))
+    {
+        return NotFound(new
+        {
+            message = "PDF file not found on server"
+        });
+    }
+
+    // Increase count only when the PDF actually exists
+    var downloadIncremented =
+        await _noteService.IncrementDownloadAsync(id);
+
+    if (!downloadIncremented)
+    {
+        return StatusCode(
+            500,
+            new
             {
-                await _noteService.IncrementDownloadAsync(id);
-
-                return Ok(new
-                {
-                    message = "No PDF available",
-                    downloadCount = note.DownloadCount + 1
-                });
+                message = "Could not update download count"
             }
+        );
+    }
 
-            var filePath = Path.Combine(
-                _env.WebRootPath ?? "wwwroot",
-                note.PdfPath.Replace(
-                    "/",
-                    Path.DirectorySeparatorChar.ToString()
-                )
-            );
+    // Get the updated count
+    var updatedNote = await _db.Notes
+        .AsNoTracking()
+        .Where(n => n.Id == id)
+        .Select(n => new
+        {
+            n.DownloadCount
+        })
+        .FirstAsync();
 
-            if (!System.IO.File.Exists(filePath))
-                return NotFound(new { message = "PDF file not found on server" });
+    var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
 
-            await _noteService.IncrementDownloadAsync(id);
+    var fileName = $"{note.Title.Replace(" ", "_")}.pdf";
 
-            var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
+    Response.Headers["X-Download-Count"] =
+        updatedNote.DownloadCount.ToString();
 
-            var fileName = $"{note.Title.Replace(" ", "_")}.pdf";
-
-            return File(
-                fileBytes,
-                "application/pdf",
-                fileName
-            );
-        }
+    return File(
+        fileBytes,
+        "application/pdf",
+        fileName
+    );
+}
 
         [HttpPost("{id}/comment")]
         [Authorize]

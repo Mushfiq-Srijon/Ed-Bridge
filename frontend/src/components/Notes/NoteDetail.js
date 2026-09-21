@@ -3,27 +3,18 @@ import { notesAPI } from '../../services/api';
 import { transformNote } from '../../utils/noteAdapter';
 import { useAuth } from '../../context/AuthContext';
 import '../../styles/NoteDetail.css';
-
+const viewedNotes = new Set();
 const API_BASE = 'http://localhost:5180';
 
 function StarRating({ value, onChange, readOnly = false }) {
   const [hovered, setHovered] = useState(0);
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        gap: '4px',
-        cursor: readOnly ? 'default' : 'pointer'
-      }}
-    >
+    <div className="star-rating">
       {[1, 2, 3, 4, 5].map((star) => (
         <span
           key={star}
-          style={{
-            fontSize: '24px',
-            color: (hovered || value) >= star ? '#f5a623' : '#ccc'
-          }}
+          className={(hovered || value) >= star ? 'active' : ''}
           onMouseEnter={() => !readOnly && setHovered(star)}
           onMouseLeave={() => !readOnly && setHovered(0)}
           onClick={() => !readOnly && onChange && onChange(star)}
@@ -57,37 +48,95 @@ export default function NoteDetail({ noteId, onBack }) {
   const [reportReason, setReportReason] = useState('');
   const [reportSubmitting, setReportSubmitting] = useState(false);
 
+  const [isSaved, setIsSaved] = useState(false);
+  const [saveSubmitting, setSaveSubmitting] = useState(false);
+
+  const [downloadSubmitting, setDownloadSubmitting] = useState(false);
+
   useEffect(() => {
     loadNote();
   }, [noteId]);
 
   const loadNote = async () => {
-    try {
-      setLoading(true);
-      setError('');
+  try {
+    setLoading(true);
+    setError('');
 
-      const data = await notesAPI.getById(noteId);
-      const formatted = transformNote(data);
+    // Check if already viewed in this session
+    const alreadyViewed = viewedNotes.has(noteId);
+const data = await notesAPI.getById(noteId, !alreadyViewed);
+    const formatted = transformNote(data);
 
-      setNote(formatted);
-      setEditTitle(formatted.title);
-      setEditContent(formatted.content);
-      setEditCourseCode(formatted.courseCode);
+    setNote(formatted);
+    setEditTitle(formatted.title);
+    setEditContent(formatted.content);
+    setEditCourseCode(formatted.courseCode);
 
-      if (data.userRating) {
-        setUserRating(data.userRating);
-      }
-    } catch (err) {
-      setError(err.message || 'Failed to load note');
-    } finally {
-      setLoading(false);
-    }
-  };
+    if (data.userRating) setUserRating(data.userRating);
+
+    // Mark as viewed in this session
+    if (!alreadyViewed) {
+  viewedNotes.add(noteId);
+}
+  } catch (err) {
+    console.error('Failed to load note:', err);
+    setError(err.message || 'Failed to load note');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const isOwner =
     Boolean(user) &&
     Boolean(note) &&
-    note.authorId === user.id;
+    Number(note.authorId) === Number(user.id);
+
+  const handleSaveNote = async () => {
+    if (saveSubmitting) return;
+
+    try {
+      setSaveSubmitting(true);
+
+      if (isSaved) {
+        await notesAPI.unsave(note.id);
+        setIsSaved(false);
+      } else {
+        await notesAPI.save(note.id);
+        setIsSaved(true);
+      }
+    } catch (err) {
+      console.error('Failed to save note:', err);
+      alert(err.message || 'Failed to update saved note.');
+    } finally {
+      setSaveSubmitting(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (downloadSubmitting) return;
+
+    try {
+      setDownloadSubmitting(true);
+
+      const result = await notesAPI.download(note.id);
+
+      if (result?.downloaded) {
+        setNote((prev) => ({
+          ...prev,
+          downloads: (prev.downloads || 0) + 1,
+        }));
+
+        return;
+      }
+
+      alert(result?.message || 'No PDF available for this note.');
+    } catch (err) {
+      console.error('Failed to download note:', err);
+      alert(err.message || 'Failed to download note.');
+    } finally {
+      setDownloadSubmitting(false);
+    }
+  };
 
   const handleSaveEdit = async () => {
     if (
@@ -95,7 +144,7 @@ export default function NoteDetail({ noteId, onBack }) {
       !editContent.trim() ||
       !editCourseCode.trim()
     ) {
-      alert('Title, content, and course code cannot be empty');
+      alert('Title, content, and course code cannot be empty.');
       return;
     }
 
@@ -115,7 +164,7 @@ export default function NoteDetail({ noteId, onBack }) {
 
       setIsEditing(false);
     } catch (err) {
-      alert(err.message || 'Failed to update note');
+      alert(err.message || 'Failed to update note.');
     }
   };
 
@@ -128,24 +177,7 @@ export default function NoteDetail({ noteId, onBack }) {
       await notesAPI.delete(note.id);
       onBack();
     } catch (err) {
-      alert(err.message || 'Failed to delete note');
-    }
-  };
-
-  const handleDownload = async () => {
-    try {
-      const result = await notesAPI.download(note.id);
-
-      if (result && !result.downloaded) {
-        alert(result.message || 'No PDF available for this note.');
-      }
-
-      setNote((prev) => ({
-        ...prev,
-        downloads: prev.downloads + 1,
-      }));
-    } catch (err) {
-      alert(err.message || 'Failed to download');
+      alert(err.message || 'Failed to delete note.');
     }
   };
 
@@ -157,20 +189,17 @@ export default function NoteDetail({ noteId, onBack }) {
     try {
       const res = await notesAPI.addComment(
         note.id,
-        commentText
+        commentText.trim()
       );
 
       setNote((prev) => ({
         ...prev,
-        comments: [
-          res.comment,
-          ...(prev.comments || [])
-        ],
+        comments: [res.comment, ...(prev.comments || [])],
       }));
 
       setCommentText('');
     } catch (err) {
-      alert(err.message || 'Failed to add comment');
+      alert(err.message || 'Failed to add comment.');
     } finally {
       setCommentSubmitting(false);
     }
@@ -178,7 +207,7 @@ export default function NoteDetail({ noteId, onBack }) {
 
   const handleRate = async (star) => {
     if (!user) {
-      alert('Please login to rate');
+      alert('Please login to rate this note.');
       return;
     }
 
@@ -195,7 +224,7 @@ export default function NoteDetail({ noteId, onBack }) {
         ratingCount: res.ratingCount,
       }));
     } catch (err) {
-      alert(err.message || 'Failed to rate');
+      alert(err.message || 'Failed to rate note.');
     } finally {
       setRatingSubmitting(false);
     }
@@ -203,21 +232,24 @@ export default function NoteDetail({ noteId, onBack }) {
 
   const handleReport = async () => {
     if (!reportReason.trim()) {
-      alert('Please enter a reason');
+      alert('Please enter a reason.');
       return;
     }
 
     setReportSubmitting(true);
 
     try {
-      await notesAPI.report(note.id, reportReason);
+      await notesAPI.report(
+        note.id,
+        reportReason.trim()
+      );
 
-      alert('Report submitted successfully');
+      alert('Report submitted successfully.');
 
       setShowReportModal(false);
       setReportReason('');
     } catch (err) {
-      alert(err.message || 'Failed to submit report');
+      alert(err.message || 'Failed to submit report.');
     } finally {
       setReportSubmitting(false);
     }
@@ -226,8 +258,10 @@ export default function NoteDetail({ noteId, onBack }) {
   if (loading) {
     return (
       <div className="note-detail-page">
-        <button onClick={onBack}>← Back</button>
-        <p>Loading...</p>
+        <div className="note-detail-loading">
+          <div className="note-loading-spinner"></div>
+          <p>Loading note...</p>
+        </div>
       </div>
     );
   }
@@ -235,222 +269,479 @@ export default function NoteDetail({ noteId, onBack }) {
   if (error || !note) {
     return (
       <div className="note-detail-page">
-        <button onClick={onBack}>← Back</button>
-        <p>{error || 'Note not found.'}</p>
+        <div className="note-detail-error">
+          <h2>Unable to load note</h2>
+          <p>{error || 'Note not found.'}</p>
+          <button onClick={onBack}>← Back to Notes</button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="note-detail-page">
-      <button onClick={onBack}>← Back to Notes</button>
+      <div className="note-detail-container">
 
-      {/* Thumbnail */}
-      {note.thumbnailPath && (
-        <img
-          src={`${API_BASE}/${note.thumbnailPath}`}
-          alt="Note thumbnail"
-          style={{
-            width: '100%',
-            maxHeight: '200px',
-            objectFit: 'cover',
-            borderRadius: '8px',
-            marginBottom: '16px'
-          }}
-        />
-      )}
-
-      {/* Title */}
-      {isEditing ? (
-        <input
-          type="text"
-          value={editTitle}
-          onChange={(e) => setEditTitle(e.target.value)}
-          placeholder="Note title"
-        />
-      ) : (
-        <h1>{note.title}</h1>
-      )}
-
-      <p>By {note.author?.name || 'Unknown'}</p>
-
-      {/* Education information */}
-      {note.educationLevel && (
-        <p>
-          📚 {note.educationLevel}
-          {note.className && ` • Class ${note.className}`}
-          {note.group && ` • ${note.group}`}
-          {note.department && ` • ${note.department}`}
-          {note.courseTitle && ` • ${note.courseTitle}`}
-          {note.yearSemester && ` • ${note.yearSemester}`}
-        </p>
-      )}
-
-      {/* Course code */}
-      {isEditing ? (
-        <input
-          type="text"
-          value={editCourseCode}
-          onChange={(e) => setEditCourseCode(e.target.value)}
-          placeholder="Course code"
-        />
-      ) : (
-        <p>{note.courseCode}</p>
-      )}
-
-      {/* Tags */}
-      <div>
-        {(note.tags || []).map((tag) => (
-          <span key={tag}>#{tag} </span>
-        ))}
-      </div>
-
-      {/* Stats */}
-      <p>
-        👁️ {note.views} views | ⬇️ {note.downloads} downloads
-      </p>
-
-      {/* Rating */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          margin: '8px 0'
-        }}
-      >
-        <StarRating
-          value={Math.round(note.averageRating || 0)}
-          readOnly
-        />
-
-        <span>
-          {note.averageRating
-            ? `${note.averageRating} / 5`
-            : 'No ratings yet'}
-
-          {note.ratingCount > 0 &&
-            ` (${note.ratingCount} ratings)`}
-        </span>
-      </div>
-
-      {/* User rating */}
-      {user && !isOwner && (
-        <div style={{ margin: '8px 0' }}>
-          <p style={{ marginBottom: '4px' }}>
-            Your rating:
-          </p>
-
-          <StarRating
-            value={userRating}
-            onChange={handleRate}
-            readOnly={ratingSubmitting}
-          />
-        </div>
-      )}
-
-      <p>{note.createdAt}</p>
-
-      <hr />
-
-      {/* Content */}
-      {isEditing ? (
-        <div>
-          <textarea
-            value={editContent}
-            onChange={(e) => setEditContent(e.target.value)}
-            rows="10"
-          />
-
-          <button onClick={handleSaveEdit}>
-            Save Changes
-          </button>
-
-          <button onClick={() => setIsEditing(false)}>
-            Cancel
-          </button>
-        </div>
-      ) : (
-        <div>
-          <p style={{ whiteSpace: 'pre-wrap' }}>
-            {note.content}
-          </p>
-        </div>
-      )}
-
-      <hr />
-
-      {/* Actions */}
-      <div className="note-actions">
-
-        {/* Save Note */}
+        {/* Back button */}
         <button
-          className="save-note-button"
-          onClick={() =>
-            alert('Save Note feature coming soon!')
-          }
+          className="note-back-button"
+          onClick={onBack}
         >
-          🔖 Save Note
+          ← Back to Notes
         </button>
 
-        {/* Download */}
-        <button onClick={handleDownload}>
-          {note.hasPdf
-            ? '⬇️ Download PDF'
-            : '⬇️ Download (No PDF)'}
-        </button>
+        {/* Main header */}
+        <section className="note-header-card">
 
-        {/* Report */}
-        {user && !isOwner && (
-          <button
-            onClick={() => setShowReportModal(true)}
-          >
-            🚩 Report
-          </button>
-        )}
+          <div className="note-header-content">
 
-        {/* Owner actions */}
-        {isOwner && !isEditing && (
-          <>
-            <button onClick={() => setIsEditing(true)}>
-              ✏️ Edit
+            <div className="note-badges">
+              {note.educationLevel && (
+                <span className="note-education-badge">
+                  📚 {note.educationLevel}
+                </span>
+              )}
+
+              {note.subject && (
+                <span className="note-subject-badge">
+                  {note.subject}
+                </span>
+              )}
+            </div>
+
+            {isEditing ? (
+              <input
+                className="note-edit-title"
+                type="text"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Note title"
+              />
+            ) : (
+              <h1>{note.title}</h1>
+            )}
+
+            <div className="note-author">
+              <span className="author-icon">👤</span>
+              <span>
+                By <strong>{note.author?.name || 'Unknown'}</strong>
+              </span>
+            </div>
+
+            <div className="note-meta-grid">
+
+              {note.courseCode && (
+                <div className="note-meta-item">
+                  <span className="meta-label">Course Code</span>
+                  <strong>{note.courseCode}</strong>
+                </div>
+              )}
+
+              {note.courseTitle && (
+                <div className="note-meta-item">
+                  <span className="meta-label">Course</span>
+                  <strong>{note.courseTitle}</strong>
+                </div>
+              )}
+
+              {note.department && (
+                <div className="note-meta-item">
+                  <span className="meta-label">Department</span>
+                  <strong>{note.department}</strong>
+                </div>
+              )}
+
+              {note.className && (
+                <div className="note-meta-item">
+                  <span className="meta-label">Class</span>
+                  <strong>{note.className}</strong>
+                </div>
+              )}
+
+              {note.group && (
+                <div className="note-meta-item">
+                  <span className="meta-label">Group</span>
+                  <strong>{note.group}</strong>
+                </div>
+              )}
+
+              {note.yearSemester && (
+                <div className="note-meta-item">
+                  <span className="meta-label">Year / Semester</span>
+                  <strong>{note.yearSemester}</strong>
+                </div>
+              )}
+
+            </div>
+
+            {/* Tags */}
+            {(note.tags || []).length > 0 && (
+              <div className="note-tags">
+                {note.tags.map((tag) => (
+                  <span key={tag}>#{tag}</span>
+                ))}
+              </div>
+            )}
+
+          </div>
+
+          {/* Thumbnail */}
+          <div className="note-thumbnail-section">
+            {note.thumbnailPath ? (
+              <img
+                src={`${API_BASE}/${note.thumbnailPath}`}
+                alt={note.title}
+                className="note-thumbnail"
+              />
+            ) : (
+              <div className="note-thumbnail-placeholder">
+                <span>📚</span>
+                <p>No thumbnail</p>
+              </div>
+            )}
+          </div>
+
+        </section>
+
+        {/* Stats */}
+        <section className="note-stats-card">
+
+          <div className="note-stat">
+            <span className="stat-icon">👁️</span>
+            <div>
+              <strong>{note.views || 0}</strong>
+              <span>Views</span>
+            </div>
+          </div>
+
+          <div className="stat-divider"></div>
+
+          <div className="note-stat">
+            <span className="stat-icon">⬇️</span>
+            <div>
+              <strong>{note.downloads || 0}</strong>
+              <span>Downloads</span>
+            </div>
+          </div>
+
+          <div className="stat-divider"></div>
+
+          <div className="note-stat">
+            <span className="stat-icon">⭐</span>
+            <div>
+              <strong>
+                {note.averageRating
+                  ? Number(note.averageRating).toFixed(1)
+                  : '—'}
+              </strong>
+              <span>
+                {note.ratingCount || 0} Ratings
+              </span>
+            </div>
+          </div>
+
+          <div className="stat-divider"></div>
+
+          <div className="note-stat">
+            <span className="stat-icon">📅</span>
+            <div>
+              <strong>
+                {note.createdAt
+                  ? new Date(note.createdAt).toLocaleDateString()
+                  : '—'}
+              </strong>
+              <span>Created</span>
+            </div>
+          </div>
+
+        </section>
+
+        {/* Actions */}
+        <section className="note-actions-card">
+
+          <div className="primary-note-actions">
+
+            <button
+              className={`save-note-button ${
+                isSaved ? 'saved' : ''
+              }`}
+              onClick={handleSaveNote}
+              disabled={saveSubmitting}
+            >
+              {saveSubmitting
+                ? 'Saving...'
+                : isSaved
+                  ? '🔖 Saved'
+                  : '🔖 Save Note'}
             </button>
 
-            <button onClick={handleDelete}>
-              🗑️ Delete
+            <button
+              className="download-note-button"
+              onClick={handleDownload}
+              disabled={downloadSubmitting}
+            >
+              {downloadSubmitting
+                ? 'Downloading...'
+                : note.hasPdf
+                  ? '⬇️ Download PDF'
+                  : '⬇️ No PDF Available'}
             </button>
-          </>
-        )}
+
+            {user && !isOwner && (
+              <button
+                className="report-note-button"
+                onClick={() => setShowReportModal(true)}
+              >
+                🚩 Report
+              </button>
+            )}
+
+          </div>
+
+          {isOwner && !isEditing && (
+            <div className="owner-note-actions">
+              <button
+                className="edit-note-button"
+                onClick={() => setIsEditing(true)}
+              >
+                ✏️ Edit Note
+              </button>
+
+              <button
+                className="delete-note-button"
+                onClick={handleDelete}
+              >
+                🗑️ Delete Note
+              </button>
+            </div>
+          )}
+
+        </section>
+
+        {/* Content */}
+        <section className="note-content-card">
+
+          <div className="section-heading">
+            <span>📖</span>
+            <div>
+              <h2>Note Content</h2>
+              <p>Read the complete study material below.</p>
+            </div>
+          </div>
+
+          {isEditing ? (
+            <>
+              <input
+                className="note-edit-field"
+                type="text"
+                value={editCourseCode}
+                onChange={(e) =>
+                  setEditCourseCode(e.target.value)
+                }
+                placeholder="Course code"
+              />
+
+              <textarea
+                className="note-edit-content"
+                value={editContent}
+                onChange={(e) =>
+                  setEditContent(e.target.value)
+                }
+                rows="16"
+                placeholder="Note content"
+              />
+
+              <div className="edit-actions">
+                <button
+                  className="save-edit-button"
+                  onClick={handleSaveEdit}
+                >
+                  Save Changes
+                </button>
+
+                <button
+                  className="cancel-edit-button"
+                  onClick={() => setIsEditing(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="note-content">
+              {note.content}
+            </div>
+          )}
+
+        </section>
+
+        {/* Rating */}
+        <section className="note-rating-card">
+
+          <div className="section-heading">
+            <span>⭐</span>
+            <div>
+              <h2>Rate This Note</h2>
+              <p>
+                Share your experience with this study material.
+              </p>
+            </div>
+          </div>
+
+          <div className="rating-content">
+
+            <div className="average-rating">
+              <strong>
+                {note.averageRating
+                  ? Number(note.averageRating).toFixed(1)
+                  : '0.0'}
+              </strong>
+
+              <StarRating
+                value={Math.round(
+                  note.averageRating || 0
+                )}
+                readOnly
+              />
+
+              <span>
+                {note.ratingCount || 0} ratings
+              </span>
+            </div>
+
+            {user && !isOwner && (
+              <div className="your-rating">
+                <span>Your rating</span>
+
+                <StarRating
+                  value={userRating}
+                  onChange={handleRate}
+                  readOnly={ratingSubmitting}
+                />
+              </div>
+            )}
+
+          </div>
+
+        </section>
+
+        {/* Comments */}
+        <section className="note-comments-card">
+
+          <div className="section-heading">
+            <span>💬</span>
+            <div>
+              <h2>Comments</h2>
+              <p>
+                {note.comments?.length || 0} comments
+              </p>
+            </div>
+          </div>
+
+          {user && (
+            <div className="comment-form">
+
+              <textarea
+                value={commentText}
+                onChange={(e) =>
+                  setCommentText(e.target.value)
+                }
+                rows="3"
+                placeholder="Write a comment..."
+              />
+
+              <button
+                onClick={handleAddComment}
+                disabled={
+                  commentSubmitting ||
+                  !commentText.trim()
+                }
+              >
+                {commentSubmitting
+                  ? 'Posting...'
+                  : 'Post Comment'}
+              </button>
+
+            </div>
+          )}
+
+          <div className="comments-list">
+
+            {(note.comments || []).length === 0 ? (
+              <div className="no-comments">
+                <span>💬</span>
+                <p>No comments yet.</p>
+                <small>
+                  Be the first to share your thoughts.
+                </small>
+              </div>
+            ) : (
+              note.comments.map((comment) => (
+                <div
+                  className="comment-item"
+                  key={comment.id}
+                >
+                  <div className="comment-avatar">
+                    {(
+                      comment.authorName || 'U'
+                    )
+                      .charAt(0)
+                      .toUpperCase()}
+                  </div>
+
+                  <div className="comment-body">
+
+                    <div className="comment-header">
+                      <strong>
+                        {comment.authorName}
+                      </strong>
+
+                      <span>
+                        {comment.createdAt
+                          ? new Date(
+                              comment.createdAt
+                            ).toLocaleDateString()
+                          : ''}
+                      </span>
+                    </div>
+
+                    <p>{comment.commentText}</p>
+
+                  </div>
+                </div>
+              ))
+            )}
+
+          </div>
+
+        </section>
+
       </div>
 
-      {/* Report Modal */}
+      {/* Report modal */}
       {showReportModal && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-          }}
-        >
-          <div
-            style={{
-              background: '#fff',
-              padding: '24px',
-              borderRadius: '8px',
-              width: '400px'
-            }}
-          >
-            <h3>Report Note</h3>
+        <div className="report-modal-overlay">
+
+          <div className="report-modal">
+
+            <button
+              className="report-modal-close"
+              onClick={() =>
+                setShowReportModal(false)
+              }
+            >
+              ×
+            </button>
+
+            <div className="report-modal-icon">
+              🚩
+            </div>
+
+            <h2>Report Note</h2>
 
             <p>
-              Why are you reporting this note?
+              Tell us why you think this note should
+              be reviewed.
             </p>
 
             <textarea
@@ -458,95 +749,42 @@ export default function NoteDetail({ noteId, onBack }) {
               onChange={(e) =>
                 setReportReason(e.target.value)
               }
-              rows="4"
-              style={{
-                width: '100%',
-                marginBottom: '12px'
-              }}
-              placeholder="Enter reason..."
+              rows="5"
+              placeholder="Enter your reason..."
             />
 
-            <button
-              onClick={handleReport}
-              disabled={reportSubmitting}
-            >
-              {reportSubmitting
-                ? 'Submitting...'
-                : 'Submit Report'}
-            </button>
+            <div className="report-modal-actions">
 
-            <button
-              onClick={() => setShowReportModal(false)}
-              style={{ marginLeft: '8px' }}
-            >
-              Cancel
-            </button>
+              <button
+                className="cancel-report-button"
+                onClick={() => {
+                  setShowReportModal(false);
+                  setReportReason('');
+                }}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="submit-report-button"
+                onClick={handleReport}
+                disabled={
+                  reportSubmitting ||
+                  !reportReason.trim()
+                }
+              >
+                {reportSubmitting
+                  ? 'Submitting...'
+                  : 'Submit Report'}
+              </button>
+
+            </div>
+
           </div>
+
         </div>
       )}
 
-      <hr />
-
-      {/* Comments */}
-      <div>
-        <h3>Comments</h3>
-
-        {user && (
-          <div style={{ marginBottom: '16px' }}>
-            <textarea
-              value={commentText}
-              onChange={(e) =>
-                setCommentText(e.target.value)
-              }
-              rows="3"
-              placeholder="Write a comment..."
-              style={{ width: '100%' }}
-            />
-
-            <button
-              onClick={handleAddComment}
-              disabled={
-                commentSubmitting ||
-                !commentText.trim()
-              }
-            >
-              {commentSubmitting
-                ? 'Posting...'
-                : 'Post Comment'}
-            </button>
-          </div>
-        )}
-
-        {(note.comments || []).length === 0 ? (
-          <p>No comments yet.</p>
-        ) : (
-          (note.comments || []).map((c) => (
-            <div
-              key={c.id}
-              style={{
-                borderBottom: '1px solid #eee',
-                padding: '8px 0'
-              }}
-            >
-              <strong>{c.authorName}</strong>
-
-              <span
-                style={{
-                  fontSize: '12px',
-                  color: '#888',
-                  marginLeft: '8px'
-                }}
-              >
-                {new Date(c.createdAt).toLocaleDateString()}
-              </span>
-
-              <p style={{ margin: '4px 0' }}>
-                {c.commentText}
-              </p>
-            </div>
-          ))
-        )}
-      </div>
     </div>
   );
 }

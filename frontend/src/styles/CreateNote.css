@@ -1,120 +1,304 @@
 .create-note-page {
   min-height: 100vh;
-  padding: 5rem 2rem;
+  padding: 5.5rem 1.5rem 4rem;
   background: var(--bg-secondary);
 }
 
-.create-note-page form {
-  max-width: 750px;
-  margin: 0 auto;
-  padding: 2.5rem;
-  background: var(--bg-card);
-  border-radius: 15px;
-  box-shadow: 0 10px 30px var(--shadow-color);
-}
-
-.create-note-page h1 {
-  max-width: 750px;
+.create-note-header {
+  max-width: 860px;
   margin: 0 auto 2rem;
-  color: var(--text-primary);
-  font-size: 2.5rem;
-  font-weight: 700;
 }
 
-.create-note-page label {
-  display: block;
-  margin-bottom: 0.5rem;
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 1rem;
+}
+
+.btn-back:hover {
+  color: #7c3aed;
+  border-color: #8b5cf6;
+  background: rgba(139,92,246,0.06);
+}
+
+.create-note-header h1 {
+  font-size: 2rem;
+  font-weight: 800;
   color: var(--text-primary);
+  margin: 0 0 0.3rem;
+}
+
+.create-note-header p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.error-banner {
+  max-width: 860px;
+  margin: 0 auto 1rem;
+  padding: 0.9rem 1.2rem;
+  background: rgba(220,38,38,0.08);
+  border: 1px solid rgba(220,38,38,0.2);
+  border-radius: 10px;
+  color: #dc2626;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 
-.create-note-page input,
-.create-note-page textarea,
-.create-note-page select {
+.create-note-form {
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.form-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 1.5rem;
+}
+
+.form-section h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 1.2rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid var(--border-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.form-group label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.optional-label {
+  font-weight: 400;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
   width: 100%;
   box-sizing: border-box;
-  padding: 1rem;
-  margin-bottom: 0.5rem;
+  padding: 0.7rem 1rem;
   background: var(--bg-secondary);
+  border: 1.5px solid var(--border-color);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.92rem;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139,92,246,0.1);
+  background: var(--bg-card);
+}
+
+.form-group textarea {
+  resize: vertical;
+  line-height: 1.7;
+}
+
+.form-group input[type="file"] {
+  padding: 0.6rem;
+  cursor: pointer;
+}
+
+.field-error {
+  font-size: 0.8rem;
+  color: #dc2626;
+  margin: 0;
+}
+
+/* Education level buttons */
+.edu-level-buttons {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.edu-level-btn {
+  padding: 0.6rem 1.2rem;
+  border: 1.5px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.edu-level-btn:hover {
+  border-color: #8b5cf6;
+  color: #7c3aed;
+  background: rgba(139,92,246,0.06);
+}
+
+.edu-level-btn.active {
+  border-color: #8b5cf6;
+  background: rgba(139,92,246,0.1);
+  color: #7c3aed;
+}
+
+/* File upload */
+.file-upload-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.file-selected {
+  font-size: 0.82rem;
+  color: #16a34a;
+  margin: 0;
+}
+
+.thumbnail-preview {
+  width: 100%;
+  max-width: 200px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
   border: 1px solid var(--border-color);
+}
+
+/* Form actions */
+.form-actions {
+  display: flex;
+  gap: 0.8rem;
+  padding: 1.2rem 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+}
+
+.btn-submit {
+  padding: 0.9rem 2rem;
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  color: #ffffff;
+  border: none;
   border-radius: 10px;
   font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(109,40,217,0.3);
+  transition: all 0.2s;
+}
+
+.btn-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(109,40,217,0.4);
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-cancel {
+  padding: 0.9rem 1.5rem;
+  background: var(--bg-secondary);
+  border: 1.5px solid var(--border-color);
+  border-radius: 10px;
   color: var(--text-primary);
-  outline: none;
-  transition: all 0.3s ease;
-  color-scheme: light dark;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.create-note-page input:focus,
-.create-note-page textarea:focus,
-.create-note-page select:focus {
-  background: var(--bg-card);
-  border-color: #8b5cf6;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+.btn-cancel:hover {
+  background: var(--border-color);
 }
 
-.create-note-page textarea {
-  resize: vertical;
-  min-height: 180px;
+@media (max-width: 640px) {
+  .create-note-page { padding: 5rem 1rem 3rem; }
+  .form-row { grid-template-columns: 1fr; }
+  .edu-level-buttons { flex-direction: column; }
+  .form-actions { flex-direction: column; }
+  .btn-submit, .btn-cancel { width: 100%; text-align: center; }
 }
 
-.create-note-page select option {
-  background: var(--bg-card);
-  color: var(--text-primary);
+.create-note-form .form-section h2 {
+  font-size: 1.05rem !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
 }
 
-.create-note-page p {
-  margin: 0.3rem 0 1rem;
-  color: #dc2626;
-  font-size: 0.85rem;
+.create-note-form .form-group label {
+  font-size: 0.92rem !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
 }
 
-.create-note-page button {
-  padding: 0.9rem 1.6rem;
-  margin-right: 0.7rem;
+.form-actions .btn-submit {
+  padding: 0.9rem 2rem;
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important;
+  color: #fff !important;
   border: none;
   border-radius: 10px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px rgba(109,40,217,0.3);
+  transition: all 0.2s;
+  min-width: 160px;
 }
 
-.create-note-page button[type="submit"] {
-  background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
-  color: white;
-  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.25);
+.form-actions .btn-cancel {
+  padding: 0.9rem 1.5rem;
+  background: var(--bg-secondary) !important;
+  border: 1.5px solid var(--border-color);
+  border-radius: 10px;
+  color: var(--text-primary) !important;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.create-note-page button[type="submit"]:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(139, 92, 246, 0.4);
-}
-
-.create-note-page button[type="button"] {
-  background: var(--bg-secondary);
-  color: var(--text-secondary);
-}
-
-.create-note-page button[type="button"]:hover {
-  background: var(--border-color);
-  transform: translateY(-2px);
-}
-
-@media (max-width: 768px) {
-  .create-note-page {
-    padding: 3rem 1rem;
-  }
-
-  .create-note-page form {
-    padding: 1.5rem;
-  }
-
-  .create-note-page h1 {
-    font-size: 2rem;
-  }
-
-  .create-note-page button {
-    margin-bottom: 0.7rem;
-  }
+.form-actions .btn-cancel:hover {
+  transform: none;
+  background: var(--border-color) !important;
 }
