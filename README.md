@@ -281,6 +281,17 @@ Ed-Bridge was developed as a collaborative academic software project by a team o
 
 The project focuses on improving access to educational resources, encouraging peer-to-peer learning, and promoting the reuse of academic materials.
 
+## Contributors
+
+| Name | Role |
+|---|---|
+| MD. Mushfiqur Rahman | Backend & Frontend Developer |
+| Sabikun Alam | Backend & Frontend Developer |
+| Maimuna Momtaj Emu | Frontend Developer |
+| MD. Mahedi Hasan Oni | Frontend Developer |
+
+---
+
 ## Security Considerations
 
 For production deployment:
