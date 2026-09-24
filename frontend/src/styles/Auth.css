@@ -202,6 +202,37 @@
   cursor: not-allowed;
 }
 
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  flex: 1;
+  height: 1px;
+  content: '';
+  background: var(--border-color);
+}
+
+.google-sign-in {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.google-sign-in-message {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-align: center;
+}
+
 .auth-link {
   text-align: center;
   margin-top: 1.5rem;

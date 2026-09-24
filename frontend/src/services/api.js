@@ -25,14 +25,23 @@ export const apiCall = async (endpoint, method = 'GET', body = null) => {
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+    const response = await fetch(
+      `${API_BASE_URL}${endpoint}`,
+      config
+    );
 
-    if (response.status === 401 && endpoint !== '/auth/login') {
+    if (
+      response.status === 401 &&
+      endpoint !== '/auth/login'
+    ) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+
       window.location.assign('/login');
 
-      throw new Error('Your session has expired. Please log in again.');
+      throw new Error(
+        'Your session has expired. Please log in again.'
+      );
     }
 
     if (!response.ok) {
@@ -43,7 +52,11 @@ export const apiCall = async (endpoint, method = 'GET', body = null) => {
       if (responseText) {
         try {
           const errorData = JSON.parse(responseText);
-          errorMessage = errorData.message || errorMessage;
+
+          errorMessage =
+            errorData.message ||
+            errorData.title ||
+            errorMessage;
         } catch {
           errorMessage = responseText;
         }
@@ -52,7 +65,17 @@ export const apiCall = async (endpoint, method = 'GET', body = null) => {
       throw new Error(errorMessage);
     }
 
-    return await response.json();
+    const responseText = await response.text();
+
+    if (!responseText) {
+      return {};
+    }
+
+    try {
+      return JSON.parse(responseText);
+    } catch {
+      return responseText;
+    }
   } catch (error) {
     console.error('API Call Failed:', error);
     throw error;
@@ -78,6 +101,12 @@ export const authAPI = {
       password,
     }),
 
+  getGoogleConfig: () =>
+    apiCall('/auth/google/config'),
+
+  loginWithGoogle: (idToken) =>
+    apiCall('/auth/google', 'POST', { idToken }),
+
   getProfile: () =>
     apiCall('/auth/profile'),
 
@@ -95,25 +124,40 @@ export const authAPI = {
 
     formData.append('file', file);
 
-    const token = localStorage.getItem('token');
+    const token = getAuthToken();
 
     const response = await fetch(
-      'http://localhost:5180/api/auth/profile/photo',
+      `${API_BASE_URL}/auth/profile/photo`,
       {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: token
+          ? {
+              Authorization: `Bearer ${token}`,
+            }
+          : {},
         body: formData,
       }
     );
 
     if (!response.ok) {
-      const errorData = await response.json();
+      const responseText = await response.text();
 
-      throw new Error(
-        errorData.message || `API Error: ${response.status}`
-      );
+      let errorMessage = `API Error: ${response.status}`;
+
+      if (responseText) {
+        try {
+          const errorData = JSON.parse(responseText);
+
+          errorMessage =
+            errorData.message ||
+            errorData.title ||
+            errorMessage;
+        } catch {
+          errorMessage = responseText;
+        }
+      }
+
+      throw new Error(errorMessage);
     }
 
     return response.json();
@@ -121,6 +165,11 @@ export const authAPI = {
 
   removeProfilePhoto: () =>
     apiCall('/auth/profile/photo', 'DELETE'),
+
+  verifyEmail: (token) =>
+    apiCall(
+      `/auth/verify-email?token=${encodeURIComponent(token)}`
+    ),
 };
 
 
@@ -131,7 +180,9 @@ export const authAPI = {
 export const notesAPI = {
   // Get all notes
   getAll: (page = 1, pageSize = 10) =>
-    apiCall(`/notes?page=${page}&pageSize=${pageSize}`),
+    apiCall(
+      `/notes?page=${page}&pageSize=${pageSize}`
+    ),
 
   // Get one note
   getById: (id) =>
@@ -168,9 +219,14 @@ export const notesAPI = {
         let msg = `API Error: ${res.status}`;
 
         try {
-          msg = JSON.parse(text).message || msg;
+          const data = JSON.parse(text);
+
+          msg =
+            data.message ||
+            data.title ||
+            msg;
         } catch {
-          msg = text;
+          msg = text || msg;
         }
 
         throw new Error(msg);
@@ -210,9 +266,14 @@ export const notesAPI = {
       let msg = `API Error: ${response.status}`;
 
       try {
-        msg = JSON.parse(text).message || msg;
+        const data = JSON.parse(text);
+
+        msg =
+          data.message ||
+          data.title ||
+          msg;
       } catch {
-        msg = text;
+        msg = text || msg;
       }
 
       throw new Error(msg);
@@ -287,15 +348,12 @@ export const notesAPI = {
   // SAVED NOTES
   // =========================
 
-  // Save a note
   save: (id) =>
     apiCall(`/notes/${id}/save`, 'POST'),
 
-  // Remove a note from saved items
   unsave: (id) =>
     apiCall(`/notes/${id}/save`, 'DELETE'),
 
-  // Get all saved notes
   getSaved: () =>
     apiCall('/notes/saved'),
 };
@@ -448,11 +506,14 @@ export const forumAPI = {
   getSubjects: () =>
     apiCall('/posts/subjects'),
 
-  save: (id) => apiCall(`/posts/${id}/save`, 'POST'),
+  save: (id) =>
+    apiCall(`/posts/${id}/save`, 'POST'),
 
-  unsave: (id) => apiCall(`/posts/${id}/save`, 'DELETE'),
+  unsave: (id) =>
+    apiCall(`/posts/${id}/save`, 'DELETE'),
 
-  getSaved: () => apiCall('/posts/saved'),
+  getSaved: () =>
+    apiCall('/posts/saved'),
 };
 
 
@@ -536,8 +597,8 @@ export const listingsAPI = {
   },
 
   // Get one listing
-getById: (id) =>
-  apiCall(`/listings/${id}`),
+  getById: (id) =>
+    apiCall(`/listings/${id}`),
 
   // Get categories
   getCategories: () =>
@@ -547,11 +608,14 @@ getById: (id) =>
   getAreas: () =>
     apiCall('/listings/areas'),
 
-  save: (id) => apiCall(`/listings/${id}/save`, 'POST'),
+  save: (id) =>
+    apiCall(`/listings/${id}/save`, 'POST'),
 
-  unsave: (id) => apiCall(`/listings/${id}/save`, 'DELETE'),
+  unsave: (id) =>
+    apiCall(`/listings/${id}/save`, 'DELETE'),
 
-  getSaved: () => apiCall('/listings/saved'),
+  getSaved: () =>
+    apiCall('/listings/saved'),
 
   // Create listing
   create: (data) =>
@@ -606,7 +670,10 @@ getById: (id) =>
     apiCall('/messages/unread-count'),
 
   markConversationRead: (listingId) =>
-    apiCall(`/messages/listing/${listingId}/read`, 'PUT'),
+    apiCall(
+      `/messages/listing/${listingId}/read`,
+      'PUT'
+    ),
 
   // Update listing status
   updateStatus: (
@@ -709,6 +776,8 @@ export const reportAPI = {
     ),
 };
 
+
 export const userAPI = {
-  getDashboard: () => apiCall('/user/dashboard'),
+  getDashboard: () =>
+    apiCall('/user/dashboard'),
 };

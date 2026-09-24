@@ -24,6 +24,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Register AuthService
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Add JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT key is not configured.");

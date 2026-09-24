@@ -16,6 +16,7 @@ import SettingsPage from './pages/SettingsPage';
 import Bookmarks from './pages/Bookmarks';
 import AdminDashboard from './pages/AdminDashboard';
 import MyDashboard from './pages/MyDashboard';
+import VerifyEmail from './components/Auth/VerifyEmail';
 
 import './App.css';
 
@@ -64,6 +65,7 @@ function App() {
             <Route path="/forum" element={<ForumPage />} />
             <Route path="/messages" element={<PrivateRoute><MessagesPage /></PrivateRoute>} />
             <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
             <Route
   path="/bookmarks"
   element={
