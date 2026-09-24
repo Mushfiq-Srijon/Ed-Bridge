@@ -42,7 +42,6 @@ The platform allows students to share academic notes, participate in discussions
 - React Router
 - JavaScript
 - CSS
-- Create React App
 
 ### Backend
 
@@ -50,11 +49,11 @@ The platform allows students to share academic notes, participate in discussions
 - .NET 10
 - Entity Framework Core
 - JWT Bearer Authentication
-- Swagger / OpenAPI
+- Swagger
 
 ### Database
 
-- MySQL or MariaDB
+- MySQL
 - Pomelo Entity Framework Core Provider
 
 ## Project Structure
@@ -98,19 +97,19 @@ Before running the project, make sure the following software is installed:
 - Git
 - .NET 10 SDK
 - Node.js and npm
-- MySQL or MariaDB
+- MySQL
 - Entity Framework Core CLI tools
 
 ## Installation
 
 ### 1. Clone the repository
 
-    git clone <repository-url>
+    git clone https://github.com/Mushfiq-Srijon/Ed-Bridge
     cd Ed-Bridge
 
 ### 2. Create the database
 
-Create a MySQL or MariaDB database named:
+Create a MySQL database named:
 
     ed_bridge
 
