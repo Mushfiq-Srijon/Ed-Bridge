@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../../services/api';
-import { useAuth } from '../../context/AuthContext';
 import PasswordStrengthIndicator from './PasswordStrengthIndicator';
+import GoogleSignInButton from './GoogleSignInButton';
+import { useAuth } from '../../context/AuthContext';
 import '../../styles/Auth.css';
 
 export default function RegisterForm() {
@@ -15,6 +16,7 @@ export default function RegisterForm() {
     password: '',
     confirmPassword: '',
   });
+
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState('');
@@ -22,15 +24,30 @@ export default function RegisterForm() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+      setErrors((prev) => ({
+        ...prev,
+        [name]: '',
+      }));
+    }
+
+    if (serverError) {
+      setServerError('');
     }
   };
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+    }
 
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
@@ -55,37 +72,63 @@ export default function RegisterForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setServerError('');
+
     const newErrors = validateForm();
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
 
     setLoading(true);
+
     try {
-      await authAPI.register(formData.email, formData.password, formData.name);
-      const loginResponse = await authAPI.login(formData.email, formData.password);
-      login(loginResponse.token, loginResponse.user);
-      navigate('/');
+      const response = await authAPI.register(
+        formData.email,
+        formData.password,
+        formData.name
+      );
+
+      navigate('/login', {
+        state: {
+          message:
+            response.message ||
+            'Account created. Please check your email to verify your account.',
+        },
+      });
     } catch (error) {
-      setServerError(error.message || 'Registration failed. Please try again.');
+      setServerError(
+        error.message || 'Registration failed. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  const handleGoogleSuccess = (response) => {
+    login(response.token, response.user);
+    navigate('/');
+  };
+
   return (
     <form onSubmit={handleSubmit} className="auth-form register-form">
       <h2>Create Your Account</h2>
-      <p className="form-subtitle">Join Ed-Bridge and start sharing knowledge</p>
+
+      <p className="form-subtitle">
+        Join Ed-Bridge and start sharing knowledge
+      </p>
 
       {serverError && (
-        <div className="error-banner"><span>{serverError}</span></div>
+        <div className="error-banner">
+          <span>⚠️ {serverError}</span>
+        </div>
       )}
 
       <div className="form-group">
         <label htmlFor="name">Full Name</label>
+
         <input
           type="text"
           id="name"
@@ -96,11 +139,17 @@ export default function RegisterForm() {
           className={errors.name ? 'input-error' : ''}
           disabled={loading}
         />
-        {errors.name && <span className="error-text">{errors.name}</span>}
+
+        {errors.name && (
+          <span className="error-text">
+            {errors.name}
+          </span>
+        )}
       </div>
 
       <div className="form-group">
         <label htmlFor="email">Email Address</label>
+
         <input
           type="email"
           id="email"
@@ -111,11 +160,17 @@ export default function RegisterForm() {
           className={errors.email ? 'input-error' : ''}
           disabled={loading}
         />
-        {errors.email && <span className="error-text">{errors.email}</span>}
+
+        {errors.email && (
+          <span className="error-text">
+            {errors.email}
+          </span>
+        )}
       </div>
 
       <div className="form-group">
         <label htmlFor="password">Password</label>
+
         <div className="password-input-wrapper">
           <input
             type={showPassword ? 'text' : 'password'}
@@ -127,6 +182,7 @@ export default function RegisterForm() {
             className={errors.password ? 'input-error' : ''}
             disabled={loading}
           />
+
           <button
             type="button"
             className="password-toggle"
@@ -136,12 +192,23 @@ export default function RegisterForm() {
             {showPassword ? 'Hide' : 'Show'}
           </button>
         </div>
-        {errors.password && <span className="error-text">{errors.password}</span>}
-        <PasswordStrengthIndicator password={formData.password} />
+
+        {errors.password && (
+          <span className="error-text">
+            {errors.password}
+          </span>
+        )}
+
+        <PasswordStrengthIndicator
+          password={formData.password}
+        />
       </div>
 
       <div className="form-group">
-        <label htmlFor="confirmPassword">Confirm Password</label>
+        <label htmlFor="confirmPassword">
+          Confirm Password
+        </label>
+
         <div className="password-input-wrapper">
           <input
             type={showPassword ? 'text' : 'password'}
@@ -154,17 +221,33 @@ export default function RegisterForm() {
             disabled={loading}
           />
         </div>
+
         {errors.confirmPassword && (
-          <span className="error-text">{errors.confirmPassword}</span>
+          <span className="error-text">
+            {errors.confirmPassword}
+          </span>
         )}
       </div>
 
-      <button type="submit" className="btn btn-submit" disabled={loading}>
+      <button
+        type="submit"
+        className="btn btn-submit"
+        disabled={loading}
+      >
         {loading ? 'Creating Account...' : 'Create Account'}
       </button>
 
+      <div className="auth-divider"><span>or</span></div>
+
+      <GoogleSignInButton
+        disabled={loading}
+        onSuccess={handleGoogleSuccess}
+        onError={setServerError}
+      />
+
       <p className="auth-link">
-        Already have an account? <Link to="/login">Sign In</Link>
+        Already have an account?{' '}
+        <Link to="/login">Sign In</Link>
       </p>
     </form>
   );

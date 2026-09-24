@@ -1,73 +1,119 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { authAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import GoogleSignInButton from './GoogleSignInButton';
 import '../../styles/Auth.css';
 
 export default function LoginForm() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
 
-  // All state at the top
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
+
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState('');
+  const [successMessage, setSuccessMessage] = useState(
+    location.state?.message || ''
+  );
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+
+    if (successMessage) {
+      setSuccessMessage('');
+    }
+
+    if (serverError) {
+      setServerError('');
     }
   };
 
   const validateForm = () => {
     const newErrors = {};
+
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
+
     if (!formData.password) {
       newErrors.password = 'Password is required';
     }
+
     return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setServerError('');
-    
+
     const newErrors = validateForm();
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
 
     setLoading(true);
+
     try {
-      const response = await authAPI.login(formData.email, formData.password);
+      const response = await authAPI.login(
+        formData.email,
+        formData.password
+      );
+
       login(response.token, response.user);
+
       navigate('/');
     } catch (error) {
-      setServerError(error.message || 'Login failed. Please check your credentials.');
+      setServerError(
+        error.message ||
+        'Login failed. Please check your credentials.'
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  const handleGoogleSuccess = (response) => {
+    login(response.token, response.user);
+    navigate('/');
+  };
+
   return (
     <form onSubmit={handleSubmit} className="auth-form login-form">
       <h2>Welcome Back</h2>
-      <p className="form-subtitle">Sign in to access your Ed-Bridge account</p>
+
+      <p className="form-subtitle">
+        Sign in to access your Ed-Bridge account
+      </p>
+
+      {successMessage && (
+        <div className="success-banner">
+          <span>✓ {successMessage}</span>
+        </div>
+      )}
 
       {serverError && (
         <div className="error-banner">
@@ -77,6 +123,7 @@ export default function LoginForm() {
 
       <div className="form-group">
         <label htmlFor="email">Email Address</label>
+
         <input
           type="email"
           id="email"
@@ -87,11 +134,17 @@ export default function LoginForm() {
           className={errors.email ? 'input-error' : ''}
           disabled={loading}
         />
-        {errors.email && <span className="error-text">⚠️ {errors.email}</span>}
+
+        {errors.email && (
+          <span className="error-text">
+            ⚠️ {errors.email}
+          </span>
+        )}
       </div>
 
       <div className="form-group">
         <label htmlFor="password">Password</label>
+
         <div className="password-input-wrapper">
           <input
             type={showPassword ? 'text' : 'password'}
@@ -103,6 +156,7 @@ export default function LoginForm() {
             className={errors.password ? 'input-error' : ''}
             disabled={loading}
           />
+
           <button
             type="button"
             className="password-toggle"
@@ -112,20 +166,41 @@ export default function LoginForm() {
             {showPassword ? '👁️' : '👁️‍🗨️'}
           </button>
         </div>
-        {errors.password && <span className="error-text">⚠️ {errors.password}</span>}
+
+        {errors.password && (
+          <span className="error-text">
+            ⚠️ {errors.password}
+          </span>
+        )}
       </div>
 
       <div className="auth-form-helper">
         <span>Secure sign-in to your Ed-Bridge account</span>
-        <a href="#forgot" className="forgot-password">Forgot password?</a>
+
+        <a href="#forgot" className="forgot-password">
+          Forgot password?
+        </a>
       </div>
 
-      <button type="submit" className="btn btn-submit" disabled={loading}>
+      <button
+        type="submit"
+        className="btn btn-submit"
+        disabled={loading}
+      >
         {loading ? 'Signing In...' : 'Sign In'}
       </button>
 
+      <div className="auth-divider"><span>or</span></div>
+
+      <GoogleSignInButton
+        disabled={loading}
+        onSuccess={handleGoogleSuccess}
+        onError={setServerError}
+      />
+
       <p className="auth-link">
-        Don't have an account? <Link to="/register">Create one</Link>
+        Don't have an account?{' '}
+        <Link to="/register">Create one</Link>
       </p>
     </form>
   );

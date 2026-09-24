@@ -8,6 +8,7 @@ namespace EdBridge.API.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; }
         public DbSet<Listing> Listings { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<SubjectTag> SubjectTags { get; set; }
@@ -32,6 +33,12 @@ namespace EdBridge.API.Data
 protected override void OnModelCreating(ModelBuilder modelBuilder)
 {
     base.OnModelCreating(modelBuilder);
+
+    modelBuilder.Entity<EmailVerificationToken>()
+    .HasOne(t => t.User)
+    .WithMany()
+    .HasForeignKey(t => t.UserId)
+    .OnDelete(DeleteBehavior.Cascade);
 
     modelBuilder.Entity<ListingSubjectTag>()
         .HasKey(x => new { x.ListingId, x.SubjectTagId });
