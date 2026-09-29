@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { notesAPI } from '../../services/api';
+import { API_ORIGIN } from '../../config';
 import '../../styles/NoteCard.css';
-
-const API_BASE = 'http://localhost:5180';
 
 export default function NoteCard({ note, onView }) {
   const [isSaved, setIsSaved] = useState(false);
@@ -39,7 +38,7 @@ export default function NoteCard({ note, onView }) {
       {note.thumbnailPath ? (
         <img
           className="note-card-thumbnail"
-          src={`${API_BASE}/${note.thumbnailPath}`}
+          src={`${API_ORIGIN}/${note.thumbnailPath}`}
           alt={note.title}
         />
       ) : (

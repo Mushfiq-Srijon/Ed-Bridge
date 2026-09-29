@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { API_ORIGIN } from '../config';
 import '../styles/ProfileDropdown.css';
 
 export default function ProfileDropdown({ unreadConversations = 0 }) {
@@ -41,7 +42,7 @@ export default function ProfileDropdown({ unreadConversations = 0 }) {
 >
   {user?.profilePhotoPath ? (
     <img
-      src={`http://localhost:5180/${user.profilePhotoPath}`}
+      src={`${API_ORIGIN}/${user.profilePhotoPath}`}
       alt="Profile"
       className="profile-mini-photo"
     />

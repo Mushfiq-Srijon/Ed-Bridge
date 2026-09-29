@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/api';
+import { API_ORIGIN } from '../config';
 import { useAuth } from '../context/AuthContext';
 import '../styles/ProfilePage.css';
 
@@ -166,7 +167,7 @@ const handlePhotoChange = async (e) => {
   }
 
   const photoUrl = profile.profilePhotoPath
-    ? `http://localhost:5180/${profile.profilePhotoPath}`
+    ? `${API_ORIGIN}/${profile.profilePhotoPath}`
     : null;
 
   return (
