@@ -50,21 +50,26 @@ const compressImageForListing = async (file) => {
   throw new Error('This image is still too large after compression. Choose a smaller image.');
 };
 
-export default function CreateListingModal({ onClose, onCreate }) {
+export default function CreateListingModal({
+  onClose,
+  onCreate,
+  initialListing = null,
+  isEditing = false,
+}) {
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    condition: 'Good',
-    originalPrice: '',
-    askingPrice: '',
-    category: '',
-    area: '',
-    educationLevel: '',
-    imageUrl: '',
+    title: initialListing?.title || '',
+    description: initialListing?.description || '',
+    condition: initialListing?.condition || 'Good',
+    originalPrice: initialListing?.originalPrice ?? '',
+    askingPrice: initialListing?.askingPrice ?? '',
+    category: initialListing?.category || '',
+    area: initialListing?.area || '',
+    educationLevel: initialListing?.educationLevel || '',
+    imageUrl: initialListing?.imageUrl || '',
     subjectTagIds: [],
   });
 
-  const [imagePreview, setImagePreview] = useState('');
+  const [imagePreview, setImagePreview] = useState(initialListing?.imageUrl || '');
   const [subjects, setSubjects] = useState([]);
   const [subjectsLoading, setSubjectsLoading] = useState(true);
   const [subjectsError, setSubjectsError] = useState('');
@@ -286,7 +291,7 @@ export default function CreateListingModal({ onClose, onCreate }) {
         'Asking price should not be higher than the original price.';
     }
 
-    if (formData.subjectTagIds.length === 0 && !customSubject.trim()) {
+    if (!isEditing && formData.subjectTagIds.length === 0 && !customSubject.trim()) {
       newErrors.subject = 'Please select at least one subject.';
     } else if (customSubject.trim() && customSubject.trim().length < 2) {
       newErrors.subject = 'A custom subject must contain at least 2 characters.';
@@ -340,7 +345,7 @@ export default function CreateListingModal({ onClose, onCreate }) {
         onClick={(event) => event.stopPropagation()}
       >
         <div className="modal-header">
-          <h2 id="create-listing-title">Post a Listing</h2>
+            <h2 id="create-listing-title">{isEditing ? 'Edit Listing' : 'Post a Listing'}</h2>
 
           <button
             type="button"
@@ -563,7 +568,7 @@ export default function CreateListingModal({ onClose, onCreate }) {
           </div>
 
           <div className="form-group">
-            <label>Subjects * (select at least one)</label>
+            <label>{isEditing ? 'Subjects (unchanged while editing)' : 'Subjects * (select at least one)'}</label>
 
             <div
               ref={setFieldRef('subject')}
@@ -647,7 +652,7 @@ export default function CreateListingModal({ onClose, onCreate }) {
               className="btn-submit"
               disabled={isSubmitting || subjectsLoading || isProcessingImage}
             >
-              {isSubmitting ? 'Posting…' : 'Post Listing'}
+              {isSubmitting ? (isEditing ? 'Saving…' : 'Posting…') : (isEditing ? 'Save Changes' : 'Post Listing')}
             </button>
 
             <button
