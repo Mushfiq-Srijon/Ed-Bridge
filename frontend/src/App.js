@@ -1,7 +1,9 @@
+
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { CartProvider } from './context/CartContext';
 import Navbar from './components/Navbar';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
@@ -17,6 +19,7 @@ import Bookmarks from './pages/Bookmarks';
 import AdminDashboard from './pages/AdminDashboard';
 import MyDashboard from './pages/MyDashboard';
 import VerifyEmail from './components/Auth/VerifyEmail';
+import CartPage from './pages/CartPage';
 
 import './App.css';
 
@@ -32,9 +35,11 @@ function ScrollToTop() {
 
 function PrivateRoute({ children }) {
   const { token, loading } = useAuth();
+
   if (loading) {
     return <div>Loading...</div>;
   }
+
   return token ? children : <Navigate to="/login" />;
 }
 
@@ -45,7 +50,9 @@ function AdminRoute({ children }) {
     return <div>Loading...</div>;
   }
 
-  return token && user?.role === 'Admin' ? children : <Navigate to="/login" replace />;
+  return token && user?.role === 'Admin'
+    ? children
+    : <Navigate to="/login" replace />;
 }
 
 function App() {
@@ -53,31 +60,81 @@ function App() {
     <Router>
       <ThemeProvider>
         <AuthProvider>
-          <ScrollToTop />
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/marketplace" element={<MarketplacePage />} />
-            <Route path="/notes" element={<NotesPage />} />
-            <Route path="/marketplace/listing/:id" element={<ListingDetailsPage />} />
-            <Route path="/forum" element={<ForumPage />} />
-            <Route path="/messages" element={<PrivateRoute><MessagesPage /></PrivateRoute>} />
-            <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
-            <Route path="/verify-email" element={<VerifyEmail />} />
-            <Route
-  path="/bookmarks"
-  element={
-    <PrivateRoute>
-      <Bookmarks />
-    </PrivateRoute>
-  }
-/>
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/dashboard" element={<PrivateRoute><MyDashboard /></PrivateRoute>} />
-            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-          </Routes>
+          <CartProvider>
+            <ScrollToTop />
+            <Navbar />
+
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/marketplace" element={<MarketplacePage />} />
+              <Route path="/notes" element={<NotesPage />} />
+              <Route
+                path="/marketplace/listing/:id"
+                element={<ListingDetailsPage />}
+              />
+              <Route path="/forum" element={<ForumPage />} />
+
+              <Route
+                path="/messages"
+                element={
+                  <PrivateRoute>
+                    <MessagesPage />
+                  </PrivateRoute>
+                }
+              />
+
+              <Route
+                path="/profile"
+                element={
+                  <PrivateRoute>
+                    <ProfilePage />
+                  </PrivateRoute>
+                }
+              />
+
+              <Route path="/verify-email" element={<VerifyEmail />} />
+
+              <Route
+                path="/bookmarks"
+                element={
+                  <PrivateRoute>
+                    <Bookmarks />
+                  </PrivateRoute>
+                }
+              />
+
+              <Route path="/settings" element={<SettingsPage />} />
+
+              <Route
+                path="/dashboard"
+                element={
+                  <PrivateRoute>
+                    <MyDashboard />
+                  </PrivateRoute>
+                }
+              />
+
+              <Route
+                path="/admin"
+                element={
+                  <AdminRoute>
+                    <AdminDashboard />
+                  </AdminRoute>
+                }
+              />
+
+              <Route
+                path="/cart"
+                element={
+                  <PrivateRoute>
+                    <CartPage />
+                  </PrivateRoute>
+                }
+              />
+            </Routes>
+          </CartProvider>
         </AuthProvider>
       </ThemeProvider>
     </Router>
