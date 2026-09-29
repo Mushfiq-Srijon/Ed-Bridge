@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../../services/adminAPI';
 import AdminLoading from './AdminLoading';
+import React, { useState, useEffect, useCallback } from 'react';
 
 export default function ForumsManagement({ onRefresh, refreshTrigger }) {
     const [posts, setPosts] = useState([]);
@@ -13,7 +13,7 @@ export default function ForumsManagement({ onRefresh, refreshTrigger }) {
     const [statusFilter, setStatusFilter] = useState('All');
     const [hasLoaded, setHasLoaded] = useState(false);
 
-    const loadCounts = async () => {
+    const loadCounts = useCallback(async () => {
         try {
             const allPosts = await adminAPI.getPosts();
             const reported = allPosts.filter(p => p.reportsCount > 0);
@@ -25,9 +25,9 @@ export default function ForumsManagement({ onRefresh, refreshTrigger }) {
         } catch (err) {
             console.error('Failed to load counts:', err);
         }
-    };
+    }, []);
 
-    const loadPosts = async () => {
+    const loadPosts = useCallback(async () => {
         try {
             setLoading(true);
             setError('');
@@ -39,7 +39,7 @@ export default function ForumsManagement({ onRefresh, refreshTrigger }) {
             setLoading(false);
             setHasLoaded(true);
         }
-    };
+    }, [search]);
 
     useEffect(() => {
         const searchTimer = setTimeout(() => {
@@ -48,7 +48,7 @@ export default function ForumsManagement({ onRefresh, refreshTrigger }) {
         }, 280);
 
         return () => clearTimeout(searchTimer);
-    }, [search, refreshTrigger]);
+    }, [search, refreshTrigger, loadCounts, loadPosts]);
 
     const handleSearch = (e) => {
         setSearch(e.target.value);

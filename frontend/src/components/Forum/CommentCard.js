@@ -3,8 +3,6 @@ import React, { useState } from 'react';
 export default function CommentCard({ comment, onUpvote, onDownvote, onReport }) {
   const [showOptions, setShowOptions] = useState(false);
 
-  const score = comment.upvotes - comment.downvotes;
-
   return (
     <div className="comment-card">
       <div className="comment-header">
