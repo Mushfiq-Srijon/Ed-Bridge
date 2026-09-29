@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { forumAPI, listingsAPI, notesAPI } from '../services/api';
+import { API_ORIGIN } from '../config';
 import Pagination from '../components/Pagination';
 import '../styles/Bookmarks.css';
 
@@ -179,7 +180,7 @@ export default function Bookmarks() {
               {paginatedItems.map((item) => (
                 <article className={`saved-item-card saved-item-card-${item.savedType}`} key={`${item.savedType}-${item.id}`}>
                   <div className={`saved-item-visual saved-${item.savedType}-visual`}>
-                    {item.savedType === 'notes' && (item.thumbnailPath ? <img src={`http://localhost:5180/${item.thumbnailPath}`} alt="" /> : <span className="saved-visual-placeholder">▤</span>)}
+                    {item.savedType === 'notes' && (item.thumbnailPath ? <img src={`${API_ORIGIN}/${item.thumbnailPath}`} alt="" /> : <span className="saved-visual-placeholder">▤</span>)}
                     {item.savedType === 'listings' && <img src={item.imageUrl || 'https://via.placeholder.com/640x420?text=No+Image'} alt="" />}
                     {item.savedType === 'forums' && <span className="saved-visual-placeholder">☷</span>}
                     <div className="saved-visual-topline">

@@ -2,9 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { notesAPI } from '../../services/api';
 import { transformNote } from '../../utils/noteAdapter';
 import { useAuth } from '../../context/AuthContext';
+import { API_ORIGIN } from '../../config';
 import '../../styles/NoteDetail.css';
 const viewedNotes = new Set();
-const API_BASE = 'http://localhost:5180';
 
 function StarRating({ value, onChange, readOnly = false }) {
   const [hovered, setHovered] = useState(0);
@@ -389,7 +389,7 @@ const data = await notesAPI.getById(noteId, !alreadyViewed);
           <div className="note-thumbnail-section">
             {note.thumbnailPath ? (
               <img
-                src={`${API_BASE}/${note.thumbnailPath}`}
+                src={`${API_ORIGIN}/${note.thumbnailPath}`}
                 alt={note.title}
                 className="note-thumbnail"
               />
