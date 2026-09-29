@@ -11,7 +11,21 @@ namespace EdBridge.API.Migrations
             // These statements are retry-safe for MariaDB. The first local
             // migration attempt may have committed part of its DDL before a
             // later statement failed.
-            migrationBuilder.Sql("ALTER TABLE `Messages` ADD COLUMN IF NOT EXISTS `IsRead` tinyint(1) NOT NULL DEFAULT FALSE;");
+            migrationBuilder.Sql(@"
+                SET @add_is_read_sql = (
+                    SELECT IF(
+                        COUNT(*) = 0,
+                        'ALTER TABLE `Messages` ADD `IsRead` tinyint(1) NOT NULL DEFAULT FALSE',
+                        'SELECT 1'
+                    )
+                    FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = 'Messages'
+                      AND COLUMN_NAME = 'IsRead'
+                );");
+            migrationBuilder.Sql("PREPARE add_is_read FROM @add_is_read_sql;");
+            migrationBuilder.Sql("EXECUTE add_is_read;");
+            migrationBuilder.Sql("DEALLOCATE PREPARE add_is_read;");
 
             migrationBuilder.Sql(@"CREATE TABLE IF NOT EXISTS `NoteViews` (
                 `NoteId` int NOT NULL,
@@ -42,11 +56,11 @@ namespace EdBridge.API.Migrations
                 CONSTRAINT `FK_SavedPosts_Users_UserId` FOREIGN KEY (`UserId`) REFERENCES `Users` (`Id`) ON DELETE CASCADE
             ) CHARACTER SET=utf8mb4;");
 
-            migrationBuilder.Sql("CREATE INDEX IF NOT EXISTS `IX_NoteViews_UserId` ON `NoteViews` (`UserId`);");
-            migrationBuilder.Sql("CREATE INDEX IF NOT EXISTS `IX_SavedListings_ListingId` ON `SavedListings` (`ListingId`);");
-            migrationBuilder.Sql("CREATE UNIQUE INDEX IF NOT EXISTS `IX_SavedListings_UserId_ListingId` ON `SavedListings` (`UserId`, `ListingId`);");
-            migrationBuilder.Sql("CREATE INDEX IF NOT EXISTS `IX_SavedPosts_PostId` ON `SavedPosts` (`PostId`);");
-            migrationBuilder.Sql("CREATE UNIQUE INDEX IF NOT EXISTS `IX_SavedPosts_UserId_PostId` ON `SavedPosts` (`UserId`, `PostId`);");
+            migrationBuilder.Sql("CREATE INDEX `IX_NoteViews_UserId` ON `NoteViews` (`UserId`);");
+            migrationBuilder.Sql("CREATE INDEX `IX_SavedListings_ListingId` ON `SavedListings` (`ListingId`);");
+            migrationBuilder.Sql("CREATE UNIQUE INDEX `IX_SavedListings_UserId_ListingId` ON `SavedListings` (`UserId`, `ListingId`);");
+            migrationBuilder.Sql("CREATE INDEX `IX_SavedPosts_PostId` ON `SavedPosts` (`PostId`);");
+            migrationBuilder.Sql("CREATE UNIQUE INDEX `IX_SavedPosts_UserId_PostId` ON `SavedPosts` (`UserId`, `PostId`);");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
