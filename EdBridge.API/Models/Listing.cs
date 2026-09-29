@@ -39,5 +39,6 @@ namespace EdBridge.API.Models
         public ICollection<Report> Reports { get; set; } = new List<Report>();
         public ICollection<ListingSubjectTag> ListingSubjectTags { get; set; } = new List<ListingSubjectTag>();
         public ICollection<SavedListing> SavedByUsers { get; set; } = new List<SavedListing>();
+        public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 }

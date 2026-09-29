@@ -20,6 +20,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import MyDashboard from './pages/MyDashboard';
 import VerifyEmail from './components/Auth/VerifyEmail';
 import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
 
 import './App.css';
 
@@ -130,6 +131,15 @@ function App() {
                 element={
                   <PrivateRoute>
                     <CartPage />
+                  </PrivateRoute>
+                }
+              />
+
+              <Route
+                path="/checkout"
+                element={
+                  <PrivateRoute>
+                    <CheckoutPage />
                   </PrivateRoute>
                 }
               />

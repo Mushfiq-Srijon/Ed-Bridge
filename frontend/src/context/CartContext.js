@@ -3,14 +3,17 @@ import React, {
   createContext,
   useContext,
   useEffect,
+  useCallback,
   useState,
 } from "react";
+import { useAuth } from "./AuthContext";
 
 const CartContext = createContext();
 
 const CART_STORAGE_KEY = "edbridge_cart";
 
 export function CartProvider({ children }) {
+  const { user } = useAuth();
   const [cartItems, setCartItems] = useState(() => {
     try {
       const storedCart = localStorage.getItem(CART_STORAGE_KEY);
@@ -24,9 +27,29 @@ export function CartProvider({ children }) {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
   }, [cartItems]);
 
+  // A cart can survive a browser refresh. Remove any old item belonging to
+  // the currently signed-in user before it can reach checkout.
+  useEffect(() => {
+    if (!user?.id) return;
+
+    setCartItems((currentItems) =>
+      currentItems.filter(
+        (item) => String(item.seller?.id) !== String(user.id)
+      )
+    );
+  }, [user]);
+
   const addToCart = (listing) => {
     if (!listing?.id) {
       return { success: false, message: "Invalid listing." };
+    }
+
+    if (user?.id && listing.seller?.id &&
+        String(user.id) === String(listing.seller.id)) {
+      return {
+        success: false,
+        message: "You cannot add your own listing to the cart.",
+      };
     }
 
     const existingItem = cartItems.find(
@@ -69,9 +92,9 @@ export function CartProvider({ children }) {
     );
   };
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCartItems([]);
-  };
+  }, []);
 
   const isInCart = (listingId) =>
     cartItems.some((item) => item.id === listingId);

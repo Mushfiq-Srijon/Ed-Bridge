@@ -34,6 +34,7 @@
 
 .logo-text {
   display: inline-block;
+  text-decoration: none;
   white-space: nowrap;
   padding-right: 0.12em;
   background: white;
@@ -46,6 +47,12 @@
   font-family: "Avenir Next", "Segoe UI Variable", Inter, "Segoe UI", sans-serif;
   font-style: normal;
   animation: gradientShift 3s ease-in-out infinite;
+}
+
+.logo-text:hover,
+.logo-text:focus,
+.logo-text:visited {
+  text-decoration: none;
 }
 
 @keyframes gradientShift {
