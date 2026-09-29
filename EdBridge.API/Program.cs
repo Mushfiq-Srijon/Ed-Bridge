@@ -54,13 +54,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Add CORS (dynamic based on FrontendUrl configuration)
+// Add CORS for the configured frontend and the known local/production clients.
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReact", policy =>
     {
-        var frontendUrl = builder.Configuration["FrontendUrl"] ?? "http://localhost:3000";
-        policy.WithOrigins(frontendUrl)
+        var configuredFrontendUrl = builder.Configuration["FrontendUrl"];
+        var allowedOrigins = new[]
+            {
+                configuredFrontendUrl,
+                "https://ed-bridge-mu.vercel.app",
+                "http://localhost:3000"
+            }
+            .Where(origin => !string.IsNullOrWhiteSpace(origin))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        policy.WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
