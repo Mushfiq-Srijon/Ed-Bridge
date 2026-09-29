@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { adminAPI } from '../../services/adminAPI';
 import AdminLoading from './AdminLoading';
 
@@ -12,7 +12,7 @@ export default function ReportsManagement({ onRefresh, refreshTrigger }) {
   const [actionLoading, setActionLoading] = useState(false);
 
   // Load counts for all statuses
-  const loadCounts = async () => {
+  const loadCounts = useCallback(async () => {
     try {
       const allReports = await adminAPI.getReports(null);
       const pending = await adminAPI.getReports('Pending');
@@ -28,10 +28,10 @@ export default function ReportsManagement({ onRefresh, refreshTrigger }) {
     } catch (err) {
       console.error('Failed to load counts:', err);
     }
-  };
+  }, []);
 
   // Load filtered reports
-  const loadReports = async () => {
+  const loadReports = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -42,12 +42,12 @@ export default function ReportsManagement({ onRefresh, refreshTrigger }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter]);
 
   useEffect(() => {
     loadCounts();
     loadReports();
-  }, [statusFilter, refreshTrigger]);
+  }, [statusFilter, refreshTrigger, loadCounts, loadReports]);
 
   const handleDismiss = async (reportId) => {
     try {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { notesAPI } from '../../services/api';
 import { transformNote } from '../../utils/noteAdapter';
 import { useAuth } from '../../context/AuthContext';
@@ -53,11 +53,7 @@ export default function NoteDetail({ noteId, onBack }) {
 
   const [downloadSubmitting, setDownloadSubmitting] = useState(false);
 
-  useEffect(() => {
-    loadNote();
-  }, [noteId]);
-
-  const loadNote = async () => {
+  const loadNote = useCallback(async () => {
   try {
     setLoading(true);
     setError('');
@@ -84,7 +80,11 @@ const data = await notesAPI.getById(noteId, !alreadyViewed);
   } finally {
     setLoading(false);
   }
-};
+  }, [noteId]);
+
+  useEffect(() => {
+    loadNote();
+  }, [loadNote]);
 
   const isOwner =
     Boolean(user) &&

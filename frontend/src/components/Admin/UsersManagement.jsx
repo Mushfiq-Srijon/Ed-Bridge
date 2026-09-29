@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { adminAPI } from '../../services/adminAPI';
 import { useAuth } from '../../context/AuthContext';
 import AdminLoading from './AdminLoading';
@@ -17,7 +17,7 @@ export default function UsersManagement({ onRefresh, refreshTrigger }) {
   const isCurrentAdmin = selectedUser?.id === currentUser?.id;
 
   // Load counts for all statuses
-  const loadCounts = async () => {
+  const loadCounts = useCallback(async () => {
     try {
       const allUsers = await adminAPI.getUsers(search || null, null);
       const active = await adminAPI.getUsers(search || null, 'active');
@@ -31,10 +31,10 @@ export default function UsersManagement({ onRefresh, refreshTrigger }) {
     } catch (err) {
       console.error('Failed to load counts:', err);
     }
-  };
+  }, [search]);
 
   // Load filtered users
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -46,7 +46,7 @@ export default function UsersManagement({ onRefresh, refreshTrigger }) {
       setLoading(false);
       setHasLoaded(true);
     }
-  };
+  }, [search, statusFilter]);
 
   useEffect(() => {
     // Debouncing keeps the input mounted while the API catches up, so typing
@@ -57,7 +57,7 @@ export default function UsersManagement({ onRefresh, refreshTrigger }) {
     }, 280);
 
     return () => clearTimeout(searchTimer);
-  }, [search, statusFilter, refreshTrigger]);
+  }, [search, statusFilter, refreshTrigger, loadCounts, loadUsers]);
 
   const handleSearch = (e) => {
     setSearch(e.target.value);
