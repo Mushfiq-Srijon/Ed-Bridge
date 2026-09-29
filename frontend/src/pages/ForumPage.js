@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import PostList from '../components/Forum/PostList';
 import CreatePostModal from '../components/Forum/CreatePostModal';
@@ -28,17 +28,13 @@ export default function ForumPage() {
   // Forum discussions are ranked by community score, with newer discussions
   // winning ties. Keeping this rule in the UI also makes newly-created posts
   // and filtered results feel consistent before the next server refresh.
-  const sortPosts = (items) => [...items].sort((a, b) => {
+  const sortPosts = useCallback((items) => [...items].sort((a, b) => {
     const scoreDifference = (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes);
     if (scoreDifference !== 0) return scoreDifference;
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-  });
+  }), []);
 
-  useEffect(() => {
-    loadPosts();
-  }, []);
-
-  const loadPosts = async () => {
+  const loadPosts = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -56,7 +52,11 @@ export default function ForumPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [sortPosts]);
+
+  useEffect(() => {
+    loadPosts();
+  }, [loadPosts]);
 
   const handleSearch = (query) => {
     setSearchQuery(query);

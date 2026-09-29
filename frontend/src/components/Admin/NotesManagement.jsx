@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { adminAPI } from '../../services/adminAPI';
 import AdminLoading from './AdminLoading';
 
@@ -13,7 +13,7 @@ export default function NotesManagement({ onRefresh, refreshTrigger }) {
     const [hasLoaded, setHasLoaded] = useState(false);
     const [statusFilter, setStatusFilter] = useState('All');
 
-    const loadCounts = async () => {
+    const loadCounts = useCallback(async () => {
         try {
             const allNotes = await adminAPI.getNotes();
             const reported = allNotes.filter(n => n.reportsCount > 0);
@@ -25,9 +25,9 @@ export default function NotesManagement({ onRefresh, refreshTrigger }) {
         } catch (err) {
             console.error('Failed to load counts:', err);
         }
-    };
+    }, []);
 
-    const loadNotes = async () => {
+    const loadNotes = useCallback(async () => {
         try {
             setLoading(true);
             setError('');
@@ -39,7 +39,7 @@ export default function NotesManagement({ onRefresh, refreshTrigger }) {
             setLoading(false);
             setHasLoaded(true);
         }
-    };
+    }, [search]);
 
   useEffect(() => {
         const searchTimer = setTimeout(() => {
@@ -48,7 +48,7 @@ export default function NotesManagement({ onRefresh, refreshTrigger }) {
         }, 280);
 
         return () => clearTimeout(searchTimer);
-    }, [search, refreshTrigger]);
+    }, [search, refreshTrigger, loadCounts, loadNotes]);
 
     const handleSearch = (e) => {
         setSearch(e.target.value);

@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useRef } from "react";
+import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import MarketplaceSearch from "../components/Marketplace/MarketplaceSearch";
@@ -40,11 +40,6 @@ export default function MarketplacePage() {
   const resultsRef = useRef(null);
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => loadListings(currentPage), searchTerm ? 300 : 0);
-    return () => window.clearTimeout(timeoutId);
-  }, [filters, searchTerm, sortOption, currentPage]);
-
-  useEffect(() => {
     setCurrentPage(1);
   }, [filters, searchTerm, sortOption]);
 
@@ -65,7 +60,7 @@ export default function MarketplacePage() {
     loadFilterOptions();
   }, []);
 
-  const loadListings = async (page = 1) => {
+  const loadListings = useCallback(async (page = 1) => {
     try {
       setLoading((previous) => previous && listings.length === 0);
       setRefreshing(true);
@@ -83,7 +78,12 @@ export default function MarketplacePage() {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [filters, searchTerm, sortOption, listings.length]);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => loadListings(currentPage), searchTerm ? 300 : 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [filters, searchTerm, sortOption, currentPage, loadListings]);
 
   const handleCreateListing = async (listingData) => {
     try {

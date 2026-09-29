@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { adminAPI } from '../../services/adminAPI';
 import AdminLoading from './AdminLoading';
 
@@ -13,12 +13,7 @@ export default function ListingsManagement({ onRefresh, refreshTrigger }) {
   const [actionLoading, setActionLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
 
-  useEffect(() => {
-    const searchTimer = setTimeout(() => loadListings(), 280);
-    return () => clearTimeout(searchTimer);
-  }, [statusFilter, search, refreshTrigger]);
-
-  const loadListings = async () => {
+  const loadListings = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -37,7 +32,12 @@ export default function ListingsManagement({ onRefresh, refreshTrigger }) {
       setLoading(false);
       setHasLoaded(true);
     }
-  };
+  }, [search, statusFilter]);
+
+  useEffect(() => {
+    const searchTimer = setTimeout(() => loadListings(), 280);
+    return () => clearTimeout(searchTimer);
+  }, [statusFilter, search, refreshTrigger, loadListings]);
 
   const handleSearch = (e) => {
     setSearch(e.target.value);
