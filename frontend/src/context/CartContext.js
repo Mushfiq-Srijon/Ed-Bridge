@@ -11,37 +11,51 @@ import { useAuth } from "./AuthContext";
 const CartContext = createContext();
 
 const CART_STORAGE_KEY = "edbridge_cart";
+const getCartStorageKey = (userId) =>
+  userId ? `${CART_STORAGE_KEY}_${userId}` : `${CART_STORAGE_KEY}_guest`;
 
 export function CartProvider({ children }) {
-  const { user } = useAuth();
-  const [cartItems, setCartItems] = useState(() => {
+  const { user, loading: authLoading } = useAuth();
+  const cartStorageKey = getCartStorageKey(user?.id);
+  const [cartItems, setCartItems] = useState([]);
+  const [loadedStorageKey, setLoadedStorageKey] = useState(null);
+
+  useEffect(() => {
+    if (authLoading) return;
+
+    let storedItems = [];
     try {
-      const storedCart = localStorage.getItem(CART_STORAGE_KEY);
-      return storedCart ? JSON.parse(storedCart) : [];
+      const storedCart = localStorage.getItem(cartStorageKey);
+      const parsedCart = storedCart ? JSON.parse(storedCart) : [];
+      if (Array.isArray(parsedCart)) {
+        storedItems = parsedCart.filter(
+          (item) => !user?.id || String(item.seller?.id) !== String(user.id)
+        );
+      }
     } catch {
-      return [];
+      storedItems = [];
     }
-  });
+
+    setCartItems(storedItems);
+    setLoadedStorageKey(cartStorageKey);
+  }, [authLoading, cartStorageKey, user?.id]);
 
   useEffect(() => {
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
-  }, [cartItems]);
+    if (authLoading || loadedStorageKey !== cartStorageKey) return;
 
-  // A cart can survive a browser refresh. Remove any old item belonging to
-  // the currently signed-in user before it can reach checkout.
-  useEffect(() => {
-    if (!user?.id) return;
+    localStorage.setItem(cartStorageKey, JSON.stringify(cartItems));
+  }, [authLoading, cartItems, cartStorageKey, loadedStorageKey]);
 
-    setCartItems((currentItems) =>
-      currentItems.filter(
-        (item) => String(item.seller?.id) !== String(user.id)
-      )
-    );
-  }, [user]);
+  const cartReady = !authLoading && loadedStorageKey === cartStorageKey;
+  const visibleCartItems = cartReady ? cartItems : [];
 
   const addToCart = (listing) => {
     if (!listing?.id) {
       return { success: false, message: "Invalid listing." };
+    }
+
+    if (authLoading || loadedStorageKey !== cartStorageKey) {
+      return { success: false, message: "Your cart is still loading. Please try again." };
     }
 
     if (user?.id && listing.seller?.id &&
@@ -97,9 +111,9 @@ export function CartProvider({ children }) {
   }, []);
 
   const isInCart = (listingId) =>
-    cartItems.some((item) => item.id === listingId);
+    visibleCartItems.some((item) => item.id === listingId);
 
-  const cartTotal = cartItems.reduce(
+  const cartTotal = visibleCartItems.reduce(
     (total, item) => total + item.askingPrice,
     0
   );
@@ -107,8 +121,8 @@ export function CartProvider({ children }) {
   return (
     <CartContext.Provider
       value={{
-        cartItems,
-        cartCount: cartItems.length,
+        cartItems: visibleCartItems,
+        cartCount: visibleCartItems.length,
         cartTotal,
         addToCart,
         removeFromCart,

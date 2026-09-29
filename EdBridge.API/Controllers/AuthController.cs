@@ -264,6 +264,14 @@ namespace EdBridge.API.Controllers
 
             if (verificationToken.UsedAt != null)
             {
+                if (verificationToken.User.EmailVerified)
+                {
+                    return Ok(new
+                    {
+                        message = "Email verified successfully. You can now log in."
+                    });
+                }
+
                 return BadRequest(new
                 {
                     message = "This verification link has already been used."

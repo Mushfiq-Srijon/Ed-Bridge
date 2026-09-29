@@ -163,6 +163,22 @@
 .checkout-result-card .checkout-message { margin: 20px 0; text-align: left; }
 .checkout-secondary-button { display: inline-block; margin-top: 24px; }
 
+.checkout-invoice-button {
+  display: block;
+  margin: 24px auto 0;
+  padding: 12px 18px;
+  border: 1px solid #168f7b;
+  border-radius: 8px;
+  color: #fff;
+  background: #168f7b;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.checkout-invoice-button:hover:not(:disabled) { background: #10725f; }
+.checkout-invoice-button:disabled { cursor: wait; opacity: 0.65; }
+
 @media (max-width: 760px) {
   .checkout-page { padding: 34px 16px 60px; }
   .checkout-heading { align-items: flex-start; flex-direction: column; }

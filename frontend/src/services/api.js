@@ -699,6 +699,34 @@ export const checkoutAPI = {
 
   createCashOnDeliveryOrder: (data) =>
     apiCall('/checkout/cash-on-delivery', 'POST', data),
+
+  downloadInvoice: async (orderId) => {
+    const token = getAuthToken();
+    const response = await fetch(
+      `${API_BASE_URL}/orders/${orderId}/invoice`,
+      {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      }
+    );
+
+    if (!response.ok) {
+      const responseText = await response.text();
+      let errorMessage = `API Error: ${response.status}`;
+
+      if (responseText) {
+        try {
+          const errorData = JSON.parse(responseText);
+          errorMessage = errorData.message || errorData.title || errorMessage;
+        } catch {
+          errorMessage = responseText;
+        }
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    return response.blob();
+  },
 };
 
 

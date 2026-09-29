@@ -32,6 +32,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Register AuthService
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<EdBridge.API.Services.InvoiceService>();
 
 // Add JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT key is not configured.");
@@ -77,6 +78,7 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(optio
 {
     options.MultipartBodyLengthLimit = 52428800;
 });
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
