@@ -14,9 +14,9 @@ namespace EdBridge.API.Services
         }
 
         public async Task SendVerificationEmailAsync(
-            string recipientEmail,
-            string recipientName,
-            string verificationLink)
+    string recipientEmail,
+    string recipientName,
+    string verificationLink)
         {
             var smtpServer = _configuration["EmailSettings:SmtpServer"];
             var smtpPortValue = _configuration["EmailSettings:SmtpPort"] ?? "587";
@@ -24,6 +24,13 @@ namespace EdBridge.API.Services
             var smtpPassword = _configuration["EmailSettings:SmtpPassword"];
             var fromEmail = _configuration["EmailSettings:FromEmail"];
             var fromName = _configuration["EmailSettings:FromName"];
+
+            // Debug: Log what was loaded
+            Console.WriteLine($"[EMAIL DEBUG] Server: {smtpServer}");
+            Console.WriteLine($"[EMAIL DEBUG] Port: {smtpPortValue}");
+            Console.WriteLine($"[EMAIL DEBUG] Username: {smtpUsername}");
+            Console.WriteLine($"[EMAIL DEBUG] Password loaded: {!string.IsNullOrWhiteSpace(smtpPassword)}");
+            Console.WriteLine($"[EMAIL DEBUG] From: {fromEmail}");
 
             if (string.IsNullOrWhiteSpace(smtpServer) ||
                 string.IsNullOrWhiteSpace(smtpUsername) ||
@@ -39,55 +46,58 @@ namespace EdBridge.API.Services
                 throw new InvalidOperationException("EmailSettings:SmtpPort must be a valid port number.");
 
             var message = new MimeMessage();
-
-            message.From.Add(
-                new MailboxAddress(fromName, fromEmail)
-            );
-
-            message.To.Add(
-                new MailboxAddress(recipientName, recipientEmail)
-            );
-
+            message.From.Add(new MailboxAddress(fromName, fromEmail));
+            message.To.Add(new MailboxAddress(recipientName, recipientEmail));
             message.Subject = "Verify your Ed-Bridge email";
 
             var body = $"""
-                Hello {recipientName},
+        Hello {recipientName},
 
-                Welcome to Ed-Bridge!
+        Welcome to Ed-Bridge!
 
-                Please verify your email address by clicking the link below:
+        Please verify your email address by clicking the link below:
 
-                {verificationLink}
+        {verificationLink}
 
-                This verification link will expire in 24 hours.
+        This verification link will expire in 24 hours.
 
-                If you did not create an Ed-Bridge account, you can ignore this email.
+        If you did not create an Ed-Bridge account, you can ignore this email.
 
-                Regards,
-                Ed-Bridge Team
-                """;
+        Regards,
+        Ed-Bridge Team
+        """;
 
-            message.Body = new TextPart("plain")
-            {
-                Text = body
-            };
+            message.Body = new TextPart("plain") { Text = body };
 
             using var smtp = new SmtpClient();
 
-            await smtp.ConnectAsync(
-                smtpServer,
-                smtpPort,
-                SecureSocketOptions.StartTls
-            );
+            // ⚠️ DEVELOPMENT ONLY: Bypass certificate validation
+            // Remove this before going to production
+            smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-            await smtp.AuthenticateAsync(
-                smtpUsername,
-                smtpPassword
-            );
+            try
+            {
+                Console.WriteLine($"[EMAIL DEBUG] Connecting to {smtpServer}:{smtpPort}...");
+                await smtp.ConnectAsync(smtpServer, smtpPort, SecureSocketOptions.StartTls);
+                Console.WriteLine($"[EMAIL DEBUG] Connected successfully");
 
-            await smtp.SendAsync(message);
 
-            await smtp.DisconnectAsync(true);
+                Console.WriteLine($"[EMAIL DEBUG] Authenticating as {smtpUsername}...");
+                await smtp.AuthenticateAsync(smtpUsername, smtpPassword);
+                Console.WriteLine($"[EMAIL DEBUG] Authenticated successfully");
+
+                Console.WriteLine($"[EMAIL DEBUG] Sending email to {recipientEmail}...");
+                await smtp.SendAsync(message);
+                Console.WriteLine($"[EMAIL DEBUG] Email sent successfully");
+
+                await smtp.DisconnectAsync(true);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[EMAIL ERROR] {ex.GetType().Name}: {ex.Message}");
+                Console.WriteLine($"[EMAIL ERROR] Stack Trace: {ex.StackTrace}");
+                throw;  // Re-throw so controller's catch block handles it
+            }
         }
     }
 }

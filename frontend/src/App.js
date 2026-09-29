@@ -10,6 +10,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import MarketplacePage from './pages/MarketplacePage';
 import ListingDetailsPage from './pages/ListingDetailsPage';
+import ListingEditPage from './pages/ListingEditPage';
 import NotesPage from './pages/NotesPage';
 import ForumPage from './pages/ForumPage';
 import MessagesPage from './pages/MessagesPage';
@@ -74,6 +75,14 @@ function App() {
               <Route
                 path="/marketplace/listing/:id"
                 element={<ListingDetailsPage />}
+              />
+              <Route
+                path="/marketplace/listing/:id/edit"
+                element={
+                  <PrivateRoute>
+                    <ListingEditPage />
+                  </PrivateRoute>
+                }
               />
               <Route path="/forum" element={<ForumPage />} />
 
