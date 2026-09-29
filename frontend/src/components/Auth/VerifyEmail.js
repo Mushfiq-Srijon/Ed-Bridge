@@ -1,17 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { authAPI } from '../../services/api';
 
 export default function VerifyEmail() {
   const [searchParams] = useSearchParams();
+  const verificationRequests = useRef(new Map());
 
   const [status, setStatus] = useState('verifying');
   const [message, setMessage] = useState('');
+  const token = searchParams.get('token');
 
   useEffect(() => {
-    const verifyEmail = async () => {
-      const token = searchParams.get('token');
+    let isCurrent = true;
 
+    const verifyEmail = async () => {
       if (!token) {
         setStatus('error');
         setMessage('Verification token is missing.');
@@ -19,22 +21,36 @@ export default function VerifyEmail() {
       }
 
       try {
-        const response = await authAPI.verifyEmail(token);
+        let request = verificationRequests.current.get(token);
+        if (!request) {
+          request = authAPI.verifyEmail(token);
+          verificationRequests.current.set(token, request);
+        }
 
-        setStatus('success');
-        setMessage(
-          response.message || 'Email verified successfully.'
-        );
+        const response = await request;
+
+        if (isCurrent) {
+          setStatus('success');
+          setMessage(
+            response.message || 'Email verified successfully.'
+          );
+        }
       } catch (error) {
-        setStatus('error');
-        setMessage(
-          error.message || 'Email verification failed.'
-        );
+        if (isCurrent) {
+          setStatus('error');
+          setMessage(
+            error.message || 'Email verification failed.'
+          );
+        }
       }
     };
 
     verifyEmail();
-  }, [searchParams]);
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [token]);
 
   return (
     <div className="auth-page">

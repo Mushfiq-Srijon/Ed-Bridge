@@ -11,6 +11,8 @@ export default function CheckoutPage() {
   const [searchParams] = useSearchParams();
   const [customerEmail, setCustomerEmail] = useState(user?.email || "");
   const [loadingMethod, setLoadingMethod] = useState("");
+  const [invoiceOrderId, setInvoiceOrderId] = useState(searchParams.get("order_id"));
+  const [invoiceLoading, setInvoiceLoading] = useState(false);
   const [message, setMessage] = useState(null);
 
   const paymentResult = searchParams.get("payment");
@@ -90,6 +92,7 @@ export default function CheckoutPage() {
         customerEmail: customerEmail.trim(),
       });
       clearCart();
+      setInvoiceOrderId(response.orderId);
       setMessage({
         type: "success",
         text: `${response.message} Order #${response.orderId} is pending payment.`,
@@ -98,6 +101,27 @@ export default function CheckoutPage() {
       setMessage({ type: "error", text: error.message || "Unable to place COD order." });
     } finally {
       setLoadingMethod("");
+    }
+  };
+
+  const handleDownloadInvoice = async () => {
+    if (!invoiceOrderId) return;
+
+    try {
+      setInvoiceLoading(true);
+      const pdf = await checkoutAPI.downloadInvoice(invoiceOrderId);
+      const url = window.URL.createObjectURL(pdf);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `EDB-INV-${String(invoiceOrderId).padStart(6, "0")}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+    } catch (error) {
+      setMessage({ type: "error", text: error.message || "Unable to download the invoice." });
+    } finally {
+      setInvoiceLoading(false);
     }
   };
 
@@ -110,6 +134,16 @@ export default function CheckoutPage() {
           </div>
           <h1>{paymentResult === "success" ? "Thank you for your order" : "Checkout"}</h1>
           {message ? <p className={`checkout-message ${message.type}`}>{message.text}</p> : <p>Your cart is empty.</p>}
+          {invoiceOrderId && paymentResult !== "cancelled" && (
+            <button
+              type="button"
+              className="checkout-invoice-button"
+              onClick={handleDownloadInvoice}
+              disabled={invoiceLoading}
+            >
+              {invoiceLoading ? "Preparing invoice..." : "Download invoice PDF"}
+            </button>
+          )}
           <Link className="checkout-secondary-button" to="/marketplace">Continue shopping</Link>
         </section>
       </main>
