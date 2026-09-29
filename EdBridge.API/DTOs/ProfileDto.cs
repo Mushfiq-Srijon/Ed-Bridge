@@ -8,6 +8,7 @@ namespace EdBridge.API.DTOs
         public string? Institution { get; set; }
         public string? EducationLevel { get; set; }
         public string? Phone { get; set; }
+        public string? About { get; set; }
         public string? ProfilePhotoPath { get; set; }
         public string Role { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
@@ -19,5 +20,6 @@ namespace EdBridge.API.DTOs
         public string? Institution { get; set; }
         public string? EducationLevel { get; set; }
         public string? Phone { get; set; }
+        public string? About { get; set; }
     }
 }

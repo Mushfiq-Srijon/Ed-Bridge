@@ -30,6 +30,8 @@ namespace EdBridge.API.Data
         public DbSet<NoteView> NoteViews { get; set; }
         public DbSet<SavedListing> SavedListings { get; set; }
         public DbSet<SavedPost> SavedPosts { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
 protected override void OnModelCreating(ModelBuilder modelBuilder)
 {
     base.OnModelCreating(modelBuilder);
@@ -115,7 +117,29 @@ modelBuilder.Entity<SavedNote>()
         .HasOne(x => x.Post).WithMany(x => x.SavedByUsers)
         .HasForeignKey(x => x.PostId).OnDelete(DeleteBehavior.Cascade);
     modelBuilder.Entity<SavedPost>()
-        .HasIndex(x => new { x.UserId, x.PostId }).IsUnique();
+    .HasIndex(x => new { x.UserId, x.PostId }).IsUnique();
+
+    modelBuilder.Entity<Order>()
+        .HasOne(order => order.Buyer)
+        .WithMany()
+        .HasForeignKey(order => order.BuyerId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Order>()
+        .HasIndex(order => order.StripeCheckoutSessionId)
+        .IsUnique();
+
+    modelBuilder.Entity<OrderItem>()
+        .HasOne(item => item.Order)
+        .WithMany(order => order.Items)
+        .HasForeignKey(item => item.OrderId)
+        .OnDelete(DeleteBehavior.Cascade);
+
+    modelBuilder.Entity<OrderItem>()
+        .HasOne(item => item.Listing)
+        .WithMany(listing => listing.OrderItems)
+        .HasForeignKey(item => item.ListingId)
+        .OnDelete(DeleteBehavior.SetNull);
 }
     }
 }

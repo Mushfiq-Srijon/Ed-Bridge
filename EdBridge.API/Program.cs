@@ -5,8 +5,15 @@ using System.Text;
 using EdBridge.API.Data;
 using EdBridge.API.Services;
 using EdBridge.API.Middleware;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Stripe is configured from user secrets or environment variables. The API
+// still starts without a key so the rest of the application remains usable.
+var stripeSecretKey = builder.Configuration["Stripe:SecretKey"];
+if (!string.IsNullOrWhiteSpace(stripeSecretKey))
+    StripeConfiguration.ApiKey = stripeSecretKey;
 
 // Keep local API diagnostics on the console. The Windows EventLog provider
 // can be unavailable for non-elevated development processes and may turn a

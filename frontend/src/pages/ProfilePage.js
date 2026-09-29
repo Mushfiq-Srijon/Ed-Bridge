@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import '../styles/ProfilePage.css';
 
 export default function ProfilePage() {
   const { login, token } = useAuth();
+  const navigate = useNavigate();
 
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -16,11 +18,13 @@ export default function ProfilePage() {
     institution: '',
     educationLevel: '',
     phone: '',
+    about: '',
   });
 
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [photoInputKey, setPhotoInputKey] = useState(0);
+  const [phoneError, setPhoneError] = useState('');
 
   useEffect(() => {
     loadProfile();
@@ -38,6 +42,7 @@ export default function ProfilePage() {
         institution: data.institution || '',
         educationLevel: data.educationLevel || '',
         phone: data.phone || '',
+        about: data.about || '',
       });
     } catch (err) {
       console.error('Failed to load profile:', err);
@@ -49,7 +54,9 @@ export default function ProfilePage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const nextValue = name === 'phone' ? value.replace(/\D/g, '').slice(0, 13) : value;
+    if (name === 'phone') setPhoneError('');
+    setFormData((prev) => ({ ...prev, [name]: nextValue }));
   };
 
   const handleEditClick = () => {
@@ -62,13 +69,20 @@ export default function ProfilePage() {
       institution: profile.institution || '',
       educationLevel: profile.educationLevel || '',
       phone: profile.phone || '',
+      about: profile.about || '',
     });
+    setPhoneError('');
     setIsEditing(false);
   };
 
   const handleSave = async () => {
     if (!formData.name.trim()) {
       alert('Name cannot be empty');
+      return;
+    }
+
+    if (formData.phone && !/^(01\d{9}|8801\d{9})$/.test(formData.phone)) {
+      setPhoneError('Use 01 followed by 9 digits, or 8801 followed by 9 digits.');
       return;
     }
 
@@ -85,6 +99,7 @@ export default function ProfilePage() {
         institution: result.profile.institution,
         educationLevel: result.profile.educationLevel,
         phone: result.profile.phone,
+        about: result.profile.about,
       };
       login(token, updatedUser);
     } catch (err) {
@@ -156,7 +171,13 @@ const handlePhotoChange = async (e) => {
 
   return (
     <div className="profile-page">
-      <h1>My Profile</h1>
+      <div className="profile-page-heading">
+        <div>
+          <p className="profile-eyebrow">Account profile</p>
+          <h1>My Profile</h1>
+          <p className="profile-heading-copy">Keep your learning identity current for the Ed-Bridge community.</p>
+        </div>
+      </div>
 
       <div className="profile-card">
         <div className="profile-photo-section">
@@ -248,15 +269,20 @@ const handlePhotoChange = async (e) => {
             <label>Phone</label>
             {isEditing ? (
               <input
-                type="text"
+                type="tel"
+                inputMode="numeric"
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
+                placeholder="01XXXXXXXXX"
+                maxLength={13}
                 disabled={saving}
               />
             ) : (
               <p>{profile.phone || 'Not set'}</p>
             )}
+            {isEditing && <small className="field-hint">11 digits starting with 01, or 13 digits starting with 8801.</small>}
+            {phoneError && <small className="field-error">{phoneError}</small>}
           </div>
 
           <div className="profile-field">
@@ -281,6 +307,37 @@ const handlePhotoChange = async (e) => {
             )}
           </div>
         </div>
+      </div>
+
+      <div className="profile-lower-grid">
+        <section className="profile-about-card">
+          <p className="profile-eyebrow">Community presence</p>
+          <h2>About</h2>
+          {isEditing ? (
+            <textarea
+              name="about"
+              value={formData.about}
+              onChange={handleChange}
+              placeholder="Tell the Ed-Bridge community about yourself, your interests, and your learning journey..."
+              maxLength={1000}
+              disabled={saving}
+              rows={5}
+            />
+          ) : (
+            <p className={profile.about ? 'profile-about-text' : 'profile-about-placeholder'}>
+              {profile.about || 'Tell the Ed-Bridge community about yourself, your interests, and your learning journey.'}
+            </p>
+          )}
+        </section>
+
+        <section className="profile-security-card">
+          <div>
+            <p className="profile-eyebrow">Security</p>
+            <h2>Keep your account secure</h2>
+            <p>Change your password regularly and protect your learning space.</p>
+          </div>
+          <button className="btn-security" onClick={() => navigate('/settings')}>Change Password</button>
+        </section>
       </div>
     </div>
   );

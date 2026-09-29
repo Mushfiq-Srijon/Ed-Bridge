@@ -689,6 +689,18 @@ export const listingsAPI = {
     ),
 };
 
+// =========================
+// CHECKOUT API
+// =========================
+
+export const checkoutAPI = {
+  createStripeSession: (data) =>
+    apiCall('/checkout/stripe-session', 'POST', data),
+
+  createCashOnDeliveryOrder: (data) =>
+    apiCall('/checkout/cash-on-delivery', 'POST', data),
+};
+
 
 // =========================
 // REVIEWS API

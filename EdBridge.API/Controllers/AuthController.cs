@@ -310,6 +310,7 @@ namespace EdBridge.API.Controllers
                 Institution = user.Institution,
                 EducationLevel = user.EducationLevel,
                 Phone = user.Phone,
+                About = user.About,
                 ProfilePhotoPath = user.ProfilePhotoPath,
                 Role = user.Role,
                 CreatedAt = user.CreatedAt
@@ -335,10 +336,15 @@ namespace EdBridge.API.Controllers
             if (string.IsNullOrWhiteSpace(req.Name))
                 return BadRequest(new { message = "Name is required" });
 
+            if (!string.IsNullOrWhiteSpace(req.Phone) &&
+                !System.Text.RegularExpressions.Regex.IsMatch(req.Phone, "^(01\\d{9}|8801\\d{9})$"))
+                return BadRequest(new { message = "Phone must be 11 digits starting with 01 or 13 digits starting with 8801" });
+
             user.Name = req.Name;
             user.Institution = req.Institution;
             user.EducationLevel = req.EducationLevel;
             user.Phone = req.Phone;
+            user.About = string.IsNullOrWhiteSpace(req.About) ? null : req.About.Trim();
             user.UpdatedAt = DateTime.UtcNow;
 
             await _db.SaveChangesAsync();
@@ -351,6 +357,7 @@ namespace EdBridge.API.Controllers
                 Institution = user.Institution,
                 EducationLevel = user.EducationLevel,
                 Phone = user.Phone,
+                About = user.About,
                 ProfilePhotoPath = user.ProfilePhotoPath,
                 Role = user.Role,
                 CreatedAt = user.CreatedAt

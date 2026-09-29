@@ -10,15 +10,22 @@ export default function ListingCard({ listing, onClick }) {
   const [saving, setSaving] = useState(false);
 
   const { addToCart, isInCart } = useCart();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
 
   const alreadyInCart = isInCart(listing.id);
+  const isOwnListing = user?.id && listing.seller?.id &&
+    String(user.id) === String(listing.seller.id);
 
   const handleAddToCart = (event) => {
     event.stopPropagation();
 
     if (!token) {
       alert("Please log in to add items to your cart.");
+      return;
+    }
+
+    if (isOwnListing) {
+      alert("You cannot add your own listing to the cart.");
       return;
     }
 
@@ -127,9 +134,13 @@ export default function ListingCard({ listing, onClick }) {
           type="button"
           className="listing-add-cart-button"
           onClick={handleAddToCart}
-          disabled={alreadyInCart}
+          disabled={alreadyInCart || isOwnListing}
         >
-          {alreadyInCart ? "✓ Added to Cart" : "🛒 Add to Cart"}
+          {isOwnListing
+            ? "Your Listing"
+            : alreadyInCart
+              ? "✓ Added to Cart"
+              : "🛒 Add to Cart"}
         </button>
 
         <button
