@@ -54,12 +54,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Add CORS (for React frontend on localhost:3000)
+// Add CORS (dynamic based on FrontendUrl configuration)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReact", policy =>
     {
-        policy.WithOrigins("http://localhost:3000")
+        var frontendUrl = builder.Configuration["FrontendUrl"] ?? "http://localhost:3000";
+        policy.WithOrigins(frontendUrl)
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
